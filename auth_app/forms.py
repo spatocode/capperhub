@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.auth.hashers import make_password
 
 class UserAccountForm(forms.Form):
     first_name = forms.CharField(required=True)
@@ -9,3 +10,11 @@ class UserAccountForm(forms.Form):
     mobile_no = forms.IntegerField(required=True)
     country = forms.CharField(required=True)
     is_predictor = forms.BooleanField(required=True)
+
+    def _post_clean(self):
+        # Data massage only if form is valid
+        if self.is_valid():
+            password = self.cleaned_data.pop('password')
+            self.cleaned_data.update({
+                'password': make_password(password),
+            })
