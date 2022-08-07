@@ -9,7 +9,7 @@ class UserAccountForm(forms.Form):
     password = forms.CharField(required=True)
     mobile_no = forms.IntegerField(required=True)
     country = forms.CharField(required=True)
-    is_predictor = forms.BooleanField(required=True)
+    is_predictor = forms.BooleanField(required=False)
 
     def _post_clean(self):
         # Data massage only if form is valid

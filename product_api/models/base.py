@@ -15,16 +15,20 @@ class Currency(models.Model):
         regex='[A-Z]{3}',
         message='Please enter a valid 3-letter currency code'
     )
-    # Fields
     code = models.CharField(max_length=3, primary_key=True, validators=[code_validator])
 
-
-class Price(models.Model):
-    amount = models.IntegerField()
-    currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
+    def __str__(self):
+        return f'{self.code}'
 
 
 class Product(models.Model):
     type = models.PositiveIntegerField(choices=PRODUCT_TYPES)
-    owner = models.ForeignKey('auth_app.UserAccount', on_delete=models.CASCADE, related_name='products')
-    price = models.ForeignKey(Price, on_delete=models.CASCADE)
+    owner = models.ForeignKey('product_auth_api.UserAccount', on_delete=models.CASCADE, related_name='products')
+    price = models.IntegerField()
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('type', 'owner')
+    
+    def __str__(self):
+        return f'{PRODUCT_TYPES[self.type][1]}-{self.owner.user.username}'

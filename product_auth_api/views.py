@@ -1,12 +1,12 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
-from auth_app.exceptions import UserAlreadyExistsException, ValidationException
-from auth_app.forms import UserAccountForm
-from auth_app.models import UserAccount
-from rest_framework import views, response, permissions, exceptions
+from product_auth_api.exceptions import UserAlreadyExistsException, ValidationException
+from product_auth_api.forms import UserAccountForm
+from product_auth_api.models import UserAccount
+from product_auth_api.serializers import UserAccountSerializer, UserSerializer
+from rest_framework import views, viewsets, response, permissions
 from rest_framework.decorators import permission_classes
-from rest_framework.generics import CreateAPIView
-from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED
+from rest_framework.status import HTTP_201_CREATED
 
 
 @permission_classes((permissions.AllowAny,))
@@ -62,3 +62,22 @@ class RegisterUserView(views.APIView):
             #TODO: Send an `email verification` email to user
 
         return response.Response({"detail": "User Creation Successful"}, status=HTTP_201_CREATED)
+
+
+@permission_classes((permissions.IsAuthenticated,))
+class UserListView(viewsets.ModelViewSet):
+    serializer_class = UserAccountSerializer
+
+    def get_queryset(self):
+        user_accounts = UserAccount.objects.filter()
+        return user_accounts
+
+
+@permission_classes((permissions.IsAuthenticated,))
+class UserInfoView(views.APIView):
+    serializer_class = UserAccountSerializer
+
+    def get(self, request, id):
+        user_account = UserAccount.objects.get(id=id)
+        serializer = UserAccountSerializer(user_account)
+        return response.Response(serializer.data)
