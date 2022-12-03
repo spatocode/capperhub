@@ -40,3 +40,6 @@ webpack-stats.json
 !.elasticbeanstalk/*.global.yml
 
 composed.html
+/product_api
+/product_auth_api
+/logger_api
