@@ -16,11 +16,12 @@ class SportsTips(models.Model):
     home_team = models.CharField(max_length=50)
     away_team = models.CharField(max_length=50)
     prediction = models.CharField(max_length=50)
-    match_day = models.DateTimeField()
+    date = models.DateTimeField()
     success = models.BooleanField(default=False)
+    is_published = models.BooleanField(default=False)
 
     class Meta:
-        unique_together = ('sport', 'owner')
-    
+        unique_together = ('sport', 'owner', 'home_team', 'away_team', 'date')
+
     def __str__(self):
         return f'{SPORTS[self.sport][1]}-{self.owner.user.username}'
