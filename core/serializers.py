@@ -1,7 +1,8 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from dj_rest_auth.registration.serializers import RegisterSerializer
-from core.models.user import UserAccount, SportsTips
+from core.models.user import UserAccount
+from core.models.tips import Tips
 
 class UserAccountRegisterSerializer(RegisterSerializer):
     username = serializers.CharField(required=False)
@@ -43,7 +44,7 @@ class UserAccountSerializer(serializers.ModelSerializer):
         exclude = ['ip_address']
 
 
-class SportsTipsSerializer(serializers.ModelSerializer):
+class TipsSerializer(serializers.ModelSerializer):
 
     def validate_owner(self, value):
         """
@@ -55,6 +56,6 @@ class SportsTipsSerializer(serializers.ModelSerializer):
         return value
 
     class Meta:
-        model = SportsTips
-        fields = ['id', 'sport', 'owner', 'home_team', 'away_team', 'prediction', 'date', 'is_published']
+        model = Tips
+        fields = '__all__'
         read_only_fields = ['id']

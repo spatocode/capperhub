@@ -7,10 +7,10 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from dj_rest_auth.registration.views import RegisterView
-from core.serializers import SportsTipsSerializer, UserAccountSerializer, UserAccountRegisterSerializer
+from core.serializers import TipsSerializer, UserAccountSerializer, UserAccountRegisterSerializer
 from core.models.user import UserAccount
-from core.models.tips import SportsTips
-from core.filters import SportsTipsFilterSet, UserAccountFilterSet
+from core.models.tips import Tips
+from core.filters import TipsFilterSet, UserAccountFilterSet
 from core.exceptions import SubscriptionError
 
 
@@ -130,32 +130,32 @@ class UserAPIView(APIView):
 
 
 class SportsTipsAPIView(APIView):
-    filter_class = SportsTipsFilterSet
+    filter_class = TipsFilterSet
 
     def get_object(self, pk):
         try:
-            return SportsTips.objects.get(pk=pk)
-        except SportsTips.DoesNotExist:
+            return Tips.objects.get(pk=pk)
+        except Tips.DoesNotExist:
             raise Http404
 
     def get(self, request, pk=None, format=None):
         if pk:
             data = self.get_object(pk)
-            serializer = SportsTipsSerializer(data)
+            serializer = TipsSerializer(data)
         else:
             query_params = request.query_params
             filterset = self.filter_class(
                 data=query_params,
-                queryset=SportsTips.objects.all()
+                queryset=Tips.objects.all()
             )
-            serializer = SportsTipsSerializer(filterset.qs, many=True)
+            serializer = TipsSerializer(filterset.qs, many=True)
 
         return Response(serializer.data)
 
     def put(self, request, pk=None, format=None):
         #TODO: Make sure tips can only be updated before it's sent to subscribers
-        tips =  SportsTips.objects.get(pk=pk)
-        serializer = SportsTipsSerializer(instance=tips, data=request.data, partial=True)
+        tips =  Tips.objects.get(pk=pk)
+        serializer = TipsSerializer(instance=tips, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({
@@ -166,7 +166,7 @@ class SportsTipsAPIView(APIView):
     def post(self, request, format=None):
         #TODO: Confirm the match is valid from probably an API before saving to the DB
         data = request.data
-        serializer = SportsTipsSerializer(data=data)
+        serializer = TipsSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({
@@ -177,10 +177,10 @@ class SportsTipsAPIView(APIView):
     def delete(self, request, pk, format=None):
         #TODO: Make sure tips can only be deleted before it's sent to subscribers
         try:
-            user = SportsTips.objects.get(pk=pk)
-        except SportsTips.DoesNotExist:
+            tips = Tips.objects.get(pk=pk)
+        except Tips.DoesNotExist:
             raise Http404
-        user.delete()
+        tips.delete()
         return Response({
             'message': 'Tips deleted Successfully'
         })

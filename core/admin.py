@@ -1,10 +1,11 @@
 from django.contrib import admin
 from core.models.user import UserAccount, Currency
-from core.models.tips import SportsTips
+from core.models.currency import Currency
+from core.models.tips import Tips
 
 class UserAccountAdmin(admin.ModelAdmin):
-    list_display = ['username', 'id', 'email', 'first_name', 'last_name', 'country', 'phone_number', 'price', 'is_tipster', 'email_verified']
-    list_filter = ['price', 'country', 'is_tipster', 'email_verified']
+    list_display = ['username', 'email', 'first_name', 'last_name', 'country', 'phone_number', 'is_tipster', 'email_verified']
+    list_filter = ['country', 'is_tipster', 'email_verified']
 
     def username(self, obj):
         return obj.user.username
@@ -22,11 +23,11 @@ class UserAccountAdmin(admin.ModelAdmin):
 class CurrencyAdmin(admin.ModelAdmin):
     list_display = ['code']
 
-class SportsTipsAdmin(admin.ModelAdmin):
-    list_display = ['owner', 'id', 'sport', 'home_team', 'away_team', 'date', 'prediction']
-    list_filter = ['owner', 'sport', 'date', 'success']
+class TipsAdmin(admin.ModelAdmin):
+    list_display = ['issuer', 'sport', 'home_team', 'away_team', 'date', 'prediction', 'success', 'published']
+    list_filter = ['issuer', 'sport', 'date', 'published', 'success']
 
 
 admin.site.register(UserAccount, UserAccountAdmin)
-admin.site.register(SportsTips, SportsTipsAdmin)
+admin.site.register(Tips, TipsAdmin)
 admin.site.register(Currency, CurrencyAdmin)

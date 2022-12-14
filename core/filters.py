@@ -1,16 +1,16 @@
 from django_filters import FilterSet, DateTimeFilter
-from core.models.tips import SportsTips
+from core.models.tips import Tips
 from core.models.user import UserAccount
 
 
-class SportsTipsFilterSet(FilterSet):
+class TipsFilterSet(FilterSet):
     date = DateTimeFilter(field_name='date')
     date__gt = DateTimeFilter(field_name='date', lookup_expr='gt')
     date__lt = DateTimeFilter(field_name='date', lookup_expr='lt')
 
     class Meta:
-        model = SportsTips
-        fields = ['owner', 'date', 'success', 'is_published']
+        model = Tips
+        fields = ['issuer', 'date', 'success', 'published']
 
 
 class UserAccountFilterSet(FilterSet):

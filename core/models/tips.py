@@ -1,27 +1,21 @@
 from django.db import models
 
+class Game(models.Model):
+    type = models.CharField(max_length=30)
 
-FOOTBALL = 0
-BASKETBALL = 1
-BASEBALL = 2
-SPORTS = (
-    (FOOTBALL, 'FOOTBALL'),
-    (BASKETBALL, 'BASKETBALL'),
-    (BASEBALL, 'BASEBALL'),
-)
 
-class SportsTips(models.Model):
-    owner = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE)
-    sport = models.PositiveIntegerField(choices=SPORTS)
+class Tips(models.Model):
+    game = models.ForeignKey('core.Game', on_delete=models.CASCADE, related_name='tips')
+    issuer = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE)
     home_team = models.CharField(max_length=50)
     away_team = models.CharField(max_length=50)
     prediction = models.CharField(max_length=50)
     date = models.DateTimeField()
     success = models.BooleanField(default=False)
-    is_published = models.BooleanField(default=False)
+    published = models.BooleanField(default=False)
 
     class Meta:
-        unique_together = ('sport', 'owner', 'home_team', 'away_team', 'date')
+        unique_together = ('game', 'issuer', 'home_team', 'away_team', 'date')
 
     def __str__(self):
-        return f'{SPORTS[self.sport][1]}-{self.owner.user.username}'
+        return f'{self.game.type}-{self.issuer.user.username}'
