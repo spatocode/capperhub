@@ -2,4 +2,7 @@ from rest_framework.exceptions import APIException
 
 
 class SubscriptionError(APIException):
-    pass
+    status_code = 400
+
+class PricingError(APIException):
+    status_code = 403

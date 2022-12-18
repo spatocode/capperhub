@@ -8,7 +8,7 @@ class Currency(models.Model):
         message='Please enter a valid 3-letter currency code'
     )
     code = models.CharField(max_length=3, primary_key=True, validators=[code_validator])
-    country = CountryField()
+    country = CountryField(null=True)
 
     def __str__(self):
         return f'{self.code}'

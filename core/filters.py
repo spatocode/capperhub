@@ -1,6 +1,7 @@
 from django_filters import FilterSet, DateTimeFilter
 from core.models.tips import Tips
 from core.models.user import UserAccount
+from core.models.subscription import Subscription
 
 
 class TipsFilterSet(FilterSet):
@@ -17,4 +18,11 @@ class UserAccountFilterSet(FilterSet):
 
     class Meta:
         model = UserAccount
-        fields = ['is_tipster', 'price', 'currency', 'country']
+        fields = ['is_tipster', 'country']
+
+
+class SubscriptionFilterSet(FilterSet):
+
+    class Meta:
+        model = Subscription
+        fields = ['issuer', 'subscriber', 'type', 'is_active']

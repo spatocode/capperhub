@@ -1,8 +1,8 @@
 from django.urls import include, re_path
 from django.urls import path
-from core.views import UserAPIView, UserSubscriptionModelViewSet
+from core.views import UserAPIView, UserSubscriptionModelViewSet, UserPricingAPIView
 
-subscribers = UserSubscriptionModelViewSet.as_view({
+subscriptions = UserSubscriptionModelViewSet.as_view({
     'get': 'list'
 })
 
@@ -11,13 +11,29 @@ subscribe_user = UserSubscriptionModelViewSet.as_view({
 })
 
 unsubscribe_user = UserSubscriptionModelViewSet.as_view({
-    'delete': 'unsubscribe'
+    'put': 'unsubscribe'
+})
+
+account_owner = UserAPIView.as_view({
+    'get': 'get_account_owner'
+})
+
+get_user = UserAPIView.as_view({
+    'get': 'get_user',
+    'put': 'update_user',
+    'delete': 'delete_user'
+})
+
+get_users = UserAPIView.as_view({
+    'get': 'get_users'
 })
 
 urlpatterns = [
-    path('', UserAPIView.as_view(), name='users'),
-    path('<pk>', UserAPIView.as_view(), name='users-action'),
-    path('<pk>/subscribers', subscribers, name='user-subscribers'),
+    path('tipsters', get_users, name='users'),
+    path('subscriptions', subscriptions, name='user-subscriptions'),
+    path('account', account_owner, name='account-owner'),
+    path('<username>', get_user, name='users-action'),
+    path('<pk>/pricing', UserPricingAPIView.as_view(), name='user-pricing'),
     path('<pk>/subscribe', subscribe_user, name='subscribe-user'),
     path('<pk>/unsubscribe', unsubscribe_user, name='unsubscribe-user'),
 ]

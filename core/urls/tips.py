@@ -1,8 +1,8 @@
 from django.urls import include, re_path
 from django.urls import path
-from core.views import SportsTipsAPIView
+from core.views import TipsAPIView
 
 urlpatterns = [
-    path('', SportsTipsAPIView.as_view(), name='tips'),
-    path('<pk>', SportsTipsAPIView.as_view(), name='tips-action'),
+    path('create', TipsAPIView.as_view(), name='tips'),
+    path('<pk>', TipsAPIView.as_view(), name='tips-action'),
 ]
