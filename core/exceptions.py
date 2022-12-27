@@ -6,3 +6,6 @@ class SubscriptionError(APIException):
 
 class PricingError(APIException):
     status_code = 403
+
+class PaymentSetupError(APIException):
+    status_code = 400

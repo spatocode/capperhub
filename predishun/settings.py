@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 import os
 from pathlib import Path
+import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,6 +20,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
+
+root = environ.Path(__file__) - 2
+dotenv = root(os.environ.get('dotenv', '.env'))
+if os.path.exists(dotenv):
+    environ.Env.read_env(dotenv)
 
 SECRET_KEY = os.environ.get("SECRET_KEY") or 'cdhj6q8r&68+0n@l*t9&s$r-!&1%n=uq4x2i(v72ua=23df4dd567d/d89t24,nl0m.s33si&++='
 
@@ -107,17 +113,21 @@ ACCOUNT_EMAIL_VERIFICATION = 'none'
 # EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'tmp/email')
 
 
+# Percentage charge for tipster's pricing
+PERCENTAGE_CHARGE = 0.15
+
+
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        "ENGINE": os.environ.get("SQL_ENGINE", "django.db.backends.sqlite3"),
-        "NAME": os.environ.get("SQL_DATABASE", BASE_DIR / "db.sqlite3"),
-        "USER": os.environ.get("SQL_USER", "user"),
-        "PASSWORD": os.environ.get("SQL_PASSWORD", "password"),
-        "HOST": os.environ.get("SQL_HOST", "localhost"),
-        "PORT": os.environ.get("SQL_PORT", "5432"),
+        "ENGINE": os.environ.get("RDS_ENGINE", "django.db.backends.postgresql_psycopg2"),
+        "NAME": os.environ.get("RDS_DATABASE", "predishun"),
+        "USER": os.environ.get("RDS_USER", "postgres"),
+        "PASSWORD": os.environ.get("RDS_PASSWORD", "postgres"),
+        "HOST": os.environ.get("RDS_HOST", "localhost"),
+        "PORT": os.environ.get("RDS_PORT", "5432"),
     }
 }
 

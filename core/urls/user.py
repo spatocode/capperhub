@@ -1,6 +1,5 @@
-from django.urls import include, re_path
 from django.urls import path
-from core.views import UserAPIView, UserSubscriptionModelViewSet, UserPricingAPIView
+from core.views import UserAPIView, UserSubscriptionModelViewSet, UserWalletAPIView, UserPricingAPIView
 
 subscriptions = UserSubscriptionModelViewSet.as_view({
     'get': 'list'
@@ -34,6 +33,7 @@ urlpatterns = [
     path('account', account_owner, name='account-owner'),
     path('<username>', get_user, name='users-action'),
     path('<pk>/pricing', UserPricingAPIView.as_view(), name='user-pricing'),
+    path('<pk>/wallet', UserWalletAPIView.as_view(), name='user-wallet'),
     path('<pk>/subscribe', subscribe_user, name='subscribe-user'),
     path('<pk>/unsubscribe', unsubscribe_user, name='unsubscribe-user'),
 ]

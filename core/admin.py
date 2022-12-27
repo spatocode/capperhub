@@ -22,7 +22,7 @@ class UserAccountAdmin(admin.ModelAdmin):
 
 
 class CurrencyAdmin(admin.ModelAdmin):
-    list_display = ['code']
+    list_display = ['code', 'country']
 
 class SubscriptionAdmin(admin.ModelAdmin):
     list_display = ['type', 'issuer', 'subscriber', 'date_initialized', 'date_expired', 'is_active']

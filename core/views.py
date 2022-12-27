@@ -1,29 +1,36 @@
 import pytz
 from datetime import datetime, timedelta
+from django.conf import settings
 from django.http.response import Http404
 from rest_framework.decorators import permission_classes
 from rest_framework import authentication, permissions
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
-from rest_framework.exceptions import APIException
 from dj_rest_auth.registration.views import RegisterView
+from paystackapi.subaccount import SubAccount
+from rest_framework_simplejwt.views import TokenObtainPairView
 from core.permissions import BettorPermission, TipsterPermission, IsOwnerOrReadOnly
 from core.serializers import (
     TipsSerializer, UserAccountSerializer, UserAccountRegisterSerializer,
     SubscriptionSerializer, UserPricingSerializer, OwnerUserAccountSerializer,
-    OwnerUserSerializer, UserSerializer
+    OwnerUserSerializer, CustomTokenObtainPairSerializer, UserWalletSerializer
 )
 from core.models.user import UserAccount
+from core.models.currency import Currency
 from core.models.tips import Tips
 from core.models.subscription import Subscription, Payment
 from core.filters import TipsFilterSet, UserAccountFilterSet, SubscriptionFilterSet
-from core.exceptions import SubscriptionError, PricingError
+from core.exceptions import SubscriptionError, PricingError, PaymentSetupError
 
 
 class CsrfExemptSessionAuthentication(authentication.SessionAuthentication):
     def enforce_csrf(self, request):
         return
+
+
+class EmailTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
 
 
 class UserAccountRegisterView(RegisterView):
@@ -157,9 +164,11 @@ class UserSubscriptionModelViewSet(ModelViewSet):
             type=subscription_type,
             issuer=tipster,
             subscriber=subscriber,
-            period=period,
-            date_expired=datetime.utcnow().replace(tzinfo=pytz.UTC) + timedelta(days=period)
         )
+        if period:
+            subscription.period = period
+            subscription.date_expired = datetime.utcnow().replace(tzinfo=pytz.UTC) + timedelta(days=period)
+
         if payment is not None:
             subscription.payment = payment
         subscription.save()
@@ -205,13 +214,13 @@ class UserPricingAPIView(APIView):
 
     def get_object(self, pk):
         try:
-            return UserAccount.objects.get(pk=pk)
+            return UserAccount.objects.select_related('user', 'pricing').get(pk=pk)
         except UserAccount.DoesNotExist:
             raise Http404
 
     def post(self, request, pk=None):
         data = request.data
-        user_account = UserAccount.objects.select_related('user', 'pricing').get(pk=pk)
+        user_account = self.get_object(pk)
         self.check_object_permissions(request, user_account)
         # Make sure pricing can be updated once in 60days
         if user_account.pricing:
@@ -229,6 +238,41 @@ class UserPricingAPIView(APIView):
         user_account.save()
         return Response({
             'message': 'User Pricing Added Successfully',
+            'data': serializer.data
+        })
+
+
+@permission_classes((permissions.IsAuthenticated, TipsterPermission, IsOwnerOrReadOnly))
+class UserWalletAPIView(APIView):
+
+    def get_object(self, pk):
+        try:
+            return UserAccount.objects.select_related('wallet').get(pk=pk)
+        except UserAccount.DoesNotExist:
+            raise Http404
+
+    def post(self, request, pk=None):
+        user_account = self.get_object(pk)
+        self.check_object_permissions(request, user_account)
+
+        res = SubAccount.create(
+            business_name=user_account.full_name,
+            settlement_bank=request.data.get('bank'),
+            account_number=request.data.get('account_number'),
+            percentage_charge=settings.PERCENTAGE_CHARGE
+        )
+
+        if res.get('status') == False:
+            raise PaymentSetupError(detail=res.get('message'), code=400)
+
+        serializer = UserWalletSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user_wallet = serializer.save()
+        if not user_account.wallet:
+            user_account.wallet = user_wallet
+        user_account.save()
+        return Response({
+            'message': 'User Bank Details Added Successfully',
             'data': serializer.data
         })
 
@@ -264,12 +308,18 @@ class UserAPIView(ModelViewSet):
             queryset=UserAccount.objects.filter(
                 user__is_active=True,
                 is_tipster=True
+            ).exclude(
+                user__first_name=None,
+                user__last_name=None,
+                country=None,
+                bio=None,
+                display_name=None
             )
         )
         serializer = UserAccountSerializer(filterset.qs, many=True)
 
         return Response(serializer.data)
-    
+
     def update_user(self, request, username=None):
         user_account = UserAccount.objects.select_related('user').get(user__username=username)
         self.check_object_permissions(request, user_account)
@@ -280,7 +330,7 @@ class UserAPIView(ModelViewSet):
         )
         user_serializer.is_valid(raise_exception=True)
         user_serializer.save()
-        
+
         serializer = OwnerUserAccountSerializer(
             instance=user_account,
             data=request.data,
