@@ -51,3 +51,11 @@ class UserAccount(models.Model):
             is_active=True
         ).count()
         return num_of_subscribers
+
+    @property
+    def subscribers(self):
+        subscribers = Subscription.objects.filter(
+            issuer=self.pk,
+            is_active=True
+        )
+        return subscribers

@@ -11,7 +11,7 @@ class TipsFilterSet(FilterSet):
 
     class Meta:
         model = Tips
-        fields = ['issuer', 'date', 'success', 'published']
+        fields = ['issuer', 'date', 'status']
 
 
 class UserAccountFilterSet(FilterSet):

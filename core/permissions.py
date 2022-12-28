@@ -1,6 +1,7 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 from rest_framework.exceptions import APIException
 from core.models.user import UserAccount
+from core.models.subscription import Subscription
 
 class BettorPermission(BasePermission):
     """Permission class to detect if the user is a Bettor"""
@@ -43,6 +44,25 @@ class IsOwnerOrReadOnly(BasePermission):
         # Read permissions are allowed to any request,
         # so we'll always allow GET, HEAD or OPTIONS requests.
         if request.method in SAFE_METHODS:
+            return True
+
+        return obj.user.id == request.user.id
+
+class IsOwnerOrSubscriberReadOnly(BasePermission):
+    """
+    Object-level permission to only allow owners of an object to edit it.
+    Only subscribers can read it.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        # Read permissions are allowed to request of subscribers,
+        # so we'll always allow GET, HEAD or OPTIONS requests.
+        subscriptions = Subscription.objects.filter(
+            issuer=obj.user.id,
+            subscriber=request.user.id,
+            is_active=True
+        )
+        if request.method in SAFE_METHODS and len(subscriptions) > 0:
             return True
 
         return obj.user.id == request.user.id

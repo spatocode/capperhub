@@ -1,6 +1,7 @@
 import pytz
 from datetime import datetime, timedelta
 from django.conf import settings
+from django.core import exceptions
 from django.http.response import Http404
 from rest_framework.decorators import permission_classes
 from rest_framework import authentication, permissions
@@ -10,7 +11,7 @@ from rest_framework.response import Response
 from dj_rest_auth.registration.views import RegisterView
 from paystackapi.subaccount import SubAccount
 from rest_framework_simplejwt.views import TokenObtainPairView
-from core.permissions import BettorPermission, TipsterPermission, IsOwnerOrReadOnly
+from core.permissions import BettorPermission, TipsterPermission, IsOwnerOrReadOnly, IsOwnerOrSubscriberReadOnly
 from core.serializers import (
     TipsSerializer, UserAccountSerializer, UserAccountRegisterSerializer,
     SubscriptionSerializer, UserPricingSerializer, OwnerUserAccountSerializer,
@@ -18,7 +19,7 @@ from core.serializers import (
 )
 from core.models.user import UserAccount
 from core.models.currency import Currency
-from core.models.tips import Tips
+from core.models.tips import Tips, Game
 from core.models.subscription import Subscription, Payment
 from core.filters import TipsFilterSet, UserAccountFilterSet, SubscriptionFilterSet
 from core.exceptions import SubscriptionError, PricingError, PaymentSetupError
@@ -283,7 +284,7 @@ class UserAPIView(ModelViewSet):
 
     def get_object(self, username):
         try:
-            return UserAccount.objects.get(user__username=username)
+            return UserAccount.objects.select_related('user').get(user__username=username)
         except UserAccount.DoesNotExist:
             raise Http404
 
@@ -300,7 +301,7 @@ class UserAPIView(ModelViewSet):
         data = self.get_object(username)
         serializer = UserAccountSerializer(data)
         return Response(serializer.data)
-    
+
     def get_users(self, request, username=None):
         query_params = request.query_params
         filterset = self.filter_class(
@@ -321,7 +322,7 @@ class UserAPIView(ModelViewSet):
         return Response(serializer.data)
 
     def update_user(self, request, username=None):
-        user_account = UserAccount.objects.select_related('user').get(user__username=username)
+        user_account = self.get_object(username)
         self.check_object_permissions(request, user_account)
         user_serializer = OwnerUserSerializer(
             instance=user_account.user,
@@ -347,7 +348,7 @@ class UserAPIView(ModelViewSet):
         """
         Deleting a user is not used for now
         """
-        user_account = UserAccount.objects.select_related('user').get(user__username=username)
+        user_account = self.get_object(username)
         self.check_object_permissions(request, user_account)
         user = user_account.user
         #TODO: Make sure a tipster has no open subscriptions before deleting account
@@ -357,44 +358,49 @@ class UserAPIView(ModelViewSet):
         })
 
 
-@permission_classes((permissions.IsAuthenticated, TipsterPermission))
+@permission_classes((permissions.IsAuthenticated, TipsterPermission, IsOwnerOrSubscriberReadOnly))
 class TipsAPIView(APIView):
     filter_class = TipsFilterSet
 
     def get_object(self, pk):
         try:
-            return Tips.objects.get(pk=pk)
-        except Tips.DoesNotExist:
+            return UserAccount.objects.select_related('user').get(pk=pk)
+        except UserAccount.DoesNotExist:
             raise Http404
 
     def get(self, request, pk=None, format=None):
-        if pk:
-            data = self.get_object(pk)
-            serializer = TipsSerializer(data)
-        else:
-            query_params = request.query_params
-            filterset = self.filter_class(
-                data=query_params,
-                queryset=Tips.objects.all()
-            )
-            serializer = TipsSerializer(filterset.qs, many=True)
+        user_account = self.get_object(pk)
+        self.check_object_permissions(request, user_account)
+
+        query_params = request.query_params
+        filterset = self.filter_class(
+            data=query_params,
+            queryset=Tips.objects.filter(issuer=pk)
+        )
+        serializer = TipsSerializer(filterset.qs, many=True)
 
         return Response(serializer.data)
 
-    def put(self, request, pk=None, format=None):
-        #TODO: Make sure tips can only be updated before it's sent to subscribers
-        tips =  Tips.objects.get(pk=pk)
-        serializer = TipsSerializer(instance=tips, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response({
-            'message': 'Tips updated Successfully',
-            'data': serializer.data
-        })
+    # def put(self, request, pk=None, format=None):
+    #     #TODO: Make sure tips can only be updated before it's sent to subscribers
+    #     tips =  Tips.objects.get(pk=pk)
+    #     serializer = TipsSerializer(instance=tips, data=request.data, partial=True)
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     return Response({
+    #         'message': 'Tips updated Successfully',
+    #         'data': serializer.data
+    #     })
 
-    def post(self, request, format=None):
+    def post(self, request, pk=None, format=None):
         #TODO: Confirm the match is valid from probably an API before saving to the DB
-        data = request.data
+        user_account = self.get_object(pk)
+        self.check_object_permissions(request, user_account)
+        data = request.data.copy()
+        if int(data.get('issuer')) != int(pk):
+            raise exceptions.PermissionDenied()
+        game = Game.objects.get(type=request.data.get('game'))
+        data['game'] = game.id
         serializer = TipsSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -403,13 +409,13 @@ class TipsAPIView(APIView):
             'data': serializer.data
         })
 
-    def delete(self, request, pk, format=None):
-        #TODO: Make sure tips can only be deleted before it's sent to subscribers
-        try:
-            tips = Tips.objects.get(pk=pk)
-        except Tips.DoesNotExist:
-            raise Http404
-        tips.delete()
-        return Response({
-            'message': 'Tips deleted Successfully'
-        })
+    # def delete(self, request, pk, format=None):
+    #     #TODO: Make sure tips can only be deleted before it's sent to subscribers
+    #     try:
+    #         tips = Tips.objects.get(pk=pk)
+    #     except Tips.DoesNotExist:
+    #         raise Http404
+    #     tips.delete()
+    #     return Response({
+    #         'message': 'Tips deleted Successfully'
+    #     })

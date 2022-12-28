@@ -29,12 +29,12 @@ class SubscriptionAdmin(admin.ModelAdmin):
     list_filter = ['type', 'is_active']
 
 class TipsAdmin(admin.ModelAdmin):
-    list_display = ['issuer', 'game', 'home_team', 'away_team', 'date', 'prediction', 'success', 'published']
-    list_filter = ['issuer', 'game', 'date', 'published', 'success']
+    list_display = ['issuer', 'game', 'home_team', 'away_team', 'date', 'prediction', 'status']
+    list_filter = ['issuer', 'game', 'date', 'status']
 
 class GameAdmin(admin.ModelAdmin):
-    list_display = ['type', 'id']
-    list_filter = ['type', 'id']
+    list_display = ['id', 'type']
+    list_filter = ['type']
 
 
 class PricingAdmin(admin.ModelAdmin):
