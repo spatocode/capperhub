@@ -30,7 +30,7 @@ class UserAccount(models.Model):
     email_verified = models.BooleanField(default=False)
     currency = models.ForeignKey('core.Currency', on_delete=models.PROTECT, null=True)
     pricing = models.ForeignKey('core.Pricing', on_delete=models.PROTECT, null=True)
-    wallet = models.ForeignKey(Wallet, on_delete=models.PROTECT, null=True)
+    wallet = models.ForeignKey(Wallet, on_delete=models.PROTECT, null=True, related_name='wallet_owner')
     ip_address = models.GenericIPAddressField(null=True)
 
     def __str__(self):
@@ -43,13 +43,13 @@ class UserAccount(models.Model):
     # @property
     # def is_complete_profile(self):
     #     if self.user.first_name and self.user.last_name and self.
-    
+
     @property
     def subscriber_count(self):
         num_of_subscribers = Subscription.objects.filter(
             issuer=self.pk,
-            is_active=True
-        ).count()
+            is_active=True,
+        ).distinct('subscriber').count()
         return num_of_subscribers
 
     @property

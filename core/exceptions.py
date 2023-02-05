@@ -9,3 +9,9 @@ class PricingError(APIException):
 
 class PaymentSetupError(APIException):
     status_code = 400
+
+class BadRequestError(APIException):
+    status_code = 400
+
+class PermissionDeniedError(APIException):
+    status_code = 401

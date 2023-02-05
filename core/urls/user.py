@@ -10,7 +10,7 @@ subscribe_user = UserSubscriptionModelViewSet.as_view({
 })
 
 unsubscribe_user = UserSubscriptionModelViewSet.as_view({
-    'put': 'unsubscribe'
+    'post': 'unsubscribe'
 })
 
 account_owner = UserAPIView.as_view({
@@ -31,10 +31,10 @@ urlpatterns = [
     path('tipsters', get_users, name='users'),
     path('subscriptions', subscriptions, name='user-subscriptions'),
     path('account', account_owner, name='account-owner'),
+    path('subscribe', subscribe_user, name='subscribe-user'),
+    path('unsubscribe', unsubscribe_user, name='unsubscribe-user'),
     path('<username>', get_user, name='users-action'),
     path('<pk>/tips', TipsAPIView.as_view(), name='tips'),
     path('<pk>/pricing', UserPricingAPIView.as_view(), name='user-pricing'),
     path('<pk>/wallet', UserWalletAPIView.as_view(), name='user-wallet'),
-    path('<pk>/subscribe', subscribe_user, name='subscribe-user'),
-    path('<pk>/unsubscribe', unsubscribe_user, name='unsubscribe-user'),
 ]

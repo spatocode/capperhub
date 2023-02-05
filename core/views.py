@@ -11,18 +11,19 @@ from rest_framework.response import Response
 from dj_rest_auth.registration.views import RegisterView
 from paystackapi.subaccount import SubAccount
 from rest_framework_simplejwt.views import TokenObtainPairView
-from core.permissions import BettorPermission, TipsterPermission, IsOwnerOrReadOnly, IsOwnerOrSubscriberReadOnly
+from core.permissions import BettorPermissionOrReadOnly, TipsterPermission, IsOwnerOrReadOnly, IsOwnerOrSubscriberReadOnly
 from core.serializers import (
-    TipsSerializer, UserAccountSerializer, UserAccountRegisterSerializer,
+    MatchTipsSerializer, UserAccountSerializer, UserAccountRegisterSerializer,
     SubscriptionSerializer, UserPricingSerializer, OwnerUserAccountSerializer,
-    OwnerUserSerializer, CustomTokenObtainPairSerializer, UserWalletSerializer
+    OwnerUserSerializer, CustomTokenObtainPairSerializer, UserWalletSerializer,
+    BookingCodeTipsSerializer
 )
 from core.models.user import UserAccount
 from core.models.currency import Currency
-from core.models.tips import Tips, Game
+from core.models.tips import MatchTips, BookingCodeTips
 from core.models.subscription import Subscription, Payment
 from core.filters import TipsFilterSet, UserAccountFilterSet, SubscriptionFilterSet
-from core.exceptions import SubscriptionError, PricingError, PaymentSetupError
+from core.exceptions import SubscriptionError, PricingError, PaymentSetupError, PermissionDeniedError, BadRequestError
 
 
 class CsrfExemptSessionAuthentication(authentication.SessionAuthentication):
@@ -47,7 +48,7 @@ class UserAccountRegisterView(RegisterView):
         return user
 
 
-@permission_classes((permissions.IsAuthenticated, BettorPermission, IsOwnerOrReadOnly))
+@permission_classes((permissions.IsAuthenticated, BettorPermissionOrReadOnly))
 class UserSubscriptionModelViewSet(ModelViewSet):
     serializer_class = SubscriptionSerializer
     filter_class = SubscriptionFilterSet
@@ -60,12 +61,26 @@ class UserSubscriptionModelViewSet(ModelViewSet):
 
     def get_queryset(self):
         query_params = self.request.query_params
+        issuer = query_params.dict().get("issuer")
+        subscriber = query_params.dict().get("subscriber")
+        useraccount = self.request.user.useraccount
+
+        if not useraccount.is_tipster and not subscriber:
+            raise BadRequestError(detail="subscriber query params is required.")
+
+        if useraccount.is_tipster and not issuer:
+            raise BadRequestError(detail="issuer query params is required.")
+
+        if (useraccount.is_tipster and int(issuer) != int(useraccount.id)) or \
+            (not useraccount.is_tipster and int(subscriber) != int(useraccount.id)):
+            raise PermissionDeniedError(detail="You are not permitted to perform this action.")
+
         filterset = self.filter_class(
             data=query_params,
             queryset=Subscription.objects.all()
         )
         return filterset.qs
-    
+
     def verify_subscription_permission(self, subscriber, tipster):
         if subscriber.is_tipster:
             raise SubscriptionError(
@@ -87,7 +102,7 @@ class UserSubscriptionModelViewSet(ModelViewSet):
                 subscriber=subscriber,
                 issuer=tipster,
                 is_active=True
-            ).latest('date_initialized')
+            ).latest('subscription_date')
         except Subscription.DoesNotExist:
             return
 
@@ -101,16 +116,16 @@ class UserSubscriptionModelViewSet(ModelViewSet):
                 raise SubscriptionError(
                     detail='Incorrect Trial Period. Doesn\'t match with Tipster\'s Trial Period',
                 )
-            if subscription.date_expired < datetime.utcnow().replace(tzinfo=pytz.UTC):
+            if subscription.expiration_date < datetime.utcnow().replace(tzinfo=pytz.UTC):
                 raise SubscriptionError(
                     detail='You\'ve already completed your Trial plan',
                 )
-            elif subscription.date_expired > datetime.utcnow().replace(tzinfo=pytz.UTC):
+            elif subscription.expiration_date > datetime.utcnow().replace(tzinfo=pytz.UTC):
                 raise SubscriptionError(
                     detail='You\'ve already subscribed to Trial plan',
                 )
         elif subscription.type == Subscription.PREMIUM:
-            if subscription.date_expired > datetime.utcnow().replace(tzinfo=pytz.UTC):
+            if subscription.expiration_date > datetime.utcnow().replace(tzinfo=pytz.UTC):
                 raise SubscriptionError(
                     detail='You\'ve already subscribed to Premium plan',
                 )
@@ -143,7 +158,7 @@ class UserSubscriptionModelViewSet(ModelViewSet):
         subscription_type = request.data.get('type')
         tipster_id = request.data.get('tipster')
         period = request.data.get('period')
-        subscriber = self.get_object(pk)
+        subscriber = request.user.useraccount
         tipster = self.get_object(tipster_id)
         payment = None
 
@@ -166,9 +181,10 @@ class UserSubscriptionModelViewSet(ModelViewSet):
             issuer=tipster,
             subscriber=subscriber,
         )
+
         if period:
             subscription.period = period
-            subscription.date_expired = datetime.utcnow().replace(tzinfo=pytz.UTC) + timedelta(days=period)
+            subscription.expiration_date = datetime.utcnow().replace(tzinfo=pytz.UTC) + timedelta(days=period)
 
         if payment is not None:
             subscription.payment = payment
@@ -182,7 +198,7 @@ class UserSubscriptionModelViewSet(ModelViewSet):
     def unsubscribe(self, request, pk=None):
         subscription_type = request.data.get('type')
         tipster_id = request.data.get('tipster')
-        subscriber = self.get_object(pk)
+        subscriber = request.user.useraccount
         tipster = self.get_object(tipster_id)
 
         self.verify_subscription_permission(subscriber, tipster)
@@ -191,7 +207,7 @@ class UserSubscriptionModelViewSet(ModelViewSet):
                 subscriber=subscriber,
                 issuer=tipster,
                 is_active=True
-            ).latest('date_initialized')
+            ).latest('subscription_date')
         except Subscription.DoesNotExist:
             raise SubscriptionError(
                 detail="You're not subscribed to this plan",
@@ -324,9 +340,10 @@ class UserAPIView(ModelViewSet):
     def update_user(self, request, username=None):
         user_account = self.get_object(username)
         self.check_object_permissions(request, user_account)
+        data = request.data.copy()
         user_serializer = OwnerUserSerializer(
             instance=user_account.user,
-            data=request.data,
+            data=data,
             partial=True
         )
         user_serializer.is_valid(raise_exception=True)
@@ -334,7 +351,7 @@ class UserAPIView(ModelViewSet):
 
         serializer = OwnerUserAccountSerializer(
             instance=user_account,
-            data=request.data,
+            data=data,
             partial=True
         )
         serializer.is_valid(raise_exception=True)
@@ -358,7 +375,7 @@ class UserAPIView(ModelViewSet):
         })
 
 
-@permission_classes((permissions.IsAuthenticated, TipsterPermission, IsOwnerOrSubscriberReadOnly))
+@permission_classes((permissions.IsAuthenticated, IsOwnerOrSubscriberReadOnly,))
 class TipsAPIView(APIView):
     filter_class = TipsFilterSet
 
@@ -371,15 +388,40 @@ class TipsAPIView(APIView):
     def get(self, request, pk=None, format=None):
         user_account = self.get_object(pk)
         self.check_object_permissions(request, user_account)
+        mt_queryset = None
+        bc_queryset = None
+
+        if not request.user.useraccount.is_tipster:
+            subscriptions = Subscription.objects.filter(
+                subscriber=request.user.useraccount.id,
+                is_active=True
+            )
+            sub_issuers = subscriptions.values_list("issuer__id", flat=True)
+            # free_sub_issuers = []
+            # premium_sub_issuers = []
+            # for subscription in subscriptions:
+            #     if subscription.type == subscription.PREMIUM or subscription.type == subscription.TRIAL:
+            #         premium_sub_issuers.append(subscriptions.values_list("issuer__id", flat=True))
+            #     else:
+            #         free_sub_issuers.append(subscriptions.values_list("issuer__id", flat=True))
+
+            mt_queryset = MatchTips.objects.filter(issuer__in=sub_issuers)
+            bc_queryset = BookingCodeTips.objects.filter(issuer__in=sub_issuers)
 
         query_params = request.query_params
         filterset = self.filter_class(
             data=query_params,
-            queryset=Tips.objects.filter(issuer=pk)
+            queryset= mt_queryset if mt_queryset else MatchTips.objects.filter(issuer=pk)
         )
-        serializer = TipsSerializer(filterset.qs, many=True)
+        match_tips_serializer = MatchTipsSerializer(filterset.qs, many=True)
 
-        return Response(serializer.data)
+        booking_code = bc_queryset if bc_queryset else BookingCodeTips.objects.filter(issuer=pk)
+        booking_code_serializer = BookingCodeTipsSerializer(booking_code, many=True)
+
+        return Response({
+            "match_tips": match_tips_serializer.data,
+            "booking_code_tips": booking_code_serializer.data
+        })
 
     # def put(self, request, pk=None, format=None):
     #     #TODO: Make sure tips can only be updated before it's sent to subscribers
@@ -396,17 +438,27 @@ class TipsAPIView(APIView):
         #TODO: Confirm the match is valid from probably an API before saving to the DB
         user_account = self.get_object(pk)
         self.check_object_permissions(request, user_account)
-        data = request.data.copy()
+        data = request.data
+
+        if data.get('bookie'):
+            bc_serializer = BookingCodeTipsSerializer(data=data)
+            bc_serializer.is_valid(raise_exception=True)
+            bc_serializer.save()
+
+            return Response({
+                'message': 'Tips Created Successfully',
+                'data': bc_serializer.data
+            })
+
         if int(data.get('issuer')) != int(pk):
             raise exceptions.PermissionDenied()
-        game = Game.objects.get(type=request.data.get('game'))
-        data['game'] = game.id
-        serializer = TipsSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+
+        mt_serializer = MatchTipsSerializer(data=data)
+        mt_serializer.is_valid(raise_exception=True)
+        mt_serializer.save()
         return Response({
             'message': 'Tips Created Successfully',
-            'data': serializer.data
+            'data': mt_serializer.data
         })
 
     # def delete(self, request, pk, format=None):

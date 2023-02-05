@@ -1,12 +1,15 @@
 from django.db import models
 
-class Game(models.Model):
-    type = models.CharField(max_length=20)
 
-    def __str__(self):
-        return f'{self.type}'
+class BookingCodeTips(models.Model):
+    code = models.CharField(max_length=50)
+    bookie = models.CharField(max_length=20)
+    issuer = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE)
+    date_added = models.DateTimeField(auto_now_add=True)
+    is_free = models.BooleanField(default=True)
 
-class Tips(models.Model):
+
+class MatchTips(models.Model):
     LOSS = 0
     WIN = 1
     PENDING = 2
@@ -15,15 +18,17 @@ class Tips(models.Model):
         (WIN, "WIN"),
         (PENDING, "PENDING")
     )
-    game = models.ForeignKey('core.Game', on_delete=models.PROTECT, related_name='tips')
+    game = models.CharField(max_length=15)
     issuer = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE)
     league = models.CharField(max_length=20)
     home_team = models.CharField(max_length=50)
     away_team = models.CharField(max_length=50)
     prediction = models.CharField(max_length=50)
-    date = models.DateTimeField()
+    match_day = models.DateTimeField()
+    date_added = models.DateTimeField(auto_now_add=True)
     result = models.CharField(max_length=10, null=True)
+    is_free = models.BooleanField(default=True)
     status = models.PositiveIntegerField(choices=STATUS, default=PENDING)
 
     def __str__(self):
-        return f'{self.game.type}-{self.issuer.user.username}'
+        return f'{self.game}-{self.issuer.user.username}'

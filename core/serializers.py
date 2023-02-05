@@ -6,7 +6,7 @@ from rest_framework_simplejwt.serializers import TokenObtainSerializer, RefreshT
 from rest_framework_simplejwt import serializers as sjwt_serializers
 from django_countries.serializers import CountryFieldMixin
 from core.models.user import UserAccount, Pricing, Wallet
-from core.models.tips import Tips
+from core.models.tips import MatchTips, BookingCodeTips
 from core.models.currency import Currency
 from core.models.subscription import Subscription, Payment
 
@@ -117,7 +117,12 @@ class OwnerUserAccountSerializer(CountryFieldMixin, serializers.ModelSerializer)
 
     class Meta:
         model = UserAccount
-        fields = '__all__'
+        exclude = ['currency']
+        extra_kwargs = {
+            'bio': {
+                'required': False,
+            }
+        }
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -128,6 +133,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserAccountSerializer(CountryFieldMixin, serializers.ModelSerializer):
     user = UserSerializer()
+    full_name = serializers.CharField()
     pricing = UserPricingSerializer()
     subscriber_count = serializers.IntegerField()
 
@@ -136,7 +142,8 @@ class UserAccountSerializer(CountryFieldMixin, serializers.ModelSerializer):
         exclude = ['ip_address', 'phone_number', 'email_verified']
 
 
-class TipsSerializer(serializers.ModelSerializer):
+class MatchTipsSerializer(serializers.ModelSerializer):
+    issuer = UserAccountSerializer()
 
     def validate_issuer(self, value):
         """
@@ -146,11 +153,40 @@ class TipsSerializer(serializers.ModelSerializer):
         if not user_account.is_tipster:
             raise serializers.ValidationError("Only Tipsters can create tips")
         return value
+    
+    def to_internal_value(self, data):
+        new_data = data
+        issuer = UserAccount.objects.get(id=data.get("issuer"))
+        new_data['issuer'] = issuer
+        return new_data
 
     class Meta:
-        model = Tips
+        model = MatchTips
         fields = '__all__'
         read_only_fields = ['id']
+
+
+class BookingCodeTipsSerializer(serializers.ModelSerializer):
+    issuer = UserAccountSerializer()
+
+    def validate_issuer(self, value):
+        """
+        Check that the owner is a tipster
+        """
+        user_account = value
+        if not user_account.is_tipster:
+            raise serializers.ValidationError("Only Tipsters can create tips")
+        return value
+    
+    def to_internal_value(self, data):
+        new_data = data
+        issuer = UserAccount.objects.get(id=data.get("issuer"))
+        new_data['issuer'] = issuer
+        return new_data
+
+    class Meta:
+        model = BookingCodeTips
+        fields = '__all__'
 
 
 class CurrencySerializer(serializers.ModelSerializer):

@@ -19,13 +19,13 @@ class Subscription(models.Model):
         (PREMIUM, 'PREMIUM')
     )
     type = models.PositiveIntegerField(choices=SUBSCRIPTION_TYPE)
-    code = models.CharField(max_length=32, default=generate_unique_code)
+    code = models.CharField(max_length=32, default=generate_unique_code, editable=False)
     issuer = models.ForeignKey('core.UserAccount', on_delete=models.PROTECT, related_name='tipster_subscriptions')
     subscriber = models.ForeignKey('core.UserAccount', on_delete=models.PROTECT, related_name='bettor_subscriptions')
     payment = models.ForeignKey(Payment, on_delete=models.CASCADE, null=True, related_name='payment_subscription')
     period = models.IntegerField(default=-1)
-    date_initialized = models.DateTimeField(auto_now=True)
-    date_expired = models.DateTimeField(null=True)
+    subscription_date = models.DateTimeField(auto_now=True)
+    expiration_date = models.DateTimeField(null=True)
     is_active = models.BooleanField(default=True)
 
     def __str__(self):

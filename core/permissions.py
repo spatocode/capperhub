@@ -3,10 +3,14 @@ from rest_framework.exceptions import APIException
 from core.models.user import UserAccount
 from core.models.subscription import Subscription
 
-class BettorPermission(BasePermission):
-    """Permission class to detect if the user is a Bettor"""
+class BettorPermissionOrReadOnly(BasePermission):
+    """Permission class to detect if the user is a Bettor
+
+    """
     @staticmethod
     def has_permission(request, view, **kwargs):
+        if request.method in SAFE_METHODS:
+            return True
         try:
             user_account = UserAccount.objects.get(user=request.user.id)
         except UserAccount.DoesNotExist:
@@ -24,7 +28,7 @@ class TipsterPermission(BasePermission):
     @staticmethod
     def has_permission(request, view):
         try:
-            user_account = UserAccount.objects.get(user=request.user.id)
+            user_account = request.user.useraccount
         except UserAccount.DoesNotExist:
             raise APIException(
                 detail='User does not exist',
@@ -35,7 +39,7 @@ class TipsterPermission(BasePermission):
         return False
 
 
-class IsOwnerOrReadOnly(BasePermission):
+class  IsOwnerOrReadOnly(BasePermission):
     """
     Object-level permission to only allow owners of an object to edit it.
     """
@@ -57,18 +61,15 @@ class IsOwnerOrSubscriberReadOnly(BasePermission):
     def has_object_permission(self, request, view, obj):
         # Read permissions are allowed to request of subscribers,
         # so we'll always allow GET, HEAD or OPTIONS requests.
-        subscriptions = Subscription.objects.filter(
-            issuer=obj.user.id,
-            subscriber=request.user.id,
-            is_active=True
-        )
-        if request.method in SAFE_METHODS and len(subscriptions) > 0:
+        if request.method in SAFE_METHODS and obj.user.id == request.user.id:
             return True
+        if obj.user.id == request.user.id and request.user.useraccount.is_tipster:
+            return True
+        
+        return False
 
-        return obj.user.id == request.user.id
 
-
-#TODO: Implement blocked IP
+# TODO: Implement blocked IP
 # class BlocklistPermission(BasePermission):
 #     """
 #     Global permission check for blocked IPs.

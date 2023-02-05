@@ -1,5 +1,5 @@
 from django_filters import FilterSet, DateTimeFilter
-from core.models.tips import Tips
+from core.models.tips import MatchTips
 from core.models.user import UserAccount
 from core.models.subscription import Subscription
 
@@ -10,7 +10,7 @@ class TipsFilterSet(FilterSet):
     date__lt = DateTimeFilter(field_name='date', lookup_expr='lt')
 
     class Meta:
-        model = Tips
+        model = MatchTips
         fields = ['issuer', 'date', 'status']
 
 
