@@ -5,7 +5,7 @@ from core.models.tips import MatchTips, BookingCodeTips
 from core.models.subscription import Subscription
 
 class UserAccountAdmin(admin.ModelAdmin):
-    list_display = ['username', 'email', 'first_name', 'last_name', 'country', 'phone_number', 'is_tipster', 'email_verified']
+    list_display = ['username', 'email', 'first_name', 'last_name', 'display_name', 'country', 'phone_number', 'is_tipster', 'email_verified']
     list_filter = ['is_tipster', 'email_verified', 'country']
 
     def username(self, obj):

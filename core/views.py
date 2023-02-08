@@ -111,11 +111,19 @@ class UserSubscriptionModelViewSet(ModelViewSet):
                 detail='You\'ve already subscribed to Free plan',   
             )
 
-        if subscription.type == Subscription.PREMIUM:
+        if subscription.type == Subscription.PREMIUM and subscription_type == Subscription.PREMIUM:
             if subscription.expiration_date > datetime.utcnow().replace(tzinfo=pytz.UTC):
                 raise SubscriptionError(
                     detail='You\'ve already subscribed to Premium plan',
                 )
+
+        if subscription.type == Subscription.PREMIUM and subscription_type == Subscription.FREE:
+            if subscription.expiration_date > datetime.utcnow().replace(tzinfo=pytz.UTC):
+                raise SubscriptionError(
+                    detail='You\'ve already subscribed to Premium plan',
+                )
+        
+        return subscription
 
     def record_payment(self, amount, tipster, period):
         payment = Payment.objects.create(
@@ -135,7 +143,7 @@ class UserSubscriptionModelViewSet(ModelViewSet):
         tipster = self.get_object(tipster_id)
         payment = None
 
-        self.verify_subscription(
+        previous_subscription = self.verify_subscription(
             subscriber,
             tipster,
             period=period,
@@ -157,6 +165,11 @@ class UserSubscriptionModelViewSet(ModelViewSet):
 
         if payment is not None:
             subscription.payment = payment
+
+        if previous_subscription.type == Subscription.FREE and subscription_type == Subscription.PREMIUM:
+            previous_subscription.is_active = False
+            previous_subscription.save()
+
         subscription.save()
         serializer = self.serializer_class(instance=subscription)
         return Response({
