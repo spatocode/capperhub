@@ -130,34 +130,20 @@ class UserSubscriptionModelViewSet(ModelViewSet):
                     detail='You\'ve already subscribed to Premium plan',
                 )
 
-    def make_payment(self, tipster, subscriber, **kwargs):
-        period = kwargs.get('period')
-        price = tipster.pricing.amount
-        # Add discount if period is more than a month
-        if period > 30:
-            discount = tipster.pricing.percentage_discount
-            price = price - (price * discount)
-        subscriber_currency = subscriber.currency
-        tipster_currency = tipster.currency
-        payment_price = price
-        if tipster_currency.id != subscriber_currency.id:
-            # TODO: Use currency API service to get/convert the subscriber 
-            # currency to tipster currency thereby changing payment price
-            pass
-
+    def record_payment(self, amount, tipster, period):
         payment = Payment.objects.create(
-            base_price=price,
-            base_currency=tipster_currency,
-            payment_currency=subscriber_currency,
-            payment_price=payment_price
+            price=amount,
+            currency=tipster.currency,
+            period=period
         )
 
         return payment
 
-    def subscribe(self, request, pk=None):
+    def subscribe(self, request):
         subscription_type = request.data.get('type')
         tipster_id = request.data.get('tipster')
         period = request.data.get('period')
+        amount = request.data.get('amount')
         subscriber = request.user.useraccount
         tipster = self.get_object(tipster_id)
         payment = None
@@ -169,12 +155,8 @@ class UserSubscriptionModelViewSet(ModelViewSet):
             subscription_type=subscription_type
         )
 
-        if subscription_type == Subscription.TRIAL:
-            #TODO: Add credit card before commencing on trial
-            pass
-
         if subscription_type == Subscription.PREMIUM:
-            payment = self.make_payment(tipster, subscriber, period=period)
+            payment = self.record_payment(amount, tipster, period)
 
         subscription = Subscription(
             type=subscription_type,
@@ -298,8 +280,13 @@ class UserWalletAPIView(APIView):
 class UserAPIView(ModelViewSet):
     filter_class = UserAccountFilterSet
 
-    def get_object(self, username):
+    def get_object(self, username, request):
         try:
+            if request.query_params.get('tipster'):
+                return UserAccount.objects.select_related('user').get(
+                    user__username=username,
+                    is_tipster=True
+                )
             return UserAccount.objects.select_related('user').get(user__username=username)
         except UserAccount.DoesNotExist:
             raise Http404
@@ -314,7 +301,7 @@ class UserAPIView(ModelViewSet):
         return Response(serializer.data)
 
     def get_user(self, request, username=None):
-        data = self.get_object(username)
+        data = self.get_object(username, request)
         serializer = UserAccountSerializer(data)
         return Response(serializer.data)
 

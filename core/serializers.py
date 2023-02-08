@@ -196,8 +196,7 @@ class CurrencySerializer(serializers.ModelSerializer):
 
 
 class PaymentSerializer(serializers.ModelSerializer):
-    base_currency = CurrencySerializer()
-    payment_currency = CurrencySerializer()
+    currency = CurrencySerializer()
 
     class Meta:
         model = Payment

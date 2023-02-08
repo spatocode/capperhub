@@ -3,11 +3,9 @@ from django.utils.timezone import now
 from core.shared.model_utils import generate_unique_code
 
 class Payment(models.Model):
-    base_price = models.IntegerField(default=0)
-    base_currency = models.ForeignKey('core.Currency', on_delete=models.CASCADE, null=True, related_name='base_currency_payment')
-    payment_price = models.IntegerField(default=0)
-    payment_currency = models.ForeignKey('core.Currency', on_delete=models.CASCADE, null=True, related_name='payment_currency_payment')
-    exchange_rate = models.IntegerField(null=True)
+    price = models.IntegerField(default=0)
+    currency = models.ForeignKey('core.Currency', on_delete=models.CASCADE, null=True, related_name='currency_payment')
+    period = models.IntegerField()
 
 class Subscription(models.Model):
     FREE = 0
