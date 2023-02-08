@@ -9,11 +9,9 @@ class Payment(models.Model):
 
 class Subscription(models.Model):
     FREE = 0
-    TRIAL = 1
-    PREMIUM = 2
+    PREMIUM = 1
     SUBSCRIPTION_TYPE = (
         (FREE, 'FREE'),
-        (TRIAL, 'TRIAL'),
         (PREMIUM, 'PREMIUM')
     )
     type = models.PositiveIntegerField(choices=SUBSCRIPTION_TYPE)

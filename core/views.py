@@ -111,20 +111,7 @@ class UserSubscriptionModelViewSet(ModelViewSet):
                 detail='You\'ve already subscribed to Free plan',   
             )
 
-        if subscription.type == Subscription.TRIAL:
-            if period != tipster.pricing.trial_period:
-                raise SubscriptionError(
-                    detail='Incorrect Trial Period. Doesn\'t match with Tipster\'s Trial Period',
-                )
-            if subscription.expiration_date < datetime.utcnow().replace(tzinfo=pytz.UTC):
-                raise SubscriptionError(
-                    detail='You\'ve already completed your Trial plan',
-                )
-            elif subscription.expiration_date > datetime.utcnow().replace(tzinfo=pytz.UTC):
-                raise SubscriptionError(
-                    detail='You\'ve already subscribed to Trial plan',
-                )
-        elif subscription.type == Subscription.PREMIUM:
+        if subscription.type == Subscription.PREMIUM:
             if subscription.expiration_date > datetime.utcnow().replace(tzinfo=pytz.UTC):
                 raise SubscriptionError(
                     detail='You\'ve already subscribed to Premium plan',
@@ -384,13 +371,6 @@ class TipsAPIView(APIView):
                 is_active=True
             )
             sub_issuers = subscriptions.values_list("issuer__id", flat=True)
-            # free_sub_issuers = []
-            # premium_sub_issuers = []
-            # for subscription in subscriptions:
-            #     if subscription.type == subscription.PREMIUM or subscription.type == subscription.TRIAL:
-            #         premium_sub_issuers.append(subscriptions.values_list("issuer__id", flat=True))
-            #     else:
-            #         free_sub_issuers.append(subscriptions.values_list("issuer__id", flat=True))
 
             mt_queryset = MatchTips.objects.filter(issuer__in=sub_issuers)
             bc_queryset = BookingCodeTips.objects.filter(issuer__in=sub_issuers)

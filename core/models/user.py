@@ -14,7 +14,6 @@ class Pricing(models.Model):
     amount = models.IntegerField(default=0)
     percentage_discount = models.DecimalField(default=0.0, max_digits=19, decimal_places=10)
     date = models.DateTimeField(auto_now=True)
-    trial_period = models.PositiveIntegerField(default=14)
 
     def __str__(self):
         return f'{self.amount}'
