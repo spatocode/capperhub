@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django_countries.fields import CountryField
 from .subscription import Subscription
@@ -14,6 +15,8 @@ class Pricing(models.Model):
     amount = models.IntegerField(default=0)
     percentage_discount = models.DecimalField(default=0.0, max_digits=19, decimal_places=10)
     date = models.DateTimeField(auto_now=True)
+    free_features = ArrayField(models.CharField(max_length=50), blank=True)
+    premium_features = ArrayField(models.CharField(max_length=50), blank=True)
 
     def __str__(self):
         return f'{self.amount}'
