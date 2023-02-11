@@ -15,7 +15,7 @@ class Subscription(models.Model):
         (PREMIUM, 'PREMIUM')
     )
     type = models.PositiveIntegerField(choices=SUBSCRIPTION_TYPE)
-    code = models.CharField(max_length=32, default=generate_unique_code, editable=False)
+    reference = models.CharField(max_length=32, default=generate_unique_code, editable=False)
     issuer = models.ForeignKey('core.UserAccount', on_delete=models.PROTECT, related_name='tipster_subscriptions')
     subscriber = models.ForeignKey('core.UserAccount', on_delete=models.PROTECT, related_name='bettor_subscriptions')
     payment = models.ForeignKey(Payment, on_delete=models.CASCADE, null=True, related_name='payment_subscription')

@@ -5,4 +5,4 @@ def generate_unique_code():
     Generate a unique code
     """
     chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ123456789!@#$%&'
-    return get_random_string(8, chars)
+    return get_random_string(13, chars)

@@ -18,9 +18,9 @@ class MatchTips(models.Model):
         (WIN, "WIN"),
         (PENDING, "PENDING")
     )
-    game = models.CharField(max_length=15)
+    game = models.CharField(max_length=20)
     issuer = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE)
-    league = models.CharField(max_length=20)
+    league = models.CharField(max_length=50)
     home_team = models.CharField(max_length=50)
     away_team = models.CharField(max_length=50)
     prediction = models.CharField(max_length=50)

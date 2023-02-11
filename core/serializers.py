@@ -113,6 +113,7 @@ class OwnerUserAccountSerializer(CountryFieldMixin, serializers.ModelSerializer)
     user = OwnerUserSerializer()
     pricing = UserPricingSerializer()
     subscriber_count = serializers.IntegerField()
+    subscription_count = serializers.IntegerField()
     wallet = UserWalletSerializer()
 
     class Meta:

@@ -41,11 +41,9 @@ class UserAccount(models.Model):
     @property
     def full_name(self):
         return f'{self.user.first_name} {self.user.last_name}'
-    
-    # @property
-    # def is_complete_profile(self):
-    #     if self.user.first_name and self.user.last_name and self.
 
+    # TODO: To minimize access to DB, consider removing these count properties and use 
+    # the data returned in other properties to get count
     @property
     def subscriber_count(self):
         num_of_subscribers = Subscription.objects.filter(
@@ -53,7 +51,23 @@ class UserAccount(models.Model):
             is_active=True,
         ).distinct('subscriber').count()
         return num_of_subscribers
+    
+    @property
+    def subscription_count(self):
+        num_of_subscriptions = Subscription.objects.filter(
+            subscriber=self.pk,
+            is_active=True,
+        ).distinct('subscriber').count()
+        return num_of_subscriptions
 
+    @property
+    def subscribers(self):
+        subscribers = Subscription.objects.filter(
+            issuer=self.pk,
+            is_active=True
+        )
+        return subscribers
+    
     @property
     def subscribers(self):
         subscribers = Subscription.objects.filter(

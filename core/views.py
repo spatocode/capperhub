@@ -420,16 +420,6 @@ class TipsAPIView(APIView):
         self.check_object_permissions(request, user_account)
         data = request.data
 
-        if data.get('bookie'):
-            bc_serializer = BookingCodeTipsSerializer(data=data)
-            bc_serializer.is_valid(raise_exception=True)
-            bc_serializer.save()
-
-            return Response({
-                'message': 'Tips Created Successfully',
-                'data': bc_serializer.data
-            })
-
         if int(data.get('issuer')) != int(pk):
             raise exceptions.PermissionDenied()
 
