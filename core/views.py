@@ -16,11 +16,10 @@ from core.serializers import (
     MatchTipsSerializer, UserAccountSerializer, UserAccountRegisterSerializer,
     SubscriptionSerializer, UserPricingSerializer, OwnerUserAccountSerializer,
     OwnerUserSerializer, CustomTokenObtainPairSerializer, UserWalletSerializer,
-    BookingCodeTipsSerializer
 )
 from core.models.user import UserAccount
 from core.models.currency import Currency
-from core.models.tips import MatchTips, BookingCodeTips
+from core.models.tips import MatchTips
 from core.models.subscription import Subscription, Payment
 from core.filters import TipsFilterSet, UserAccountFilterSet, SubscriptionFilterSet
 from core.exceptions import SubscriptionError, PricingError, PaymentSetupError, PermissionDeniedError, BadRequestError
@@ -376,7 +375,6 @@ class TipsAPIView(APIView):
         user_account = self.get_object(pk)
         self.check_object_permissions(request, user_account)
         mt_queryset = None
-        bc_queryset = None
 
         if not request.user.useraccount.is_tipster:
             subscriptions = Subscription.objects.filter(
@@ -386,7 +384,6 @@ class TipsAPIView(APIView):
             sub_issuers = subscriptions.values_list("issuer__id", flat=True)
 
             mt_queryset = MatchTips.objects.filter(issuer__in=sub_issuers)
-            bc_queryset = BookingCodeTips.objects.filter(issuer__in=sub_issuers)
 
         query_params = request.query_params
         filterset = self.filter_class(
@@ -395,12 +392,8 @@ class TipsAPIView(APIView):
         )
         match_tips_serializer = MatchTipsSerializer(filterset.qs, many=True)
 
-        booking_code = bc_queryset if bc_queryset else BookingCodeTips.objects.filter(issuer=pk)
-        booking_code_serializer = BookingCodeTipsSerializer(booking_code, many=True)
-
         return Response({
-            "match_tips": match_tips_serializer.data,
-            "booking_code_tips": booking_code_serializer.data
+            "match_tips": match_tips_serializer.data
         })
 
     # def put(self, request, pk=None, format=None):

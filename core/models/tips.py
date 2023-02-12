@@ -1,14 +1,5 @@
 from django.db import models
 
-
-class BookingCodeTips(models.Model):
-    code = models.CharField(max_length=50)
-    bookie = models.CharField(max_length=20)
-    issuer = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE)
-    date_added = models.DateTimeField(auto_now_add=True)
-    is_free = models.BooleanField(default=True)
-
-
 class MatchTips(models.Model):
     LOSS = 0
     WIN = 1

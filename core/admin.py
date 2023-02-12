@@ -1,7 +1,7 @@
 from django.contrib import admin
 from core.models.user import UserAccount, Pricing, Wallet
 from core.models.currency import Currency
-from core.models.tips import MatchTips, BookingCodeTips
+from core.models.tips import MatchTips
 from core.models.subscription import Subscription
 
 class UserAccountAdmin(admin.ModelAdmin):
@@ -50,7 +50,6 @@ class WalletAdmin(admin.ModelAdmin):
 
 admin.site.register(UserAccount, UserAccountAdmin)
 admin.site.register(MatchTips, MatchTipsAdmin)
-admin.site.register(BookingCodeTips, BookingCodeTipsAdmin)
 admin.site.register(Pricing, PricingAdmin)
 admin.site.register(Wallet, WalletAdmin)
 admin.site.register(Subscription, SubscriptionAdmin)

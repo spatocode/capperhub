@@ -4,9 +4,9 @@ from rest_framework.exceptions import ValidationError
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from rest_framework_simplejwt.serializers import TokenObtainSerializer, RefreshToken, get_user_model
 from rest_framework_simplejwt import serializers as sjwt_serializers
-from django_countries.serializers import CountryFieldMixin
+from django_countries.serializer_fields import CountryField
 from core.models.user import UserAccount, Pricing, Wallet
-from core.models.tips import MatchTips, BookingCodeTips
+from core.models.tips import MatchTips
 from core.models.currency import Currency
 from core.models.subscription import Subscription, Payment
 
@@ -109,12 +109,13 @@ class OwnerUserSerializer(serializers.ModelSerializer):
         exclude = ['password']
 
 
-class OwnerUserAccountSerializer(CountryFieldMixin, serializers.ModelSerializer):
+class OwnerUserAccountSerializer(serializers.ModelSerializer):
     user = OwnerUserSerializer()
     pricing = UserPricingSerializer()
     subscriber_count = serializers.IntegerField()
     subscription_count = serializers.IntegerField()
     wallet = UserWalletSerializer()
+    country = CountryField(name_only=True)
 
     class Meta:
         model = UserAccount
@@ -132,11 +133,12 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['first_name', 'last_name', 'username', 'email']
 
 
-class UserAccountSerializer(CountryFieldMixin, serializers.ModelSerializer):
+class UserAccountSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     full_name = serializers.CharField()
     pricing = UserPricingSerializer()
     subscriber_count = serializers.IntegerField()
+    country = CountryField(name_only=True)
 
     class Meta:
         model = UserAccount
@@ -165,29 +167,6 @@ class MatchTipsSerializer(serializers.ModelSerializer):
         model = MatchTips
         fields = '__all__'
         read_only_fields = ['id']
-
-
-class BookingCodeTipsSerializer(serializers.ModelSerializer):
-    issuer = UserAccountSerializer()
-
-    def validate_issuer(self, value):
-        """
-        Check that the owner is a tipster
-        """
-        user_account = value
-        if not user_account.is_tipster:
-            raise serializers.ValidationError("Only Tipsters can create tips")
-        return value
-    
-    def to_internal_value(self, data):
-        new_data = data
-        issuer = UserAccount.objects.get(id=data.get("issuer"))
-        new_data['issuer'] = issuer
-        return new_data
-
-    class Meta:
-        model = BookingCodeTips
-        fields = '__all__'
 
 
 class CurrencySerializer(serializers.ModelSerializer):
