@@ -21,6 +21,8 @@
 
 - Handle email and phone verification on signup
 
+- Handle email and phone on change
+
 - Make sure the datetime in DB are timezone aware
 
 - Support responsive UI.
