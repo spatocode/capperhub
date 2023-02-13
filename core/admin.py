@@ -1,7 +1,7 @@
 from django.contrib import admin
 from core.models.user import UserAccount, Pricing, Wallet
-from core.models.currency import Currency
-from core.models.tips import MatchTips
+from core.models.transaction import Currency, Transaction
+from core.models.play import Play
 from core.models.subscription import Subscription
 
 class UserAccountAdmin(admin.ModelAdmin):
@@ -23,17 +23,16 @@ class UserAccountAdmin(admin.ModelAdmin):
 class CurrencyAdmin(admin.ModelAdmin):
     list_display = ['code', 'country']
 
+class TransactionAdmin(admin.ModelAdmin):
+    list_display = ['type', 'amount', 'reference']
+
 class SubscriptionAdmin(admin.ModelAdmin):
     list_display = ['type', 'issuer', 'subscriber', 'subscription_date', 'expiration_date', 'is_active']
     list_filter = ['type', 'is_active']
 
-class MatchTipsAdmin(admin.ModelAdmin):
+class PlayAdmin(admin.ModelAdmin):
     list_display = ['issuer', 'game', 'home_team', 'away_team', 'match_day', 'prediction', 'status']
     list_filter = ['issuer', 'game', 'match_day', 'status']
-
-class BookingCodeTipsAdmin(admin.ModelAdmin):
-    list_display = ['code', 'bookie', 'issuer', 'date_added', 'is_free']
-    list_filter = ['bookie', 'date_added', 'is_free']
 
 class PricingAdmin(admin.ModelAdmin):
     list_display = ['amount']
@@ -49,7 +48,7 @@ class WalletAdmin(admin.ModelAdmin):
 
 
 admin.site.register(UserAccount, UserAccountAdmin)
-admin.site.register(MatchTips, MatchTipsAdmin)
+admin.site.register(Play, PlayAdmin)
 admin.site.register(Pricing, PricingAdmin)
 admin.site.register(Wallet, WalletAdmin)
 admin.site.register(Subscription, SubscriptionAdmin)

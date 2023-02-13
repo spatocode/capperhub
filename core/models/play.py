@@ -1,6 +1,6 @@
 from django.db import models
 
-class MatchTips(models.Model):
+class Play(models.Model):
     LOSS = 0
     WIN = 1
     PENDING = 2
@@ -18,7 +18,7 @@ class MatchTips(models.Model):
     match_day = models.DateTimeField()
     date_added = models.DateTimeField(auto_now_add=True)
     result = models.CharField(max_length=10, null=True)
-    is_free = models.BooleanField(default=True)
+    is_premium = models.BooleanField(default=True)
     status = models.PositiveIntegerField(choices=STATUS, default=PENDING)
 
     def __str__(self):

@@ -9,20 +9,19 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from dj_rest_auth.registration.views import RegisterView
-from paystackapi.subaccount import SubAccount
 from rest_framework_simplejwt.views import TokenObtainPairView
-from core.permissions import BettorPermissionOrReadOnly, TipsterPermission, IsOwnerOrReadOnly, IsOwnerOrSubscriberReadOnly
+from core.permissions import BettorPermissionOrReadOnly, IsOwnerOrReadOnly, IsOwnerOrSubscriberReadOnly
 from core.serializers import (
-    MatchTipsSerializer, UserAccountSerializer, UserAccountRegisterSerializer,
+    PlaySerializer, UserAccountSerializer, UserAccountRegisterSerializer,
     SubscriptionSerializer, UserPricingSerializer, OwnerUserAccountSerializer,
     OwnerUserSerializer, CustomTokenObtainPairSerializer, UserWalletSerializer,
 )
 from core.models.user import UserAccount
-from core.models.currency import Currency
-from core.models.tips import MatchTips
-from core.models.subscription import Subscription, Payment
-from core.filters import TipsFilterSet, UserAccountFilterSet, SubscriptionFilterSet
-from core.exceptions import SubscriptionError, PricingError, PaymentSetupError, PermissionDeniedError, BadRequestError
+from core.models.transaction import Currency, Transaction
+from core.models.play import Play
+from core.models.subscription import Subscription
+from core.filters import PlayFilterSet, UserAccountFilterSet, SubscriptionFilterSet
+from core.exceptions import SubscriptionError, PricingError, PermissionDeniedError, BadRequestError
 
 
 class CsrfExemptSessionAuthentication(authentication.SessionAuthentication):
@@ -124,23 +123,27 @@ class UserSubscriptionModelViewSet(ModelViewSet):
         
         return subscription
 
-    def record_payment(self, amount, tipster, period):
-        payment = Payment.objects.create(
-            price=amount,
-            currency=tipster.currency,
-            period=period
+    def record_transaction(self, subscriber, **kwargs):
+        transaction = Transaction.objects.create(
+            type=Transaction.DEPOSIT,
+            user=subscriber,
+            issuer=kwargs.get('issuer'),
+            channel=kwargs.get('channel'),
+            price=kwargs.get('amount'),
+            currency=kwargs.get('currency'),
+            period=kwargs.get('period')
         )
 
-        return payment
+        return transaction
 
     def subscribe(self, request):
         subscription_type = request.data.get('type')
         tipster_id = request.data.get('tipster')
         period = request.data.get('period')
         amount = request.data.get('amount')
+        issuer = request.data.get('issuer')
         subscriber = request.user.useraccount
         tipster = self.get_object(tipster_id)
-        payment = None
 
         previous_subscription = self.verify_subscription(
             subscriber,
@@ -150,7 +153,8 @@ class UserSubscriptionModelViewSet(ModelViewSet):
         )
 
         if subscription_type == Subscription.PREMIUM:
-            payment = self.record_payment(amount, tipster, period)
+            self.record_transaction(subscriber, amount=amount, issuer=issuer, 
+            currency=tipster.currency, period=period)
 
         subscription = Subscription(
             type=subscription_type,
@@ -161,9 +165,6 @@ class UserSubscriptionModelViewSet(ModelViewSet):
         if period:
             subscription.period = period
             subscription.expiration_date = datetime.utcnow().replace(tzinfo=pytz.UTC) + timedelta(days=period)
-
-        if payment is not None:
-            subscription.payment = payment
 
         if previous_subscription.type == Subscription.FREE and subscription_type == Subscription.PREMIUM:
             previous_subscription.is_active = False
@@ -207,7 +208,7 @@ class UserSubscriptionModelViewSet(ModelViewSet):
         return Response({"message": "Unsubscribed successfully", "data": serializer.data})
 
 
-@permission_classes((permissions.IsAuthenticated, TipsterPermission, IsOwnerOrReadOnly))
+@permission_classes((permissions.IsAuthenticated, IsOwnerOrReadOnly))
 class UserPricingAPIView(APIView):
 
     def get_object(self, pk):
@@ -219,7 +220,6 @@ class UserPricingAPIView(APIView):
     def post(self, request, pk=None):
         data = request.data
         user_account = self.get_object(pk)
-        self.check_object_permissions(request, user_account)
         # Make sure pricing can be updated once in 60days
         if user_account.pricing:
             date_due_for_update = user_account.pricing.date + timedelta(days=60)
@@ -240,7 +240,7 @@ class UserPricingAPIView(APIView):
         })
 
 
-@permission_classes((permissions.IsAuthenticated, TipsterPermission, IsOwnerOrReadOnly))
+@permission_classes((permissions.IsAuthenticated, IsOwnerOrReadOnly))
 class UserWalletAPIView(APIView):
 
     def get_object(self, pk):
@@ -251,17 +251,6 @@ class UserWalletAPIView(APIView):
 
     def post(self, request, pk=None):
         user_account = self.get_object(pk)
-        self.check_object_permissions(request, user_account)
-
-        res = SubAccount.create(
-            business_name=user_account.full_name,
-            settlement_bank=request.data.get('bank'),
-            account_number=request.data.get('account_number'),
-            percentage_charge=settings.PERCENTAGE_CHARGE
-        )
-
-        if res.get('status') == False:
-            raise PaymentSetupError(detail=res.get('message'), code=400)
 
         serializer = UserWalletSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -362,8 +351,8 @@ class UserAPIView(ModelViewSet):
 
 
 @permission_classes((permissions.IsAuthenticated, IsOwnerOrSubscriberReadOnly,))
-class TipsAPIView(APIView):
-    filter_class = TipsFilterSet
+class PlayAPIView(APIView):
+    filter_class = PlayFilterSet
 
     def get_object(self, pk):
         try:
@@ -383,17 +372,17 @@ class TipsAPIView(APIView):
             )
             sub_issuers = subscriptions.values_list("issuer__id", flat=True)
 
-            mt_queryset = MatchTips.objects.filter(issuer__in=sub_issuers)
+            mt_queryset = Play.objects.filter(issuer__in=sub_issuers)
 
         query_params = request.query_params
         filterset = self.filter_class(
             data=query_params,
-            queryset= mt_queryset if mt_queryset else MatchTips.objects.filter(issuer=pk)
+            queryset= mt_queryset if mt_queryset else Play.objects.filter(issuer=pk)
         )
-        match_tips_serializer = MatchTipsSerializer(filterset.qs, many=True)
+        play_serializer = PlaySerializer(filterset.qs, many=True)
 
         return Response({
-            "match_tips": match_tips_serializer.data
+            "plays": play_serializer.data
         })
 
     # def put(self, request, pk=None, format=None):
@@ -416,12 +405,12 @@ class TipsAPIView(APIView):
         if int(data.get('issuer')) != int(pk):
             raise exceptions.PermissionDenied()
 
-        mt_serializer = MatchTipsSerializer(data=data)
-        mt_serializer.is_valid(raise_exception=True)
-        mt_serializer.save()
+        play_serializer = PlaySerializer(data=data)
+        play_serializer.is_valid(raise_exception=True)
+        play_serializer.save()
         return Response({
-            'message': 'Tips Created Successfully',
-            'data': mt_serializer.data
+            'message': 'Play Created Successfully',
+            'data': play_serializer.data
         })
 
     # def delete(self, request, pk, format=None):

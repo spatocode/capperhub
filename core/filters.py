@@ -1,16 +1,16 @@
 from django_filters import FilterSet, DateTimeFilter
-from core.models.tips import MatchTips
+from core.models.play import Play
 from core.models.user import UserAccount
 from core.models.subscription import Subscription
 
 
-class TipsFilterSet(FilterSet):
+class PlayFilterSet(FilterSet):
     date = DateTimeFilter(field_name='date')
     date__gt = DateTimeFilter(field_name='date', lookup_expr='gt')
     date__lt = DateTimeFilter(field_name='date', lookup_expr='lt')
 
     class Meta:
-        model = MatchTips
+        model = Play
         fields = ['issuer', 'date', 'status']
 
 

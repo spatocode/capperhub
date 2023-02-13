@@ -1,1 +1,1 @@
-from . import user, tips
+from . import user, play

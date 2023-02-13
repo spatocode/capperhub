@@ -6,9 +6,9 @@ from rest_framework_simplejwt.serializers import TokenObtainSerializer, RefreshT
 from rest_framework_simplejwt import serializers as sjwt_serializers
 from django_countries.serializer_fields import CountryField
 from core.models.user import UserAccount, Pricing, Wallet
-from core.models.tips import MatchTips
-from core.models.currency import Currency
-from core.models.subscription import Subscription, Payment
+from core.models.play import Play
+from core.models.transaction import Currency, Transaction
+from core.models.subscription import Subscription
 
 class UserAccountRegisterSerializer(RegisterSerializer):
     username = serializers.CharField(required=False)
@@ -145,7 +145,7 @@ class UserAccountSerializer(serializers.ModelSerializer):
         exclude = ['ip_address', 'phone_number', 'email_verified']
 
 
-class MatchTipsSerializer(serializers.ModelSerializer):
+class PlaySerializer(serializers.ModelSerializer):
     issuer = UserAccountSerializer()
 
     def validate_issuer(self, value):
@@ -164,7 +164,7 @@ class MatchTipsSerializer(serializers.ModelSerializer):
         return new_data
 
     class Meta:
-        model = MatchTips
+        model = Play
         fields = '__all__'
         read_only_fields = ['id']
 
@@ -175,18 +175,18 @@ class CurrencySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class PaymentSerializer(serializers.ModelSerializer):
+class TransactionSerializer(serializers.ModelSerializer):
     currency = CurrencySerializer()
 
     class Meta:
-        model = Payment
+        model = Transaction
         fields = '__all__'
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
     issuer = UserAccountSerializer()
     subscriber = UserAccountSerializer()
-    payment = PaymentSerializer()
+    transaction = TransactionSerializer()
 
     class Meta:
         model = Subscription

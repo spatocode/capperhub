@@ -22,23 +22,6 @@ class BettorPermissionOrReadOnly(BasePermission):
             return True
         return False
 
-
-class TipsterPermission(BasePermission):
-    """Permission class to detect if the user is a Tipster"""
-    @staticmethod
-    def has_permission(request, view):
-        try:
-            user_account = request.user.useraccount
-        except UserAccount.DoesNotExist:
-            raise APIException(
-                detail='User does not exist',
-                code=404
-            )
-        if user_account.is_tipster:
-            return True
-        return False
-
-
 class  IsOwnerOrReadOnly(BasePermission):
     """
     Object-level permission to only allow owners of an object to edit it.
