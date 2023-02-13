@@ -1,26 +1,4 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
-from rest_framework.exceptions import APIException
-from core.models.user import UserAccount
-from core.models.subscription import Subscription
-
-class BettorPermissionOrReadOnly(BasePermission):
-    """Permission class to detect if the user is a Bettor
-
-    """
-    @staticmethod
-    def has_permission(request, view, **kwargs):
-        if request.method in SAFE_METHODS:
-            return True
-        try:
-            user_account = UserAccount.objects.get(user=request.user.id)
-        except UserAccount.DoesNotExist:
-            raise APIException(
-                detail='User does not exist',
-                code=404
-            )
-        if not user_account.is_tipster:
-            return True
-        return False
 
 class  IsOwnerOrReadOnly(BasePermission):
     """
@@ -46,7 +24,7 @@ class IsOwnerOrSubscriberReadOnly(BasePermission):
         # so we'll always allow GET, HEAD or OPTIONS requests.
         if request.method in SAFE_METHODS and obj.user.id == request.user.id:
             return True
-        if obj.user.id == request.user.id and request.user.useraccount.is_tipster:
+        if obj.user.id != request.user.id and request.user.useraccount.is_subscriber(obj.id):
             return True
         
         return False

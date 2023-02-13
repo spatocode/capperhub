@@ -5,8 +5,8 @@ from core.models.play import Play
 from core.models.subscription import Subscription
 
 class UserAccountAdmin(admin.ModelAdmin):
-    list_display = ['username', 'email', 'first_name', 'last_name', 'display_name', 'country', 'phone_number', 'is_tipster', 'email_verified']
-    list_filter = ['is_tipster', 'email_verified', 'country']
+    list_display = ['username', 'email', 'first_name', 'last_name', 'display_name', 'country', 'phone_number', 'email_verified']
+    list_filter = ['email_verified', 'country']
 
     def username(self, obj):
         return obj.user.username
@@ -24,7 +24,13 @@ class CurrencyAdmin(admin.ModelAdmin):
     list_display = ['code', 'country']
 
 class TransactionAdmin(admin.ModelAdmin):
-    list_display = ['type', 'amount', 'reference']
+    list_display = ['type', 'amount', 'reference', 'issuer', 'channel', 'username', 'currency']
+
+    def username(self, obj):
+        return obj.user.username
+
+    def currency(self, obj):
+        return obj.currency
 
 class SubscriptionAdmin(admin.ModelAdmin):
     list_display = ['type', 'issuer', 'subscriber', 'subscription_date', 'expiration_date', 'is_active']
@@ -53,3 +59,4 @@ admin.site.register(Pricing, PricingAdmin)
 admin.site.register(Wallet, WalletAdmin)
 admin.site.register(Subscription, SubscriptionAdmin)
 admin.site.register(Currency, CurrencyAdmin)
+admin.site.register(Transaction, TransactionAdmin)

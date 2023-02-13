@@ -21,7 +21,7 @@
 
 [] Handle email and phone verification on signup
 
-[] Handle email and phone on change
+[] Handle email and phone verification on change
 
 [] Make sure the datetime in DB are timezone aware
 

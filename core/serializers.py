@@ -186,7 +186,6 @@ class TransactionSerializer(serializers.ModelSerializer):
 class SubscriptionSerializer(serializers.ModelSerializer):
     issuer = UserAccountSerializer()
     subscriber = UserAccountSerializer()
-    transaction = TransactionSerializer()
 
     class Meta:
         model = Subscription

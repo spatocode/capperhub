@@ -75,3 +75,26 @@ class UserAccount(models.Model):
             is_active=True
         )
         return subscribers
+    
+    def is_subscriber(self, issuer):
+        subscriber_count = Subscription.objects.filter(
+            issuer=issuer,
+            subscriber=self.pk,
+            is_active=True,
+        ).count()
+
+        if len(subscriber_count) > 0:
+            return True
+        return False
+    
+    def is_premium_subscriber(self, issuer):
+        subscriber_count = Subscription.objects.filter(
+            issuer=issuer,
+            subscriber=self.pk,
+            type=Subscription.PREMIUM,
+            is_active=True,
+        ).count()
+
+        if len(subscriber_count) > 0:
+            return True
+        return False

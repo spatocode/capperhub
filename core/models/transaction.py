@@ -30,7 +30,7 @@ class Transaction(models.Model):
         (CARD, 'CARD'),
     )
     PAYMENT_ISSUER = (
-        (PAYSTACK, 'PAYSTACK')
+        (PAYSTACK, 'PAYSTACK'),
     )
     type = models.PositiveIntegerField(choices=TRANSACTION_TYPE, editable=False)
     amount = models.IntegerField(default=0, editable=False)

@@ -10,7 +10,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from dj_rest_auth.registration.views import RegisterView
 from rest_framework_simplejwt.views import TokenObtainPairView
-from core.permissions import BettorPermissionOrReadOnly, IsOwnerOrReadOnly, IsOwnerOrSubscriberReadOnly
+from core.permissions import IsOwnerOrReadOnly, IsOwnerOrSubscriberReadOnly
 from core.serializers import (
     PlaySerializer, UserAccountSerializer, UserAccountRegisterSerializer,
     SubscriptionSerializer, UserPricingSerializer, OwnerUserAccountSerializer,
@@ -46,7 +46,7 @@ class UserAccountRegisterView(RegisterView):
         return user
 
 
-@permission_classes((permissions.IsAuthenticated, BettorPermissionOrReadOnly))
+@permission_classes((permissions.IsAuthenticated,))
 class UserSubscriptionModelViewSet(ModelViewSet):
     serializer_class = SubscriptionSerializer
     filter_class = SubscriptionFilterSet
@@ -79,26 +79,18 @@ class UserSubscriptionModelViewSet(ModelViewSet):
         )
         return filterset.qs
 
-    def verify_subscription_permission(self, subscriber, tipster):
-        if subscriber.is_tipster:
-            raise SubscriptionError(
-                detail='Subscription by Tipster not permitted',
-            )
-
-        if not tipster.is_tipster:
-            raise SubscriptionError(
-                detail='Subscription to non Tipster not permitted',
-            )
-
-    def verify_subscription(self, subscriber, tipster, **kwargs):
-        period = kwargs.get('period')
+    def verify_subscription(self, subscriber, issuer, **kwargs):
         subscription_type = kwargs.get('subscription_type')
-        self.verify_subscription_permission(subscriber, tipster)
+
+        if subscriber.id == issuer.id:
+            raise SubscriptionError(
+                detail='Self subscription not permitted',
+            )
 
         try:
             subscription = Subscription.objects.filter(
                 subscriber=subscriber,
-                issuer=tipster,
+                issuer=issuer,
                 is_active=True
             ).latest('subscription_date')
         except Subscription.DoesNotExist:
@@ -361,8 +353,8 @@ class PlayAPIView(APIView):
             raise Http404
 
     def get(self, request, pk=None, format=None):
-        user_account = self.get_object(pk)
-        self.check_object_permissions(request, user_account)
+        issuer = self.get_object(pk)
+        self.check_object_permissions(request, issuer)
         mt_queryset = None
 
         if not request.user.useraccount.is_tipster:
@@ -370,9 +362,10 @@ class PlayAPIView(APIView):
                 subscriber=request.user.useraccount.id,
                 is_active=True
             )
-            sub_issuers = subscriptions.values_list("issuer__id", flat=True)
+            issuers = subscriptions.values_list("issuer__id", flat=True)
+            import pdb; pdb.set_trace()
 
-            mt_queryset = Play.objects.filter(issuer__in=sub_issuers)
+            mt_queryset = Play.objects.filter(issuer__in=issuers, )
 
         query_params = request.query_params
         filterset = self.filter_class(

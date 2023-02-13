@@ -18,7 +18,7 @@ class UserAccountFilterSet(FilterSet):
 
     class Meta:
         model = UserAccount
-        fields = ['is_tipster', 'country']
+        fields = ['country']
 
 
 class SubscriptionFilterSet(FilterSet):
