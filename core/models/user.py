@@ -1,3 +1,5 @@
+import pytz
+from datetime import datetime
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
@@ -26,7 +28,6 @@ class UserAccount(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     display_name = models.CharField(null=True, max_length=50)
     bio = models.TextField(null=True)
-    is_tipster = models.BooleanField(default=False)
     country = CountryField(null=True)
     phone_number = models.CharField(null=True, unique=True, max_length=22)
     email_verified = models.BooleanField(default=False)
@@ -41,6 +42,13 @@ class UserAccount(models.Model):
     @property
     def full_name(self):
         return f'{self.user.first_name} {self.user.last_name}'
+
+    @property
+    def is_tipster(self):
+        active_plays = self.play_set.filter(match_day__lt=datetime.utcnow().replace(tzinfo=pytz.UTC))
+        if active_plays.count() > 0:
+            return True
+        return False
 
     # TODO: To minimize access to DB, consider removing these count properties and use 
     # the data returned in other properties to get count

@@ -2,6 +2,7 @@ import pytz
 from datetime import datetime, timedelta
 from django.conf import settings
 from django.core import exceptions
+from django.db.models import Q
 from django.http.response import Http404
 from rest_framework.decorators import permission_classes
 from rest_framework import authentication, permissions
@@ -10,7 +11,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from dj_rest_auth.registration.views import RegisterView
 from rest_framework_simplejwt.views import TokenObtainPairView
-from core.permissions import IsOwnerOrReadOnly, IsOwnerOrSubscriberReadOnly
+from core.permissions import IsOwnerOrReadOnly
 from core.serializers import (
     PlaySerializer, UserAccountSerializer, UserAccountRegisterSerializer,
     SubscriptionSerializer, UserPricingSerializer, OwnerUserAccountSerializer,
@@ -57,27 +58,18 @@ class UserSubscriptionModelViewSet(ModelViewSet):
         except UserAccount.DoesNotExist:
             raise Http404
 
-    def get_queryset(self):
-        query_params = self.request.query_params
-        issuer = query_params.dict().get("issuer")
-        subscriber = query_params.dict().get("subscriber")
+    def subscriptions(self, request):
         useraccount = self.request.user.useraccount
 
-        if not useraccount.is_tipster and not subscriber:
-            raise BadRequestError(detail="subscriber query params is required.")
+        subscriptions = Subscription.objects.filter(subscriber=useraccount.id, is_active=True).order_by("-subscription_date")
+        subscribers = Subscription.objects.filter(issuer=useraccount.id, is_active=True).order_by("-subscription_date")
+        subscriptions_serializer = self.serializer_class(subscriptions, many=True)
+        subscribers_serializer = self.serializer_class(subscribers, many=True)
 
-        if useraccount.is_tipster and not issuer:
-            raise BadRequestError(detail="issuer query params is required.")
-
-        if (useraccount.is_tipster and int(issuer) != int(useraccount.id)) or \
-            (not useraccount.is_tipster and int(subscriber) != int(useraccount.id)):
-            raise PermissionDeniedError(detail="You are not permitted to perform this action.")
-
-        filterset = self.filter_class(
-            data=query_params,
-            queryset=Subscription.objects.all()
-        )
-        return filterset.qs
+        return Response({
+            "subscriptions": subscriptions_serializer.data,
+            "subscribers": subscribers_serializer.data
+        })
 
     def verify_subscription(self, subscriber, issuer, **kwargs):
         subscription_type = kwargs.get('subscription_type')
@@ -157,8 +149,8 @@ class UserSubscriptionModelViewSet(ModelViewSet):
         if period:
             subscription.period = period
             subscription.expiration_date = datetime.utcnow().replace(tzinfo=pytz.UTC) + timedelta(days=period)
-
-        if previous_subscription.type == Subscription.FREE and subscription_type == Subscription.PREMIUM:
+    
+        if previous_subscription and previous_subscription.type == Subscription.FREE and subscription_type == Subscription.PREMIUM:
             previous_subscription.is_active = False
             previous_subscription.save()
 
@@ -262,11 +254,6 @@ class UserAPIView(ModelViewSet):
 
     def get_object(self, username, request):
         try:
-            if request.query_params.get('tipster'):
-                return UserAccount.objects.select_related('user').get(
-                    user__username=username,
-                    is_tipster=True
-                )
             return UserAccount.objects.select_related('user').get(user__username=username)
         except UserAccount.DoesNotExist:
             raise Http404
@@ -287,18 +274,18 @@ class UserAPIView(ModelViewSet):
 
     def get_users(self, request, username=None):
         query_params = request.query_params
-        filterset = self.filter_class(
-            data=query_params,
-            queryset=UserAccount.objects.filter(
-                user__is_active=True,
-                is_tipster=True
+        user_ids = [user.id for user in UserAccount.objects.filter(
+                user__is_active=True
             ).exclude(
                 user__first_name=None,
                 user__last_name=None,
                 country=None,
                 bio=None,
                 display_name=None
-            )
+            ) if user.is_tipster]
+        filterset = self.filter_class(
+            data=query_params,
+            queryset=UserAccount.objects.filter(id__in=user_ids)
         )
         serializer = UserAccountSerializer(filterset.qs, many=True)
 
@@ -342,60 +329,42 @@ class UserAPIView(ModelViewSet):
         })
 
 
-@permission_classes((permissions.IsAuthenticated, IsOwnerOrSubscriberReadOnly,))
-class PlayAPIView(APIView):
+@permission_classes((permissions.IsAuthenticated,))
+class PlayAPIView(ModelViewSet):
     filter_class = PlayFilterSet
 
-    def get_object(self, pk):
-        try:
-            return UserAccount.objects.select_related('user').get(pk=pk)
-        except UserAccount.DoesNotExist:
-            raise Http404
+    def get_plays(self, request):
 
-    def get(self, request, pk=None, format=None):
-        issuer = self.get_object(pk)
-        self.check_object_permissions(request, issuer)
-        mt_queryset = None
+        free_subscriptions = Subscription.objects.filter(
+            subscriber=request.user.useraccount.id,
+            type=0,
+            is_active=True
+        )
+        premium_subscriptions = Subscription.objects.filter(
+            subscriber=request.user.useraccount.id,
+            type=1,
+            is_active=True
+        )
 
-        if not request.user.useraccount.is_tipster:
-            subscriptions = Subscription.objects.filter(
-                subscriber=request.user.useraccount.id,
-                is_active=True
-            )
-            issuers = subscriptions.values_list("issuer__id", flat=True)
-            import pdb; pdb.set_trace()
-
-            mt_queryset = Play.objects.filter(issuer__in=issuers, )
+        free_sub_issuers = free_subscriptions.values_list("issuer__id", flat=True)
+        pre_sub_issuers = premium_subscriptions.values_list("issuer__id", flat=True)
+        filters = Q(issuer=request.user.useraccount.id) | Q(issuer__in=free_sub_issuers, is_premium=False) | Q(issuer__in=pre_sub_issuers, is_premium=True)
+        plays = Play.objects.filter(filters).order_by("-date_added")
 
         query_params = request.query_params
         filterset = self.filter_class(
             data=query_params,
-            queryset= mt_queryset if mt_queryset else Play.objects.filter(issuer=pk)
+            queryset= plays
         )
         play_serializer = PlaySerializer(filterset.qs, many=True)
 
-        return Response({
-            "plays": play_serializer.data
-        })
+        return Response(play_serializer.data)
 
-    # def put(self, request, pk=None, format=None):
-    #     #TODO: Make sure tips can only be updated before it's sent to subscribers
-    #     tips =  Tips.objects.get(pk=pk)
-    #     serializer = TipsSerializer(instance=tips, data=request.data, partial=True)
-    #     serializer.is_valid(raise_exception=True)
-    #     serializer.save()
-    #     return Response({
-    #         'message': 'Tips updated Successfully',
-    #         'data': serializer.data
-    #     })
-
-    def post(self, request, pk=None, format=None):
+    def create_plays(self, request):
         #TODO: Confirm the match is valid from probably an API before saving to the DB
-        user_account = self.get_object(pk)
-        self.check_object_permissions(request, user_account)
         data = request.data
 
-        if int(data.get('issuer')) != int(pk):
+        if int(data.get('issuer')) != request.user.useraccount.id:
             raise exceptions.PermissionDenied()
 
         play_serializer = PlaySerializer(data=data)
@@ -406,13 +375,3 @@ class PlayAPIView(APIView):
             'data': play_serializer.data
         })
 
-    # def delete(self, request, pk, format=None):
-    #     #TODO: Make sure tips can only be deleted before it's sent to subscribers
-    #     try:
-    #         tips = Tips.objects.get(pk=pk)
-    #     except Tips.DoesNotExist:
-    #         raise Http404
-    #     tips.delete()
-    #     return Response({
-    #         'message': 'Tips deleted Successfully'
-    #     })
