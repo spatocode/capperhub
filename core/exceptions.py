@@ -7,6 +7,9 @@ class SubscriptionError(APIException):
 class PricingError(APIException):
     status_code = 403
 
+class InsuficientFundError(APIException):
+    status_code = 403
+
 class BadRequestError(APIException):
     status_code = 400
 

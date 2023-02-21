@@ -12,7 +12,7 @@ class P2PBetFilterSet(FilterSet):
 
     class Meta:
         model = P2PBet
-        fields = ['issuer', 'date_initialized', 'status']
+        fields = ['backer', 'date_initialized', 'status']
 
 
 class PlayFilterSet(FilterSet):

@@ -50,8 +50,8 @@ class WalletAdmin(admin.ModelAdmin):
     list_filter = ['bank']
 
 class P2PBetAdmin(admin.ModelAdmin):
-    list_display = ['issuer', 'player', 'market', 'issuer_option', 'player_option', 'winner', 'event', 'date_initialized', 'is_public', 'status']
-    list_filter = ['date_initialized', 'is_public', 'status']
+    list_display = ['backer', 'layer', 'market', 'backer_option', 'layer_option', 'winner', 'event', 'placed_time', 'is_public', 'status']
+    list_filter = ['matched_time', 'is_public', 'status']
 
 class P2PBetRequestAdmin(admin.ModelAdmin):
     list_display = ['bet', 'requestor', 'requestee', 'date_initialized']

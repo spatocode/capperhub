@@ -24,7 +24,7 @@ from core.models.play import Play
 from core.models.bet import P2PBet, P2PBetInvitation
 from core.models.subscription import Subscription
 from core.filters import PlayFilterSet, UserAccountFilterSet, SubscriptionFilterSet, P2PBetFilterSet
-from core.exceptions import SubscriptionError, PricingError
+from core.exceptions import SubscriptionError, PricingError, InsuficientFundError
 
 
 class CsrfExemptSessionAuthentication(authentication.SessionAuthentication):
@@ -271,7 +271,7 @@ class UserAPIView(ModelViewSet):
         user_account = UserAccount.objects.get(
             user=request.user.id
         )
-        self.check_object_permissions(request, user_account.user.id)
+        self.check_object_permissions(request, user_account.id)
         serializer = OwnerUserAccountSerializer(user_account)
 
         return Response(serializer.data)
@@ -302,7 +302,7 @@ class UserAPIView(ModelViewSet):
 
     def update_user(self, request, username=None):
         user_account = self.get_object(username)
-        self.check_object_permissions(request, user_account.user.id)
+        self.check_object_permissions(request, user_account.id)
         data = request.data.copy()
         user_serializer = OwnerUserSerializer(
             instance=user_account.user,
@@ -322,19 +322,6 @@ class UserAPIView(ModelViewSet):
         return Response({
             'message': 'User updated Successfully',
             'data': serializer.data
-        })
-
-    def delete_user(self, request, username=None):
-        """
-        Deleting a user is not used for now
-        """
-        user_account = self.get_object(username)
-        self.check_object_permissions(request, user_account.user.id)
-        user = user_account.user
-        #TODO: Make sure a tipster has no open subscriptions before deleting account
-        user.delete()
-        return Response({
-            'message': 'User deleted Successfully'
         })
 
 
@@ -392,21 +379,62 @@ class P2PBetAPIView(ModelViewSet):
     def get_bets(self, request):
         filterset = self.filter_class(
             data=request.query_params,
-            queryset=P2PBet.objects.all().order_by("-date_initialized")
+            queryset=P2PBet.objects.all().order_by("-placed_time")
         )
         p2pbet_serializer = P2PBetSerializer(filterset.qs, many=True)
 
         return Response(p2pbet_serializer.data)
 
-    def initialize_bet(self, request):
+    def place_bet(self, request):
         data = request.data
+        if request.user.useraccount.wallet.balance < data.get("stake_per_bettor"):
+            raise InsuficientFundError(detail="You don't have sufficient fund to stake")
         p2pbet_serializer = P2PBetSerializer(data=data, partial=True)
         p2pbet_serializer.is_valid(raise_exception=True)
         p2pbet_serializer.save()
+        useraccount_wallet = request.user.useraccount.wallet
+        useraccount_wallet.withheld = useraccount_wallet.withheld + int(data.get("stake_per_bettor"))
         return Response({
             'message': 'Bet Challenge Created Successfully',
             'data': p2pbet_serializer.data
         })
+
+    def match_bet(self, request, pk):
+        p2pbet = P2PBet.objects.get(pk=pk)
+        if request.user.useraccount.wallet.balance < p2pbet.stake_per_bettor:
+            raise InsuficientFundError(detail="You don't have sufficient fund to stake")
+
+        p2pbet.layer = request.user.useraccount.id
+        p2pbet.layer_option = request.data.get("layer_option")
+        p2pbet.matched = True
+        p2pbet.matched_time = datetime.utcnow().replace(tzinfo=pytz.UTC)
+        p2pbet.save()
+
+        layer_wallet = request.user.useraccount.wallet
+        layer_wallet = layer_wallet.balance - p2pbet.stake_per_bettor
+        layer_wallet.save()
+
+        backer_wallet = p2pbet.backer.wallet
+        backer_wallet.balance = backer_wallet.balance - p2pbet.stake_per_bettor
+        backer_wallet.withheld = backer_wallet.withheld - p2pbet.stake_per_bettor
+        backer_wallet.save()
+
+        Transaction.objects.bulk_create([
+            Transaction(
+                type=Transaction.BET,
+                amount=p2pbet.stake_per_bettor,
+                balance=p2pbet.backer.wallet.balance - p2pbet.stake_per_bettor,
+                user=p2pbet.backer,
+                status=Transaction.SUCCEED,
+            ),
+            Transaction(
+                type=Transaction.BET,
+                amount=p2pbet.stake_per_bettor,
+                balance=request.user.useraccount.wallet.balance - p2pbet.stake_per_bettor,
+                user=request.user.useraccount,
+                status=Transaction.SUCCEED,
+            )
+        ])
 
     def bet_invitation(self, request, pk=None):
         try:

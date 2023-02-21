@@ -33,7 +33,7 @@ plays = PlayAPIView.as_view({
 })
 
 bets = P2PBetAPIView.as_view({
-    'post': 'initialize_bet',
+    'post': 'place_bet',
     'get': 'get_bets'
 })
 
@@ -46,6 +46,7 @@ urlpatterns = [
     path('plays', plays, name='plays'),
     path('bets', bets, name='bets'),
     path('bets/<pk>', P2PBetAPIView.as_view({'post': 'bet_invitation'}), name='bets'),
+    path('bets/<pk>/match', P2PBetAPIView.as_view({'post': 'match_bet'}), name='bets'),
     path('<username>', get_user, name='users-action'),
     path('<pk>/transactions', UserTransactionAPIView.as_view(), name='transactions'),
     path('<pk>/pricing', UserPricingAPIView.as_view(), name='user-pricing'),

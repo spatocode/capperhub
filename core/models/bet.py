@@ -22,14 +22,18 @@ class P2PBet(models.Model):
         (SETTLED, "SETTLED"),
         (PENDING, "PENDING"),
     )
-    issuer = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE, related_name='issuer_bet')
-    player = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE, related_name='player_bet', null=True)
+    backer = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE, related_name='issuer_bet')
+    layer = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE, related_name='player_bet', null=True)
     event = models.ForeignKey('core.SportsEvent', on_delete=models.CASCADE)
     market = models.CharField(max_length=50)
     winner = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE, null=True)
-    date_initialized = models.DateTimeField(auto_now_add=True)
-    issuer_option = models.BooleanField(null=True)
-    player_option = models.BooleanField(null=True)
+    placed_time = models.DateTimeField(auto_now_add=True)
+    matched_time = models.DateTimeField()
+    backer_option = models.BooleanField(null=True)
+    layer_option = models.BooleanField(null=True)
+    stake_per_bettor = models.FloatField()
+    matched = models.BooleanField(default=False)
+    currency = models.ForeignKey('core.Currency', on_delete=models.CASCADE)
     is_public = models.BooleanField(default=True)
     status = models.PositiveIntegerField(choices=STATUS, default=PENDING)
 

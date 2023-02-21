@@ -215,7 +215,7 @@ class P2PBetSerializer(serializers.ModelSerializer):
         return P2PBet.objects.create(
             event=sports_event[0],
             market=validated_data.get("market"),
-            issuer=validated_data.get("issuer")
+            issuer=validated_data.get("backer")
         )
 
     class Meta:
