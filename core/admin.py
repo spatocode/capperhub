@@ -25,10 +25,10 @@ class CurrencyAdmin(admin.ModelAdmin):
     list_display = ['code', 'country']
 
 class TransactionAdmin(admin.ModelAdmin):
-    list_display = ['type', 'amount', 'reference', 'issuer', 'channel', 'username', 'currency']
+    list_display = ['type', 'amount', 'balance', 'reference', 'payment_issuer', 'channel', 'user', 'currency', 'status']
 
-    def username(self, obj):
-        return obj.user.username
+    def user(self, obj):
+        return obj.user.full_name
 
     def currency(self, obj):
         return obj.currency

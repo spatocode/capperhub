@@ -231,3 +231,12 @@ class P2PBetInvitationSerializer(serializers.ModelSerializer):
     class Meta:
         model = P2PBetInvitation
         fields = '__all__'
+
+
+class TransactionSerializer(serializers.ModelSerializer):
+    user = UserAccountSerializer()
+    currency = CurrencySerializer()
+
+    class Meta:
+        model = Transaction
+        fields = '__all__'

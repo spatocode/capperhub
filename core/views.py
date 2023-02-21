@@ -16,7 +16,7 @@ from core.serializers import (
     PlaySerializer, UserAccountSerializer, UserAccountRegisterSerializer,
     SubscriptionSerializer, UserPricingSerializer, OwnerUserAccountSerializer,
     OwnerUserSerializer, CustomTokenObtainPairSerializer, UserWalletSerializer,
-    P2PBetSerializer, P2PBetInvitationSerializer
+    P2PBetSerializer, P2PBetInvitationSerializer, TransactionSerializer
 )
 from core.models.user import UserAccount
 from core.models.transaction import Transaction
@@ -110,14 +110,19 @@ class UserSubscriptionModelViewSet(ModelViewSet):
         return subscription
 
     def record_transaction(self, subscriber, **kwargs):
+        status = kwargs.get('status')
+        amount = kwargs.get('amount')
+        balance = subscriber.wallet.balance + amount if status == 1 else subscriber.wallet.balance
         transaction = Transaction.objects.create(
             type=Transaction.DEPOSIT,
             user=subscriber,
-            issuer=kwargs.get('issuer'),
+            payment_issuer=kwargs.get('ipayment_issuer'),
+            channel_type=kwargs.get('channel_type'),
             channel=kwargs.get('channel'),
-            price=kwargs.get('amount'),
+            amount=amount,
             currency=kwargs.get('currency'),
-            period=kwargs.get('period')
+            status=status,
+            balance=balance 
         )
 
         return transaction
@@ -204,6 +209,7 @@ class UserPricingAPIView(APIView):
             raise Http404
 
     def post(self, request, pk=None):
+        self.check_object_permissions(request, pk)
         data = request.data
         user_account = self.get_object(pk)
         # Make sure pricing can be updated once in 60days
@@ -236,6 +242,7 @@ class UserWalletAPIView(APIView):
             raise Http404
 
     def post(self, request, pk=None):
+        self.check_object_permissions(request, pk)
         user_account = self.get_object(pk)
 
         serializer = UserWalletSerializer(data=request.data)
@@ -264,7 +271,7 @@ class UserAPIView(ModelViewSet):
         user_account = UserAccount.objects.get(
             user=request.user.id
         )
-        self.check_object_permissions(request, user_account)
+        self.check_object_permissions(request, user_account.user.id)
         serializer = OwnerUserAccountSerializer(user_account)
 
         return Response(serializer.data)
@@ -295,7 +302,7 @@ class UserAPIView(ModelViewSet):
 
     def update_user(self, request, username=None):
         user_account = self.get_object(username)
-        self.check_object_permissions(request, user_account)
+        self.check_object_permissions(request, user_account.user.id)
         data = request.data.copy()
         user_serializer = OwnerUserSerializer(
             instance=user_account.user,
@@ -322,7 +329,7 @@ class UserAPIView(ModelViewSet):
         Deleting a user is not used for now
         """
         user_account = self.get_object(username)
-        self.check_object_permissions(request, user_account)
+        self.check_object_permissions(request, user_account.user.id)
         user = user_account.user
         #TODO: Make sure a tipster has no open subscriptions before deleting account
         user.delete()
@@ -419,3 +426,19 @@ class P2PBetAPIView(ModelViewSet):
             "message": "Bet Invitation Sent Successfully",
             "data": p2pbet_invitation_serializer.data
         })
+
+@permission_classes((permissions.IsAuthenticated, IsOwnerOrReadOnly))
+class UserTransactionAPIView(APIView):
+
+    def get_object(self, pk):
+        try:
+            return UserAccount.objects.get(pk=pk)
+        except UserAccount.DoesNotExist:
+            raise Http404
+    
+    def get(self, request, pk=None):
+        self.check_object_permissions(self.request, pk)
+        useraccount = self.get_object(pk)
+        transactions = useraccount.user_transactions.all()
+        serializer = TransactionSerializer(instance=transactions, many=True)
+        return Response(serializer.data)

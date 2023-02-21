@@ -10,7 +10,6 @@ class Subscription(models.Model):
         (PREMIUM, 'PREMIUM')
     )
     type = models.PositiveIntegerField(choices=SUBSCRIPTION_TYPE)
-    reference = models.CharField(max_length=32, default=generate_unique_code, editable=False)
     issuer = models.ForeignKey('core.UserAccount', on_delete=models.PROTECT, related_name='issuer_subscriptions')
     subscriber = models.ForeignKey('core.UserAccount', on_delete=models.PROTECT, related_name='subscriber_subscriptions')
     period = models.IntegerField(default=-1)
