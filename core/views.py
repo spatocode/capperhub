@@ -16,13 +16,15 @@ from core.serializers import (
     PlaySerializer, UserAccountSerializer, UserAccountRegisterSerializer,
     SubscriptionSerializer, UserPricingSerializer, OwnerUserAccountSerializer,
     OwnerUserSerializer, CustomTokenObtainPairSerializer, UserWalletSerializer,
+    P2PBetSerializer, P2PBetInvitationSerializer
 )
 from core.models.user import UserAccount
-from core.models.transaction import Currency, Transaction
+from core.models.transaction import Transaction
 from core.models.play import Play
+from core.models.bet import P2PBet, P2PBetInvitation
 from core.models.subscription import Subscription
-from core.filters import PlayFilterSet, UserAccountFilterSet, SubscriptionFilterSet
-from core.exceptions import SubscriptionError, PricingError, PermissionDeniedError, BadRequestError
+from core.filters import PlayFilterSet, UserAccountFilterSet, SubscriptionFilterSet, P2PBetFilterSet
+from core.exceptions import SubscriptionError, PricingError
 
 
 class CsrfExemptSessionAuthentication(authentication.SessionAuthentication):
@@ -375,3 +377,45 @@ class PlayAPIView(ModelViewSet):
             'data': play_serializer.data
         })
 
+
+@permission_classes((permissions.IsAuthenticated,))
+class P2PBetAPIView(ModelViewSet):
+    filter_class = P2PBetFilterSet
+
+    def get_bets(self, request):
+        filterset = self.filter_class(
+            data=request.query_params,
+            queryset=P2PBet.objects.all().order_by("-date_initialized")
+        )
+        p2pbet_serializer = P2PBetSerializer(filterset.qs, many=True)
+
+        return Response(p2pbet_serializer.data)
+
+    def initialize_bet(self, request):
+        data = request.data
+        p2pbet_serializer = P2PBetSerializer(data=data, partial=True)
+        p2pbet_serializer.is_valid(raise_exception=True)
+        p2pbet_serializer.save()
+        return Response({
+            'message': 'Bet Challenge Created Successfully',
+            'data': p2pbet_serializer.data
+        })
+
+    def bet_invitation(self, request, pk=None):
+        try:
+            requestee = UserAccount.objects.get(phone_number=request.data.get("requestee"))
+        except UserAccount.DoesNotExist:
+            # TODO: send SMS invitation with a generated link to signup, fund account
+            # and accept invitation
+            pass
+        p2pbet = P2PBet.objects.get(id=pk)
+        p2pbet_invitation = P2PBetInvitation.objects.create(
+            bet=p2pbet,
+            requestor=request.user.useraccount,
+            requestee=requestee
+        )
+        p2pbet_invitation_serializer = P2PBetInvitationSerializer(p2pbet_invitation)
+        return Response({
+            "message": "Bet Invitation Sent Successfully",
+            "data": p2pbet_invitation_serializer.data
+        })

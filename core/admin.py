@@ -2,6 +2,7 @@ from django.contrib import admin
 from core.models.user import UserAccount, Pricing, Wallet
 from core.models.transaction import Currency, Transaction
 from core.models.play import Play
+from core.models.bet import P2PBet, SportsEvent, P2PBetInvitation
 from core.models.subscription import Subscription
 
 class UserAccountAdmin(admin.ModelAdmin):
@@ -48,13 +49,23 @@ class WalletAdmin(admin.ModelAdmin):
     list_display = ['balance', 'bank', 'account_number']
     list_filter = ['bank']
 
-    # def username(self, obj):
-    #     import pdb; pdb.set_trace()
-    #     return obj.useraccount_set.object.user.username
+class P2PBetAdmin(admin.ModelAdmin):
+    list_display = ['issuer', 'player', 'market', 'issuer_option', 'player_option', 'winner', 'event', 'date_initialized', 'is_public', 'status']
+    list_filter = ['date_initialized', 'is_public', 'status']
 
+class P2PBetRequestAdmin(admin.ModelAdmin):
+    list_display = ['bet', 'requestor', 'requestee', 'date_initialized']
+    list_filter = ['date_initialized']
+
+class SportsEventAdmin(admin.ModelAdmin):
+    list_display = ['game', 'league', 'home', 'away', 'match_day', 'result']
+    list_filter = ['game', 'league', 'match_day']
 
 admin.site.register(UserAccount, UserAccountAdmin)
 admin.site.register(Play, PlayAdmin)
+admin.site.register(P2PBet, P2PBetAdmin)
+admin.site.register(P2PBetInvitation, P2PBetRequestAdmin)
+admin.site.register(SportsEvent, SportsEventAdmin)
 admin.site.register(Pricing, PricingAdmin)
 admin.site.register(Wallet, WalletAdmin)
 admin.site.register(Subscription, SubscriptionAdmin)

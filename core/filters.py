@@ -1,7 +1,18 @@
 from django_filters import FilterSet, DateTimeFilter
 from core.models.play import Play
+from core.models.bet import P2PBet
 from core.models.user import UserAccount
 from core.models.subscription import Subscription
+
+
+class P2PBetFilterSet(FilterSet):
+    date_initialized = DateTimeFilter(field_name='date_initialized')
+    date_initialized__gt = DateTimeFilter(field_name='date_initialized', lookup_expr='gt')
+    date_initialized__lt = DateTimeFilter(field_name='date_initialized', lookup_expr='lt')
+
+    class Meta:
+        model = P2PBet
+        fields = ['issuer', 'date_initialized', 'status']
 
 
 class PlayFilterSet(FilterSet):

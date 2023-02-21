@@ -7,6 +7,7 @@ from rest_framework_simplejwt import serializers as sjwt_serializers
 from django_countries.serializer_fields import CountryField
 from core.models.user import UserAccount, Pricing, Wallet
 from core.models.play import Play
+from core.models.bet import P2PBet, SportsEvent, P2PBetInvitation
 from core.models.transaction import Currency, Transaction
 from core.models.subscription import Subscription
 
@@ -147,15 +148,6 @@ class UserAccountSerializer(serializers.ModelSerializer):
 
 class PlaySerializer(serializers.ModelSerializer):
     issuer = UserAccountSerializer()
-
-    def validate_issuer(self, value):
-        """
-        Check that the owner is a tipster
-        """
-        user_account = value
-        if not user_account.is_tipster:
-            raise serializers.ValidationError("Only Tipsters can create tips")
-        return value
     
     def to_internal_value(self, data):
         new_data = data
@@ -189,4 +181,53 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Subscription
+        fields = '__all__'
+
+
+class SportsEventSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = SportsEvent
+        fields = '__all__'
+
+
+class P2PBetSerializer(serializers.ModelSerializer):
+    event = SportsEventSerializer()
+    issuer = UserAccountSerializer()
+    issuer_option = serializers.BooleanField()
+    player = UserAccountSerializer()
+    winner = UserAccountSerializer()
+
+    def to_internal_value(self, data):
+        new_data = data
+        issuer = UserAccount.objects.get(id=data.get("issuer"))
+        new_data['issuer'] = issuer
+        return new_data
+
+    def create(self, validated_data):
+        sports_event = SportsEvent.objects.get_or_create(
+            game=validated_data.get("event").pop("game"),
+            league=validated_data.get("event").pop("league"),
+            home=validated_data.get("event").pop("home"),
+            away=validated_data.get("event").pop("away"),
+            match_day=validated_data.get("event").pop("match_day")
+        )
+        return P2PBet.objects.create(
+            event=sports_event[0],
+            market=validated_data.get("market"),
+            issuer=validated_data.get("issuer")
+        )
+
+    class Meta:
+        model = P2PBet
+        fields = '__all__'
+
+
+class P2PBetInvitationSerializer(serializers.ModelSerializer):
+    bet = P2PBetSerializer()
+    requestor = UserAccountSerializer()
+    requestee = UserAccountSerializer()
+
+    class Meta:
+        model = P2PBetInvitation
         fields = '__all__'
