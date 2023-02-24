@@ -1,7 +1,7 @@
 from django.core.validators import RegexValidator
 from django.db import models
 from django_countries.fields import CountryField
-from core.shared.model_utils import generate_unique_code
+from core.shared.model_utils import generate_reference_code
 
 class Currency(models.Model):
     code_validator = RegexValidator(
@@ -39,7 +39,7 @@ class Transaction(models.Model):
     type = models.PositiveIntegerField(choices=TRANSACTION_TYPE, editable=False)
     amount = models.IntegerField(default=0, editable=False)
     balance = models.IntegerField(default=0, editable=False)
-    reference = models.CharField(max_length=32, default=generate_unique_code, editable=False)
+    reference = models.CharField(max_length=32, default=generate_reference_code, editable=False)
     payment_issuer = models.PositiveIntegerField(choices=PAYMENT_ISSUER, editable=False, null=True)
     channel = models.CharField(max_length=100, editable=False, null=True)
     status = models.PositiveIntegerField(choices=TRANSACTION_STATUS, editable=False)

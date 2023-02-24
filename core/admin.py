@@ -2,7 +2,7 @@ from django.contrib import admin
 from core.models.user import UserAccount, Pricing, Wallet
 from core.models.transaction import Currency, Transaction
 from core.models.play import Play
-from core.models.bet import P2PBet, SportsEvent, P2PBetInvitation
+from core.models.bet import P2PSportsBet, SportsEvent, P2PSportsBetInvitation
 from core.models.subscription import Subscription
 
 class UserAccountAdmin(admin.ModelAdmin):
@@ -28,7 +28,7 @@ class TransactionAdmin(admin.ModelAdmin):
     list_display = ['type', 'amount', 'balance', 'reference', 'payment_issuer', 'channel', 'user', 'currency', 'status']
 
     def user(self, obj):
-        return obj.user.full_name
+        return obj.user.username
 
     def currency(self, obj):
         return obj.currency
@@ -49,22 +49,22 @@ class WalletAdmin(admin.ModelAdmin):
     list_display = ['balance', 'bank', 'account_number']
     list_filter = ['bank']
 
-class P2PBetAdmin(admin.ModelAdmin):
+class P2PSportsBetAdmin(admin.ModelAdmin):
     list_display = ['backer', 'layer', 'market', 'backer_option', 'layer_option', 'winner', 'event', 'placed_time', 'is_public', 'status']
     list_filter = ['matched_time', 'is_public', 'status']
 
-class P2PBetRequestAdmin(admin.ModelAdmin):
+class P2PSportsBetRequestAdmin(admin.ModelAdmin):
     list_display = ['bet', 'requestor', 'requestee', 'date_initialized']
     list_filter = ['date_initialized']
 
 class SportsEventAdmin(admin.ModelAdmin):
-    list_display = ['game', 'league', 'home', 'away', 'match_day', 'result']
-    list_filter = ['game', 'league', 'match_day']
+    list_display = ['type', 'league', 'home', 'away', 'match_day', 'result']
+    list_filter = ['type', 'league', 'match_day']
 
 admin.site.register(UserAccount, UserAccountAdmin)
 admin.site.register(Play, PlayAdmin)
-admin.site.register(P2PBet, P2PBetAdmin)
-admin.site.register(P2PBetInvitation, P2PBetRequestAdmin)
+admin.site.register(P2PSportsBet, P2PSportsBetAdmin)
+admin.site.register(P2PSportsBetInvitation, P2PSportsBetRequestAdmin)
 admin.site.register(SportsEvent, SportsEventAdmin)
 admin.site.register(Pricing, PricingAdmin)
 admin.site.register(Wallet, WalletAdmin)

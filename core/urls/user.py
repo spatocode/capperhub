@@ -1,8 +1,12 @@
 from django.urls import path
-from core.views import UserAPIView, UserSubscriptionModelViewSet, UserWalletAPIView, UserPricingAPIView, PlayAPIView, P2PBetAPIView, UserTransactionAPIView
+from core.views import UserAPIView, UserSubscriptionModelViewSet, UserWalletAPIView, UserPricingAPIView, PlayAPIView, P2PSportsBetAPIView, UserTransactionAPIView
 
 subscriptions = UserSubscriptionModelViewSet.as_view({
     'get': 'subscriptions'
+})
+
+subscribers = UserSubscriptionModelViewSet.as_view({
+    'get': 'subscribers'
 })
 
 subscribe_user = UserSubscriptionModelViewSet.as_view({
@@ -20,7 +24,6 @@ account_owner = UserAPIView.as_view({
 get_user = UserAPIView.as_view({
     'get': 'get_user',
     'put': 'update_user',
-    'delete': 'delete_user'
 })
 
 get_users = UserAPIView.as_view({
@@ -32,7 +35,7 @@ plays = PlayAPIView.as_view({
     'post': 'create_plays'
 })
 
-bets = P2PBetAPIView.as_view({
+bets = P2PSportsBetAPIView.as_view({
     'post': 'place_bet',
     'get': 'get_bets'
 })
@@ -40,15 +43,16 @@ bets = P2PBetAPIView.as_view({
 urlpatterns = [
     path('tipsters', get_users, name='tipsters'),
     path('subscriptions', subscriptions, name='user-subscriptions'),
+    path('subscribers', subscribers, name='user-subscribers'),
+    path('transactions', UserTransactionAPIView.as_view(), name='transactions'),
     path('account', account_owner, name='account-owner'),
     path('subscribe', subscribe_user, name='subscribe-user'),
     path('unsubscribe', unsubscribe_user, name='unsubscribe-user'),
     path('plays', plays, name='plays'),
     path('bets', bets, name='bets'),
-    path('bets/<pk>', P2PBetAPIView.as_view({'post': 'bet_invitation'}), name='bets'),
-    path('bets/<pk>/match', P2PBetAPIView.as_view({'post': 'match_bet'}), name='bets'),
+    path('bets/<pk>', P2PSportsBetAPIView.as_view({'post': 'bet_invitation'}), name='bets'),
+    path('bets/<pk>/match', P2PSportsBetAPIView.as_view({'post': 'match_bet'}), name='bets'),
     path('<username>', get_user, name='users-action'),
-    path('<pk>/transactions', UserTransactionAPIView.as_view(), name='transactions'),
     path('<pk>/pricing', UserPricingAPIView.as_view(), name='user-pricing'),
     path('<pk>/wallet', UserWalletAPIView.as_view(), name='user-wallet'),
 ]

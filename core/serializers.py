@@ -7,7 +7,7 @@ from rest_framework_simplejwt import serializers as sjwt_serializers
 from django_countries.serializer_fields import CountryField
 from core.models.user import UserAccount, Pricing, Wallet
 from core.models.play import Play
-from core.models.bet import P2PBet, SportsEvent, P2PBetInvitation
+from core.models.bet import P2PSportsBet, SportsEvent, P2PSportsBetInvitation
 from core.models.transaction import Currency, Transaction
 from core.models.subscription import Subscription
 
@@ -15,11 +15,10 @@ class UserAccountRegisterSerializer(RegisterSerializer):
     username = serializers.CharField(required=False)
     first_name = serializers.CharField(required=False)
     last_name = serializers.CharField(required=False)
+    display_name = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
     password1 = serializers.CharField(write_only=True, required=True)
     password2 = serializers.CharField(write_only=True, required=True)
-    phone_number = serializers.CharField(required=False)
-    is_tipster = serializers.BooleanField(required=False)
 
     def get_cleaned_data(self):
         super(UserAccountRegisterSerializer, self).get_cleaned_data()
@@ -28,11 +27,10 @@ class UserAccountRegisterSerializer(RegisterSerializer):
             'username': self.validated_data.get('username', ''),
             'first_name': self.validated_data.get('first_name', ''),
             'last_name': self.validated_data.get('last_name', ''),
+            'display_name': self.validated_data.get('display_name', ''),
             'password1': self.validated_data.get('password1', ''),
             'password2': self.validated_data.get('password2', ''),
             'email': self.validated_data.get('email', ''),
-            'cell_phone': self.validated_data.get('phone_number', ''),
-            'is_tipster': self.validated_data.get('is_tipster', ''),
         }
 
 
@@ -113,8 +111,9 @@ class OwnerUserSerializer(serializers.ModelSerializer):
 class OwnerUserAccountSerializer(serializers.ModelSerializer):
     user = OwnerUserSerializer()
     pricing = UserPricingSerializer()
-    subscriber_count = serializers.IntegerField()
-    subscription_count = serializers.IntegerField()
+    free_subscribers = serializers.ListField()
+    premium_subscribers = serializers.ListField()
+    full_name = serializers.CharField()
     wallet = UserWalletSerializer()
     country = CountryField(name_only=True)
 
@@ -136,9 +135,9 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserAccountSerializer(serializers.ModelSerializer):
     user = UserSerializer()
-    full_name = serializers.CharField()
     pricing = UserPricingSerializer()
-    subscriber_count = serializers.IntegerField()
+    free_subscribers = serializers.ListField()
+    premium_subscribers = serializers.ListField()
     country = CountryField(name_only=True)
 
     class Meta:
@@ -191,11 +190,10 @@ class SportsEventSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class P2PBetSerializer(serializers.ModelSerializer):
+class P2PSportsBetSerializer(serializers.ModelSerializer):
     event = SportsEventSerializer()
-    issuer = UserAccountSerializer()
-    issuer_option = serializers.BooleanField()
-    player = UserAccountSerializer()
+    backer = UserAccountSerializer()
+    layer = UserAccountSerializer()
     winner = UserAccountSerializer()
 
     def to_internal_value(self, data):
@@ -212,24 +210,24 @@ class P2PBetSerializer(serializers.ModelSerializer):
             away=validated_data.get("event").pop("away"),
             match_day=validated_data.get("event").pop("match_day")
         )
-        return P2PBet.objects.create(
+        return P2PSportsBet.objects.create(
             event=sports_event[0],
             market=validated_data.get("market"),
             issuer=validated_data.get("backer")
         )
 
     class Meta:
-        model = P2PBet
+        model = P2PSportsBet
         fields = '__all__'
 
 
-class P2PBetInvitationSerializer(serializers.ModelSerializer):
-    bet = P2PBetSerializer()
+class P2PSportsBetInvitationSerializer(serializers.ModelSerializer):
+    bet = P2PSportsBetSerializer()
     requestor = UserAccountSerializer()
     requestee = UserAccountSerializer()
 
     class Meta:
-        model = P2PBetInvitation
+        model = P2PSportsBetInvitation
         fields = '__all__'
 
 

@@ -27,9 +27,9 @@ class Pricing(models.Model):
 
 class UserAccount(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    display_name = models.CharField(null=True, max_length=50)
-    bio = models.TextField(null=True)
-    country = CountryField(null=True)
+    display_name = models.CharField(default="", max_length=50)
+    bio = models.TextField(default="")
+    country = CountryField(default="")
     phone_number = models.CharField(null=True, unique=True, max_length=22)
     email_verified = models.BooleanField(default=False)
     currency = models.ForeignKey('core.Currency', on_delete=models.PROTECT, null=True)
@@ -42,49 +42,35 @@ class UserAccount(models.Model):
 
     @property
     def full_name(self):
+        if not self.user.first_name or self.user.last_name:
+            return ''
         return f'{self.user.first_name} {self.user.last_name}'
 
     @property
     def is_tipster(self):
-        active_plays = self.play_set.filter(match_day__lt=datetime.utcnow().replace(tzinfo=pytz.UTC))
+        active_plays = self.play_set.filter(match_day__gt=datetime.utcnow().replace(tzinfo=pytz.UTC))
         if active_plays.count() > 0:
             return True
         return False
 
-    # TODO: To minimize access to DB, consider removing these count properties and use 
-    # the data returned in other properties to get count
     @property
-    def subscriber_count(self):
-        num_of_subscribers = Subscription.objects.filter(
+    def free_subscribers(self):
+        subscribers = Subscription.objects.filter(
             issuer=self.pk,
             is_active=True,
-        ).distinct('subscriber').count()
-        return num_of_subscribers
+            type=Subscription.FREE
+        ).values_list("subscriber__user__username", flat=True)
+        return subscribers
     
     @property
-    def subscription_count(self):
-        num_of_subscriptions = Subscription.objects.filter(
-            subscriber=self.pk,
+    def premium_subscribers(self):
+        subscribers = Subscription.objects.filter(
+            issuer=self.pk,
             is_active=True,
-        ).distinct('subscriber').count()
-        return num_of_subscriptions
+            type=Subscription.PREMIUM
+        ).values_list("subscriber__user__username", flat=True)
+        return subscribers
 
-    @property
-    def subscribers(self):
-        subscribers = Subscription.objects.filter(
-            issuer=self.pk,
-            is_active=True
-        )
-        return subscribers
-    
-    @property
-    def subscribers(self):
-        subscribers = Subscription.objects.filter(
-            issuer=self.pk,
-            is_active=True
-        )
-        return subscribers
-    
     def is_subscriber(self, issuer):
         subscriber_count = Subscription.objects.filter(
             issuer=issuer,

@@ -85,6 +85,10 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
 }
 
+REST_AUTH_REGISTER_SERIALIZERS = {
+    'REGISTER_SERIALIZER': 'core.serializers.UserAccountRegisterSerializer',
+}
+
 ROOT_URLCONF = 'predishun.urls'
 
 TEMPLATES = [
