@@ -18,7 +18,7 @@ from core.serializers import (
     OwnerUserSerializer, CustomTokenObtainPairSerializer, UserWalletSerializer,
     P2PSportsBetSerializer, P2PSportsBetInvitationSerializer, TransactionSerializer
 )
-from core.models.user import UserAccount
+from core.models.user import UserAccount, Wallet
 from core.models.transaction import Transaction
 from core.models.play import Play
 from core.models.bet import P2PSportsBet, P2PSportsBetInvitation
@@ -43,7 +43,9 @@ class UserAccountRegisterView(RegisterView):
         user = super().perform_create(serializer)
         user_account = UserAccount(user=user)
         display_name = serializer.data.get('display_name')
+        wallet = Wallet.objects.create()
         user_account.display_name = display_name
+        user_account.wallet = wallet
         user_account.save()
         return user
 
@@ -208,17 +210,16 @@ class UserPricingAPIView(APIView):
 
     def post(self, request, pk=None):
         self.check_object_permissions(request, pk)
-        data = request.data
         user_account = self.get_object(pk)
         # Make sure pricing can be updated once in 60days
-        if user_account.pricing:
-            date_due_for_update = user_account.pricing.date + timedelta(days=60)
+        if user_account.pricing and int(request.data.get("amount")) != user_account.pricing.amount:
+            date_due_for_update = user_account.pricing.last_update + timedelta(days=60)
             if date_due_for_update > datetime.utcnow().replace(tzinfo=pytz.UTC):
                 raise PricingError(
                     detail='Pricing can only be updated once in 60 days',
                     code=400
                 )
-        serializer = UserPricingSerializer(data=data)
+        serializer = UserPricingSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user_pricing = serializer.save()
         if not user_account.pricing:

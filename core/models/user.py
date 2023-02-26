@@ -10,16 +10,24 @@ from .subscription import Subscription
 class Wallet(models.Model):
     balance = models.FloatField(default=0.00)
     withheld = models.FloatField(default=0.0)
-    bank = models.CharField(max_length=40)
-    account_number = models.IntegerField()
+    bank = models.CharField(max_length=40, default="")
+    account_number = models.IntegerField(default=0)
 
+    def __str__(self) -> str:
+        return f'{self.balance} - {self.bank}'
+
+def default_free_features():
+    return ["Free plays forever"]
+
+def default_premium_features():
+    return ["Carefully picked plays"]
 
 class Pricing(models.Model):
     amount = models.IntegerField(default=0)
     percentage_discount = models.DecimalField(default=0.0, max_digits=19, decimal_places=10)
-    date = models.DateTimeField(auto_now=True)
-    free_features = ArrayField(models.CharField(max_length=50), blank=True)
-    premium_features = ArrayField(models.CharField(max_length=50), blank=True)
+    last_update = models.DateTimeField(auto_now=True)
+    free_features = ArrayField(models.CharField(max_length=50), default=default_free_features, size=7, null=True)
+    premium_features = ArrayField(models.CharField(max_length=50), default=default_premium_features, size=7, null=True)
 
     def __str__(self):
         return f'{self.amount}'

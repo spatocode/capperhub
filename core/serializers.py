@@ -90,6 +90,8 @@ class CustomTokenObtainPairSerializer(EmailTokenObtainSerializer):
 
 
 class UserPricingSerializer(serializers.ModelSerializer):
+    free_features = serializers.ListField(required=False)
+    premium_features = serializers.ListField(required=False)
     class Meta:
         model = Pricing
         fields = '__all__'
