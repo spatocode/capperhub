@@ -18,7 +18,7 @@ from core.serializers import (
     OwnerUserSerializer, CustomTokenObtainPairSerializer, UserWalletSerializer,
     P2PSportsBetSerializer, P2PSportsBetInvitationSerializer, TransactionSerializer
 )
-from core.models.user import UserAccount, Wallet
+from core.models.user import UserAccount, Wallet, Pricing
 from core.models.transaction import Transaction
 from core.models.play import Play
 from core.models.bet import P2PSportsBet, P2PSportsBetInvitation
@@ -44,8 +44,10 @@ class UserAccountRegisterView(RegisterView):
         user_account = UserAccount(user=user)
         display_name = serializer.data.get('display_name')
         wallet = Wallet.objects.create()
+        pricing = Pricing.objects.create()
         user_account.display_name = display_name
         user_account.wallet = wallet
+        user_account.pricing = pricing
         user_account.save()
         return user
 
@@ -219,11 +221,13 @@ class UserPricingAPIView(APIView):
                     detail='Pricing can only be updated once in 60 days',
                     code=400
                 )
-        serializer = UserPricingSerializer(data=request.data)
+        if not user_account.wallet:
+            serializer = UserPricingSerializer(data=request.data)
+        else:
+            serializer = UserPricingSerializer(instance=user_account.pricing, data=request.data)
         serializer.is_valid(raise_exception=True)
         user_pricing = serializer.save()
-        if not user_account.pricing:
-            user_account.pricing = user_pricing
+        user_account.pricing = user_pricing
         user_account.save()
         return Response({
             'message': 'User Pricing Added Successfully',
@@ -244,11 +248,13 @@ class UserWalletAPIView(APIView):
         self.check_object_permissions(request, pk)
         user_account = self.get_object(pk)
 
-        serializer = UserWalletSerializer(data=request.data)
+        if not user_account.wallet:
+            serializer = UserWalletSerializer(data=request.data)
+        else:
+            serializer = UserWalletSerializer(instance=user_account.wallet, data=request.data)
         serializer.is_valid(raise_exception=True)
         user_wallet = serializer.save()
-        if not user_account.wallet:
-            user_account.wallet = user_wallet
+        user_account.wallet = user_wallet
         user_account.save()
         return Response({
             'message': 'User Bank Details Added Successfully',
