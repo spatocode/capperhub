@@ -101,7 +101,7 @@ class UserPricingSerializer(serializers.ModelSerializer):
 class UserWalletSerializer(serializers.ModelSerializer):
     class Meta:
         model = Wallet
-        exclude = ['balance', 'withheld']
+        fields = '__all__'
 
 
 class OwnerUserSerializer(serializers.ModelSerializer):

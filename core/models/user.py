@@ -9,7 +9,7 @@ from .subscription import Subscription
 
 class Wallet(models.Model):
     balance = models.FloatField(default=0.00)
-    withheld = models.FloatField(default=0.0)
+    withheld = models.FloatField(default=0.00)
     bank_name = models.CharField(max_length=50, default="")
     bank_account_number = models.CharField(max_length=50, default="")
 
