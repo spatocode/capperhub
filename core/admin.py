@@ -46,8 +46,8 @@ class PricingAdmin(admin.ModelAdmin):
     list_filter = ['amount']
 
 class WalletAdmin(admin.ModelAdmin):
-    list_display = ['balance', 'bank', 'account_number']
-    list_filter = ['bank']
+    list_display = ['balance', 'bank_name', 'bank_account_number']
+    list_filter = ['bank_name']
 
 class P2PSportsBetAdmin(admin.ModelAdmin):
     list_display = ['backer', 'layer', 'market', 'backer_option', 'layer_option', 'winner', 'event', 'placed_time', 'is_public', 'status']

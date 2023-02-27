@@ -247,6 +247,8 @@ class UserWalletAPIView(APIView):
     def post(self, request, pk=None):
         self.check_object_permissions(request, pk)
         user_account = self.get_object(pk)
+        first_name = request.data.get("first_name")
+        last_name = request.data.get("last_name")
 
         if not user_account.wallet:
             serializer = UserWalletSerializer(data=request.data)
@@ -255,6 +257,10 @@ class UserWalletAPIView(APIView):
         serializer.is_valid(raise_exception=True)
         user_wallet = serializer.save()
         user_account.wallet = user_wallet
+        if  first_name and last_name:
+            user_account.user.first_name = first_name
+            user_account.user.last_name = last_name
+        user_account.user.save()
         user_account.save()
         return Response({
             'message': 'User Bank Details Added Successfully',

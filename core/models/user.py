@@ -10,11 +10,12 @@ from .subscription import Subscription
 class Wallet(models.Model):
     balance = models.FloatField(default=0.00)
     withheld = models.FloatField(default=0.0)
-    bank = models.CharField(max_length=40, default="")
-    account_number = models.IntegerField(default=0)
+    bank_name = models.CharField(max_length=50, default="")
+    bank_account_number = models.CharField(max_length=50, default="")
 
     def __str__(self) -> str:
-        return f'{self.balance} - {self.bank}'
+        return f'{self.balance} - {self.bank_name}'
+
 
 def default_free_features():
     return ["Free plays forever"]
@@ -50,7 +51,7 @@ class UserAccount(models.Model):
 
     @property
     def full_name(self):
-        if not self.user.first_name or self.user.last_name:
+        if not self.user.first_name or not self.user.last_name:
             return ''
         return f'{self.user.first_name} {self.user.last_name}'
 
