@@ -9,9 +9,9 @@ class Play(models.Model):
         (WIN, "WIN"),
         (PENDING, "PENDING")
     )
-    game = models.CharField(max_length=20)
+    sports = models.CharField(max_length=20)
     issuer = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE)
-    league = models.CharField(max_length=50)
+    competition = models.CharField(max_length=50)
     home_team = models.CharField(max_length=50)
     away_team = models.CharField(max_length=50)
     prediction = models.CharField(max_length=50)
@@ -22,4 +22,4 @@ class Play(models.Model):
     status = models.PositiveIntegerField(choices=STATUS, default=PENDING)
 
     def __str__(self):
-        return f'{self.game}-{self.issuer.user.username}'
+        return f'{self.sports}-{self.issuer.user.username}'

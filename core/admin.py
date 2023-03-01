@@ -38,8 +38,8 @@ class SubscriptionAdmin(admin.ModelAdmin):
     list_filter = ['type', 'is_active']
 
 class PlayAdmin(admin.ModelAdmin):
-    list_display = ['issuer', 'game', 'home_team', 'away_team', 'match_day', 'prediction', 'status']
-    list_filter = ['issuer', 'game', 'match_day', 'status']
+    list_display = ['issuer', 'sports', 'home_team', 'away_team', 'match_day', 'prediction', 'status']
+    list_filter = ['issuer', 'sports', 'match_day', 'status']
 
 class PricingAdmin(admin.ModelAdmin):
     list_display = ['amount']
@@ -58,8 +58,8 @@ class P2PSportsBetRequestAdmin(admin.ModelAdmin):
     list_filter = ['date_initialized']
 
 class SportsEventAdmin(admin.ModelAdmin):
-    list_display = ['type', 'league', 'home', 'away', 'match_day', 'result']
-    list_filter = ['type', 'league', 'match_day']
+    list_display = ['type', 'competition', 'home', 'away', 'match_day', 'result']
+    list_filter = ['type', 'competition', 'match_day']
 
 admin.site.register(UserAccount, UserAccountAdmin)
 admin.site.register(Play, PlayAdmin)
