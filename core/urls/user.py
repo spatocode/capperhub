@@ -40,6 +40,14 @@ bets = P2PSportsBetAPIView.as_view({
     'get': 'get_bets'
 })
 
+bet_events = P2PSportsBetAPIView.as_view({
+    'get': 'get_events'
+})
+
+bet_invitations = P2PSportsBetAPIView.as_view({
+    'get': 'get_bet_invitation'
+})
+
 urlpatterns = [
     path('tipsters', get_users, name='tipsters'),
     path('subscriptions', subscriptions, name='user-subscriptions'),
@@ -50,7 +58,8 @@ urlpatterns = [
     path('unsubscribe', unsubscribe_user, name='unsubscribe-user'),
     path('plays', plays, name='plays'),
     path('bets', bets, name='bets'),
-    path('bets/<pk>', P2PSportsBetAPIView.as_view({'post': 'bet_invitation'}), name='bets'),
+    path('bets/invitations', bet_invitations, name='bets'),
+    path('bets/events', bet_events, name='bets'),
     path('bets/<pk>/match', P2PSportsBetAPIView.as_view({'post': 'match_bet'}), name='bets'),
     path('<username>', get_user, name='users-action'),
     path('<pk>/pricing', UserPricingAPIView.as_view(), name='user-pricing'),

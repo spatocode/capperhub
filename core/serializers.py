@@ -115,6 +115,7 @@ class OwnerUserAccountSerializer(serializers.ModelSerializer):
     pricing = UserPricingSerializer()
     free_subscribers = serializers.ListField()
     premium_subscribers = serializers.ListField()
+    subscription_issuers = serializers.ListField()
     full_name = serializers.CharField()
     wallet = UserWalletSerializer()
     country = CountryField(name_only=True)
@@ -140,6 +141,7 @@ class UserAccountSerializer(serializers.ModelSerializer):
     pricing = UserPricingSerializer()
     free_subscribers = serializers.ListField()
     premium_subscribers = serializers.ListField()
+    subscription_issuers = serializers.ListField()
     country = CountryField(name_only=True)
 
     class Meta:
@@ -186,6 +188,8 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
 
 class SportsEventSerializer(serializers.ModelSerializer):
+    added_by = serializers.CharField(source="added_by.user.username")
+    wager_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = SportsEvent
@@ -200,22 +204,27 @@ class P2PSportsBetSerializer(serializers.ModelSerializer):
 
     def to_internal_value(self, data):
         new_data = data
-        issuer = UserAccount.objects.get(id=data.get("issuer"))
-        new_data['issuer'] = issuer
+        backer = UserAccount.objects.get(id=data.get("backer"))
+        new_data['backer'] = backer
         return new_data
 
     def create(self, validated_data):
         sports_event = SportsEvent.objects.get_or_create(
-            game=validated_data.get("event").pop("game"),
-            league=validated_data.get("event").pop("league"),
+            type=validated_data.get("event").pop("type"),
+            competition=validated_data.get("event").pop("competition"),
             home=validated_data.get("event").pop("home"),
             away=validated_data.get("event").pop("away"),
             match_day=validated_data.get("event").pop("match_day")
         )
+        if sports_event[1]:
+            sports_event[0].added_by = validated_data.get("backer")            
+            sports_event[0].save()
         return P2PSportsBet.objects.create(
             event=sports_event[0],
             market=validated_data.get("market"),
-            issuer=validated_data.get("backer")
+            backer=validated_data.get("backer"),
+            backer_option=validated_data.get("backer_option"),
+            stake=validated_data.get("stake"),
         )
 
     class Meta:

@@ -63,6 +63,15 @@ class UserAccount(models.Model):
         return False
 
     @property
+    def subscription_issuers(self):
+        subscribers = Subscription.objects.filter(
+            subscriber=self.pk,
+            is_active=True,
+            type=Subscription.FREE
+        ).values_list("issuer__user__username", flat=True)
+        return subscribers
+
+    @property
     def free_subscribers(self):
         subscribers = Subscription.objects.filter(
             issuer=self.pk,

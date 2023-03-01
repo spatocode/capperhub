@@ -1,9 +1,7 @@
 import pytz
 from datetime import datetime, timedelta
 from django.conf import settings
-from django.core import exceptions
-from django.db.models import Q
-from django.http.response import Http404
+from django.db.models import Count, Q
 from rest_framework.decorators import permission_classes
 from rest_framework import authentication, permissions
 from rest_framework.views import APIView
@@ -16,15 +14,16 @@ from core.serializers import (
     PlaySerializer, UserAccountSerializer, UserAccountRegisterSerializer,
     SubscriptionSerializer, UserPricingSerializer, OwnerUserAccountSerializer,
     OwnerUserSerializer, CustomTokenObtainPairSerializer, UserWalletSerializer,
-    P2PSportsBetSerializer, P2PSportsBetInvitationSerializer, TransactionSerializer
+    P2PSportsBetSerializer, P2PSportsBetInvitationSerializer, TransactionSerializer,
+    SportsEventSerializer
 )
 from core.models.user import UserAccount, Wallet, Pricing
 from core.models.transaction import Transaction
 from core.models.play import Play
-from core.models.bet import P2PSportsBet, P2PSportsBetInvitation
+from core.models.bet import P2PSportsBet, P2PSportsBetInvitation, SportsEvent
 from core.models.subscription import Subscription
 from core.filters import PlayFilterSet, UserAccountFilterSet, SubscriptionFilterSet, P2PSportsBetFilterSet
-from core.exceptions import SubscriptionError, PricingError, InsuficientFundError
+from core.exceptions import SubscriptionError, PricingError, InsuficientFundError, NotFoundError
 
 
 class CsrfExemptSessionAuthentication(authentication.SessionAuthentication):
@@ -61,7 +60,7 @@ class UserSubscriptionModelViewSet(ModelViewSet):
         try:
             return UserAccount.objects.select_related('pricing', 'currency').get(pk=pk, user__is_active=True)
         except UserAccount.DoesNotExist:
-            raise Http404
+            raise NotFoundError(detail="User not found")
 
     def subscriptions(self, request):
         useraccount = self.request.user.useraccount
@@ -120,7 +119,7 @@ class UserSubscriptionModelViewSet(ModelViewSet):
         transaction = Transaction.objects.create(
             type=Transaction.DEPOSIT,
             user=subscriber,
-            payment_issuer=kwargs.get('ipayment_issuer'),
+            payment_issuer=kwargs.get('payment_issuer'),
             channel_type=kwargs.get('channel_type'),
             channel=kwargs.get('channel'),
             amount=amount,
@@ -208,7 +207,7 @@ class UserPricingAPIView(APIView):
         try:
             return UserAccount.objects.select_related('user', 'pricing').get(pk=pk, user__is_active=True)
         except UserAccount.DoesNotExist:
-            raise Http404
+            raise NotFoundError(detail="User not found")
 
     def post(self, request, pk=None):
         self.check_object_permissions(request, pk)
@@ -242,7 +241,7 @@ class UserWalletAPIView(APIView):
         try:
             return UserAccount.objects.select_related('wallet').get(pk=pk, user__is_active=True)
         except UserAccount.DoesNotExist:
-            raise Http404
+            raise NotFoundError(detail="User not found")
 
     def post(self, request, pk=None):
         self.check_object_permissions(request, pk)
@@ -276,7 +275,7 @@ class UserAPIView(ModelViewSet):
         try:
             return UserAccount.objects.select_related('user').get(user__username=username, user__is_active=True)
         except UserAccount.DoesNotExist:
-            raise Http404
+            raise NotFoundError(detail="User not found")
 
     def get_account_owner(self, request):
         user_account = UserAccount.objects.get(
@@ -336,7 +335,7 @@ class UserAPIView(ModelViewSet):
         })
 
 
-@permission_classes((permissions.IsAuthenticated,))
+@permission_classes((permissions.IsAuthenticated, IsOwnerOrReadOnly))
 class PlayAPIView(ModelViewSet):
     filter_class = PlayFilterSet
 
@@ -370,9 +369,7 @@ class PlayAPIView(ModelViewSet):
     def create_plays(self, request):
         #TODO: Confirm the match is valid from probably an API before saving to the DB
         data = request.data
-
-        if int(data.get('issuer')) != request.user.useraccount.id:
-            raise exceptions.PermissionDenied()
+        self.check_object_permissions(request, data.get('issuer'))
 
         play_serializer = PlaySerializer(data=data)
         play_serializer.is_valid(raise_exception=True)
@@ -383,28 +380,41 @@ class PlayAPIView(ModelViewSet):
         })
 
 
-@permission_classes((permissions.IsAuthenticated,))
+@permission_classes((permissions.IsAuthenticated, IsOwnerOrReadOnly))
 class P2PSportsBetAPIView(ModelViewSet):
     filter_class = P2PSportsBetFilterSet
 
     def get_bets(self, request):
+        filters = Q(backer=request.user.useraccount.id) | Q(layer=request.user.useraccount.id)
         filterset = self.filter_class(
             data=request.query_params,
-            queryset=P2PSportsBet.objects.all().order_by("-placed_time")
+            queryset=P2PSportsBet.objects.filter(filters).order_by("-placed_time")
         )
         p2psportsbet_serializer = P2PSportsBetSerializer(filterset.qs, many=True)
 
         return Response(p2psportsbet_serializer.data)
 
+    def get_events(self, request):
+        sports_events = SportsEvent.objects.filter(
+            # match_day__gt=datetime.utcnow().replace(tzinfo=pytz.UTC)
+        ).annotate(wager_count=Count("p2psportsbet"))
+        sportsevent_serializer = SportsEventSerializer(sports_events, many=True)
+
+        return Response(sportsevent_serializer.data)
+
     def place_bet(self, request):
         data = request.data
-        if request.user.useraccount.wallet.balance < data.get("stake_per_bettor"):
+        self.check_object_permissions(request, data.get('backer'))
+        if request.user.useraccount.wallet.balance < int(data.get("stake")):
             raise InsuficientFundError(detail="You don't have sufficient fund to stake")
         p2psportsbet_serializer = P2PSportsBetSerializer(data=data, partial=True)
         p2psportsbet_serializer.is_valid(raise_exception=True)
-        p2psportsbet_serializer.save()
+        p2psportsbet = p2psportsbet_serializer.save()
         useraccount_wallet = request.user.useraccount.wallet
-        useraccount_wallet.withheld = useraccount_wallet.withheld + int(data.get("stake_per_bettor"))
+        useraccount_wallet.withheld = useraccount_wallet.withheld + int(data.get("stake"))
+        useraccount_wallet.save()
+        if data.get("opponent"):
+            self.handle_bet_invitation(p2psportsbet, requestee=data.get("opponent"), requestor=request.user.useraccount)
         return Response({
             'message': 'Bet Challenge Created Successfully',
             'data': p2psportsbet_serializer.data
@@ -412,7 +422,7 @@ class P2PSportsBetAPIView(ModelViewSet):
 
     def match_bet(self, request, pk):
         p2psportsbet = P2PSportsBet.objects.get(pk=pk)
-        if request.user.useraccount.wallet.balance < p2psportsbet.stake_per_bettor:
+        if request.user.useraccount.wallet.balance < p2psportsbet.stake:
             raise InsuficientFundError(detail="You don't have sufficient fund to stake")
 
         p2psportsbet.layer = request.user.useraccount.id
@@ -422,49 +432,53 @@ class P2PSportsBetAPIView(ModelViewSet):
         p2psportsbet.save()
 
         layer_wallet = request.user.useraccount.wallet
-        layer_wallet = layer_wallet.balance - p2psportsbet.stake_per_bettor
+        layer_wallet = layer_wallet.balance - p2psportsbet.stake
         layer_wallet.save()
 
         backer_wallet = p2psportsbet.backer.wallet
-        backer_wallet.balance = backer_wallet.balance - p2psportsbet.stake_per_bettor
-        backer_wallet.withheld = backer_wallet.withheld - p2psportsbet.stake_per_bettor
+        backer_wallet.balance = backer_wallet.balance - p2psportsbet.stake
+        backer_wallet.withheld = backer_wallet.withheld - p2psportsbet.stake
         backer_wallet.save()
 
         Transaction.objects.bulk_create([
             Transaction(
                 type=Transaction.BET,
-                amount=p2psportsbet.stake_per_bettor,
-                balance=p2psportsbet.backer.wallet.balance - p2psportsbet.stake_per_bettor,
+                amount=p2psportsbet.stake,
+                balance=p2psportsbet.backer.wallet.balance - p2psportsbet.stake,
                 user=p2psportsbet.backer,
                 status=Transaction.SUCCEED,
             ),
             Transaction(
                 type=Transaction.BET,
-                amount=p2psportsbet.stake_per_bettor,
-                balance=request.user.useraccount.wallet.balance - p2psportsbet.stake_per_bettor,
+                amount=p2psportsbet.stake,
+                balance=request.user.useraccount.wallet.balance - p2psportsbet.stake,
                 user=request.user.useraccount,
                 status=Transaction.SUCCEED,
             )
         ])
 
-    def bet_invitation(self, request, pk=None):
-        try:
-            requestee = UserAccount.objects.get(phone_number=request.data.get("requestee"), user__is_active=True)
-        except UserAccount.DoesNotExist:
-            # TODO: send SMS invitation with a generated link to signup, fund account
-            # and accept invitation
-            pass
-        p2psportsbet = P2PSportsBet.objects.get(id=pk)
-        p2psportsbet_invitation = P2PSportsBetInvitation.objects.create(
-            bet=p2psportsbet,
-            requestor=request.user.useraccount,
-            requestee=requestee
+    def handle_bet_invitation(self, bet, requestee=None, requestor=None):
+        # TODO: send SMS invitation with a generated link to signup, fund account
+        # and accept invitation.
+        # Send web socket notification after inviting a registered user
+        P2PSportsBetInvitation.objects.create(
+            bet=bet,
+            requestor=requestor,
+            requestee=UserAccount.objects.get(user__username=requestee)
         )
-        p2psportsbet_invitation_serializer = P2PSportsBetInvitationSerializer(p2psportsbet_invitation)
-        return Response({
-            "message": "Bet Invitation Sent Successfully",
-            "data": p2psportsbet_invitation_serializer.data
-        })
+
+    def get_bet_invitation(self, request):
+        bet_list = [invitation.bet.id for invitation in P2PSportsBetInvitation.objects.filter(
+            requestee=request.user.useraccount.id,
+            accepted=False
+        ).select_related("bet").order_by("-date_initialized")]
+        queryset = P2PSportsBet.objects.filter(id__in=bet_list)
+        p2psportsbet_invitation_serializer = P2PSportsBetSerializer(
+            queryset, many=True
+        )
+
+        return Response(p2psportsbet_invitation_serializer.data)
+
 
 @permission_classes((permissions.IsAuthenticated, IsOwnerOrReadOnly))
 class UserTransactionAPIView(APIView):
@@ -473,7 +487,7 @@ class UserTransactionAPIView(APIView):
         try:
             return UserAccount.objects.get(pk=pk, user__is_active=True)
         except UserAccount.DoesNotExist:
-            raise Http404
+            raise NotFoundError(detail="User not found")
     
     def get(self, request):
         self.check_object_permissions(request, request.user.useraccount.id)

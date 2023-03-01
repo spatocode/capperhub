@@ -3,14 +3,16 @@ from core.shared.model_utils import generate_bet_id
 
 class SportsEvent(models.Model):
     type = models.CharField(max_length=100)
-    league = models.CharField(max_length=100)
+    competition = models.CharField(max_length=100)
     home = models.CharField(max_length=100)
     away = models.CharField(max_length=100)
     match_day = models.DateTimeField()
     result = models.CharField(max_length=10, null=True)
+    added_by = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE, null=True)
+    time_added = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.league}-{self.home[0:3]}:{self.away[0:3]}'
+        return f'{self.competition}-{self.home[0:3]}:{self.away[0:3]}'
 
 
 class P2PSportsBet(models.Model):
@@ -29,14 +31,17 @@ class P2PSportsBet(models.Model):
     market = models.CharField(max_length=50)
     winner = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE, null=True)
     placed_time = models.DateTimeField(auto_now_add=True)
-    matched_time = models.DateTimeField()
-    backer_option = models.BooleanField(null=True)
+    matched_time = models.DateTimeField(null=True)
+    backer_option = models.BooleanField()
     layer_option = models.BooleanField(null=True)
-    stake_per_bettor = models.FloatField()
+    stake = models.FloatField()
     matched = models.BooleanField(default=False)
-    currency = models.ForeignKey('core.Currency', on_delete=models.CASCADE)
+    currency = models.ForeignKey('core.Currency', on_delete=models.CASCADE, null=True)
     is_public = models.BooleanField(default=True)
     status = models.PositiveIntegerField(choices=STATUS, default=PENDING)
+
+    def __str__(self):
+        return f'{self.id}-{self.backer}'
 
 
 class P2PSportsBetInvitation(models.Model):
@@ -44,3 +49,7 @@ class P2PSportsBetInvitation(models.Model):
     requestor = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE, related_name='requestor_request')
     requestee = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE, related_name='requestee_request', null=True)
     date_initialized = models.DateTimeField(auto_now_add=True)
+    accepted = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f'{self.requestor.user.username}-{self.bet.id}'
