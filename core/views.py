@@ -22,7 +22,7 @@ from core.models.transaction import Transaction
 from core.models.play import Play
 from core.models.bet import P2PSportsBet, P2PSportsBetInvitation, SportsEvent
 from core.models.subscription import Subscription
-from core.filters import PlayFilterSet, UserAccountFilterSet, SubscriptionFilterSet, P2PSportsBetFilterSet
+from core.filters import PlayFilterSet, UserAccountFilterSet, SubscriptionFilterSet, P2PSportsBetFilterSet, SportsEventFilterSet
 from core.exceptions import SubscriptionError, PricingError, InsuficientFundError, NotFoundError
 
 
@@ -382,11 +382,12 @@ class PlayAPIView(ModelViewSet):
 
 @permission_classes((permissions.IsAuthenticated, IsOwnerOrReadOnly))
 class P2PSportsBetAPIView(ModelViewSet):
-    filter_class = P2PSportsBetFilterSet
+    p2psportsbet_filter_class = P2PSportsBetFilterSet
+    sportsevent_filter_class = SportsEventFilterSet
 
     def get_bets(self, request):
         filters = Q(backer=request.user.useraccount.id) | Q(layer=request.user.useraccount.id)
-        filterset = self.filter_class(
+        filterset = self.p2psportsbet_filter_class(
             data=request.query_params,
             queryset=P2PSportsBet.objects.filter(filters).order_by("-placed_time")
         )
@@ -395,10 +396,12 @@ class P2PSportsBetAPIView(ModelViewSet):
         return Response(p2psportsbet_serializer.data)
 
     def get_events(self, request):
-        sports_events = SportsEvent.objects.filter(
-            # match_day__gt=datetime.utcnow().replace(tzinfo=pytz.UTC)
-        ).annotate(wager_count=Count("p2psportsbet"))
-        sportsevent_serializer = SportsEventSerializer(sports_events, many=True)
+        filterset = self.sportsevent_filter_class(
+            data=request.query_params,
+            queryset=SportsEvent.objects.filter()
+            .annotate(wager_count=Count("p2psportsbet"))
+        )
+        sportsevent_serializer = SportsEventSerializer(filterset.qs, many=True)
 
         return Response(sportsevent_serializer.data)
 

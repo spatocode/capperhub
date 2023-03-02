@@ -1,6 +1,8 @@
+import pytz
+from datetime import datetime
 from django_filters.rest_framework import FilterSet, DateTimeFilter, BooleanFilter
 from core.models.play import Play
-from core.models.bet import P2PSportsBet
+from core.models.bet import P2PSportsBet, SportsEvent
 from core.models.user import UserAccount
 from core.models.subscription import Subscription
 
@@ -11,6 +13,31 @@ class P2PSportsBetFilterSet(FilterSet):
     class Meta:
         model = P2PSportsBet
         fields = ['matched']
+
+
+class SportsEventFilterSet(FilterSet):
+    top = BooleanFilter(method="top_filter")
+    open = BooleanFilter(method="open_filter")
+    latest = BooleanFilter(method="latest_filter")
+
+    def top_filter(self, queryset, name, value):
+        if value:
+            return queryset.order_by('-wager_count')
+        return queryset
+
+    def open_filter(self, queryset, name, value):
+        if value:
+            return queryset.filter(match_day__gt=datetime.utcnow().replace(tzinfo=pytz.UTC))
+        return queryset
+
+    def latest_filter(self, queryset, name, value):
+        if value:
+            return queryset.order_by('-time_added')
+        return queryset
+
+    class Meta:
+        model = SportsEvent
+        fields = ["top", "open", "latest"]
 
 
 class PlayFilterSet(FilterSet):
