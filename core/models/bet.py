@@ -45,7 +45,7 @@ class P2PSportsBet(models.Model):
 
 
 class P2PSportsBetInvitation(models.Model):
-    bet = models.ForeignKey('core.P2PSportsBet', on_delete=models.CASCADE)
+    bet = models.ForeignKey('core.P2PSportsBet', on_delete=models.CASCADE, related_name="invitation")
     requestor = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE, related_name='requestor_request')
     requestee = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE, related_name='requestee_request', null=True)
     date_initialized = models.DateTimeField(auto_now_add=True)

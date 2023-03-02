@@ -1,5 +1,6 @@
 import pytz
 from datetime import datetime
+from django.db.models import Count
 from django_filters.rest_framework import FilterSet, DateTimeFilter, BooleanFilter
 from core.models.play import Play
 from core.models.bet import P2PSportsBet, SportsEvent
@@ -9,16 +10,25 @@ from core.models.subscription import Subscription
 
 class P2PSportsBetFilterSet(FilterSet):
     matched = BooleanFilter(field_name="matched")
+    expired = BooleanFilter(method="expired_filter")
+
+    def expired_filter(self, queryset, name, value):
+        if value:
+            return queryset.filter(
+                event__match_day__lt=datetime.utcnow().replace(tzinfo=pytz.UTC)
+            )
+        return queryset
 
     class Meta:
         model = P2PSportsBet
-        fields = ['matched']
+        fields = ['matched', 'expired']
 
 
 class SportsEventFilterSet(FilterSet):
     top = BooleanFilter(method="top_filter")
     open = BooleanFilter(method="open_filter")
     latest = BooleanFilter(method="latest_filter")
+    expired = BooleanFilter(method="expired_filter")
 
     def top_filter(self, queryset, name, value):
         if value:
@@ -28,6 +38,13 @@ class SportsEventFilterSet(FilterSet):
     def open_filter(self, queryset, name, value):
         if value:
             return queryset.filter(match_day__gt=datetime.utcnow().replace(tzinfo=pytz.UTC))
+        return queryset
+
+    def expired_filter(self, queryset, name, value):
+        if value:
+            return queryset.filter(
+                match_day__lt=datetime.utcnow().replace(tzinfo=pytz.UTC)
+            )
         return queryset
 
     def latest_filter(self, queryset, name, value):

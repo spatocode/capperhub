@@ -23,7 +23,7 @@ from core.models.play import Play
 from core.models.bet import P2PSportsBet, P2PSportsBetInvitation, SportsEvent
 from core.models.subscription import Subscription
 from core.filters import PlayFilterSet, UserAccountFilterSet, SubscriptionFilterSet, P2PSportsBetFilterSet, SportsEventFilterSet
-from core.exceptions import SubscriptionError, PricingError, InsuficientFundError, NotFoundError
+from core.exceptions import SubscriptionError, PricingError, InsuficientFundError, NotFoundError, ForbiddenError, PermissionDeniedError
 
 
 class CsrfExemptSessionAuthentication(authentication.SessionAuthentication):
@@ -423,42 +423,99 @@ class P2PSportsBetAPIView(ModelViewSet):
             'data': p2psportsbet_serializer.data
         })
 
-    def match_bet(self, request, pk):
-        p2psportsbet = P2PSportsBet.objects.get(pk=pk)
+    def match_bet(self, request):
+        # TODO: Send websocket notifications
+        try:
+            p2psportsbet = P2PSportsBet.objects.select_related("backer").get(pk=request.data.get("bet"))
+        except P2PSportsBet.DoesNotExist:
+            raise NotFoundError(detail="Wager not found")
+
         if request.user.useraccount.wallet.balance < p2psportsbet.stake:
             raise InsuficientFundError(detail="You don't have sufficient fund to stake")
 
-        p2psportsbet.layer = request.user.useraccount.id
-        p2psportsbet.layer_option = request.data.get("layer_option")
+        serializer = self.update_records(
+            p2psportsbet,
+            request.user.useraccount,
+            layer_option=request.data.get("layer_option")
+        )
+        return Response({
+            'message': 'Wager Matched Successfully',
+            'data': serializer.data
+        })
+
+    def update_records(self, p2psportsbet, layer, **kwargs):
+        # Record Wagers
+        p2psportsbet.layer = layer
+        p2psportsbet.layer_option = kwargs.get("layer_option")
         p2psportsbet.matched = True
         p2psportsbet.matched_time = datetime.utcnow().replace(tzinfo=pytz.UTC)
         p2psportsbet.save()
 
-        layer_wallet = request.user.useraccount.wallet
-        layer_wallet = layer_wallet.balance - p2psportsbet.stake
+        # Record Wallets
+        layer_wallet = layer.wallet
+        layer_wallet.balance = layer_wallet.balance - p2psportsbet.stake
         layer_wallet.save()
 
-        backer_wallet = p2psportsbet.backer.wallet
+        backer = p2psportsbet.backer
+        backer_wallet = backer.wallet
         backer_wallet.balance = backer_wallet.balance - p2psportsbet.stake
         backer_wallet.withheld = backer_wallet.withheld - p2psportsbet.stake
         backer_wallet.save()
 
+        # Record Transaction
         Transaction.objects.bulk_create([
             Transaction(
                 type=Transaction.BET,
                 amount=p2psportsbet.stake,
-                balance=p2psportsbet.backer.wallet.balance - p2psportsbet.stake,
-                user=p2psportsbet.backer,
+                balance=backer_wallet.balance,
+                user=backer,
                 status=Transaction.SUCCEED,
+                currency=backer.currency
             ),
             Transaction(
                 type=Transaction.BET,
                 amount=p2psportsbet.stake,
-                balance=request.user.useraccount.wallet.balance - p2psportsbet.stake,
-                user=request.user.useraccount,
+                balance=layer_wallet.balance,
+                user=layer,
                 status=Transaction.SUCCEED,
+                currency=backer.currency
             )
         ])
+
+        serializer = P2PSportsBetSerializer(p2psportsbet)
+        return serializer
+
+    def accept_bet_invitation(self, request):
+        # TODO: Send websocket notifications
+        try:
+            queryset = P2PSportsBet.objects.select_related("backer").get(id=request.data.get("bet"))
+        except P2PSportsBet.DoesNotExist:
+            raise NotFoundError(detail="Wager not found")
+
+        try:
+            invitation = queryset.invitation.get(requestee=request.user.useraccount)
+        except queryset.invitation.DoesNotExist:
+            raise PermissionDeniedError(detail="Action not permitted")
+
+        if queryset.matched:
+            raise ForbiddenError(detail="Wager no longer available to play")
+        
+        if request.user.useraccount.wallet.balance < queryset.stake:
+            raise InsuficientFundError(detail="You don't have sufficient fund to stake")
+
+        invitation.accepted = True
+        invitation.save()
+
+        serializer = self.update_records(
+            queryset,
+            request.user.useraccount,
+            layer_option=request.data.get("layer_option")
+        )
+
+        return Response({
+            "message": "Wager Matched Successfully",
+            "data": serializer.data
+        })
 
     def handle_bet_invitation(self, bet, requestee=None, requestor=None):
         # TODO: send SMS invitation with a generated link to signup, fund account
@@ -471,6 +528,8 @@ class P2PSportsBetAPIView(ModelViewSet):
         )
 
     def get_bet_invitation(self, request):
+        # TODO: Add invitation date_initialized to the returned P2PSportsBet queryset
+        # Find better ways to optimize this operation
         bet_list = [invitation.bet.id for invitation in P2PSportsBetInvitation.objects.filter(
             requestee=request.user.useraccount.id,
             accepted=False

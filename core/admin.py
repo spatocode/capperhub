@@ -53,9 +53,9 @@ class P2PSportsBetAdmin(admin.ModelAdmin):
     list_display = ['backer', 'layer', 'market', 'backer_option', 'layer_option', 'winner', 'event', 'placed_time', 'is_public', 'status']
     list_filter = ['matched_time', 'is_public', 'status']
 
-class P2PSportsBetRequestAdmin(admin.ModelAdmin):
-    list_display = ['bet', 'requestor', 'requestee', 'date_initialized']
-    list_filter = ['date_initialized']
+class P2PSportsBetInvitationAdmin(admin.ModelAdmin):
+    list_display = ['bet', 'requestor', 'requestee', 'date_initialized', 'accepted']
+    list_filter = ['date_initialized', 'accepted']
 
 class SportsEventAdmin(admin.ModelAdmin):
     list_display = ['type', 'competition', 'home', 'away', 'match_day', 'result']
@@ -64,7 +64,7 @@ class SportsEventAdmin(admin.ModelAdmin):
 admin.site.register(UserAccount, UserAccountAdmin)
 admin.site.register(Play, PlayAdmin)
 admin.site.register(P2PSportsBet, P2PSportsBetAdmin)
-admin.site.register(P2PSportsBetInvitation, P2PSportsBetRequestAdmin)
+admin.site.register(P2PSportsBetInvitation, P2PSportsBetInvitationAdmin)
 admin.site.register(SportsEvent, SportsEventAdmin)
 admin.site.register(Pricing, PricingAdmin)
 admin.site.register(Wallet, WalletAdmin)

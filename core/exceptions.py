@@ -7,6 +7,9 @@ class SubscriptionError(APIException):
 class NotFoundError(APIException):
     status_code = 404
 
+class ForbiddenError(APIException):
+    status_code = 403
+
 class PricingError(APIException):
     status_code = 403
 
