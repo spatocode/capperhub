@@ -62,6 +62,7 @@ urlpatterns = [
     path('bets/invitations', bet_invitations, name='bets'),
     path('bets/events', bet_events, name='bets'),
     path('bets/match', P2PSportsBetAPIView.as_view({'post': 'match_bet'}), name='bets'),
+    path('event/<pk>/wagers', P2PSportsBetAPIView.as_view({'get': 'get_event_bets'}), name='bets'),
     path('<username>', get_user, name='users-action'),
     path('<pk>/pricing', UserPricingAPIView.as_view(), name='user-pricing'),
     path('<pk>/wallet', UserWalletAPIView.as_view(), name='user-wallet'),

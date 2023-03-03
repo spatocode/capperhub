@@ -26,6 +26,7 @@ class CurrencyAdmin(admin.ModelAdmin):
 
 class TransactionAdmin(admin.ModelAdmin):
     list_display = ['type', 'amount', 'balance', 'reference', 'payment_issuer', 'channel', 'user', 'currency', 'status']
+    list_filter = ['type', 'status']
 
     def user(self, obj):
         return obj.user.username
@@ -46,12 +47,12 @@ class PricingAdmin(admin.ModelAdmin):
     list_filter = ['amount']
 
 class WalletAdmin(admin.ModelAdmin):
-    list_display = ['balance', 'bank_name', 'bank_account_number']
+    list_display = ['balance', 'withheld', 'bank_name', 'bank_account_number']
     list_filter = ['bank_name']
 
 class P2PSportsBetAdmin(admin.ModelAdmin):
     list_display = ['backer', 'layer', 'market', 'backer_option', 'layer_option', 'winner', 'event', 'placed_time', 'is_public', 'status']
-    list_filter = ['matched_time', 'is_public', 'status']
+    list_filter = ['matched', 'matched_time', 'is_public', 'status']
 
 class P2PSportsBetInvitationAdmin(admin.ModelAdmin):
     list_display = ['bet', 'requestor', 'requestee', 'date_initialized', 'accepted']

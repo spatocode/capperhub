@@ -219,6 +219,8 @@ class P2PSportsBetSerializer(serializers.ModelSerializer):
         if sports_event[1]:
             sports_event[0].added_by = validated_data.get("backer")            
             sports_event[0].save()
+        if sports_event[0].result:
+            raise ValidationError(detail="Event no longer available for wager")
         return P2PSportsBet.objects.create(
             event=sports_event[0],
             market=validated_data.get("market"),
@@ -229,7 +231,7 @@ class P2PSportsBetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = P2PSportsBet
-        fields = '__all__'
+        exclude = ['transaction']
 
 
 class P2PSportsBetInvitationSerializer(serializers.ModelSerializer):

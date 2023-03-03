@@ -39,6 +39,7 @@ class P2PSportsBet(models.Model):
     currency = models.ForeignKey('core.Currency', on_delete=models.CASCADE, null=True)
     is_public = models.BooleanField(default=True)
     status = models.PositiveIntegerField(choices=STATUS, default=PENDING)
+    transaction = models.ForeignKey('core.Transaction', on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return f'{self.id}-{self.backer}'
