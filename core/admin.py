@@ -2,7 +2,7 @@ from django.contrib import admin
 from core.models.user import UserAccount, Pricing, Wallet
 from core.models.transaction import Currency, Transaction
 from core.models.play import Play
-from core.models.bet import P2PSportsBet, SportsEvent, P2PSportsBetChallenge
+from core.models.wager import SportsWager, SportsEvent, SportsWagerChallenge
 from core.models.subscription import Subscription
 
 class UserAccountAdmin(admin.ModelAdmin):
@@ -50,12 +50,12 @@ class WalletAdmin(admin.ModelAdmin):
     list_display = ['balance', 'withheld', 'bank_name', 'bank_account_number']
     list_filter = ['bank_name']
 
-class P2PSportsBetAdmin(admin.ModelAdmin):
+class SportsWagerAdmin(admin.ModelAdmin):
     list_display = ['backer', 'layer', 'market', 'backer_option', 'layer_option', 'winner', 'event', 'placed_time', 'is_public', 'status']
     list_filter = ['matched', 'matched_time', 'is_public', 'status']
 
-class P2PSportsBetInvitationAdmin(admin.ModelAdmin):
-    list_display = ['bet', 'requestor', 'requestee', 'date_initialized', 'accepted']
+class SportsWagerChallengeAdmin(admin.ModelAdmin):
+    list_display = ['wager', 'requestor', 'requestee', 'date_initialized', 'accepted']
     list_filter = ['date_initialized', 'accepted']
 
 class SportsEventAdmin(admin.ModelAdmin):
@@ -64,8 +64,8 @@ class SportsEventAdmin(admin.ModelAdmin):
 
 admin.site.register(UserAccount, UserAccountAdmin)
 admin.site.register(Play, PlayAdmin)
-admin.site.register(P2PSportsBet, P2PSportsBetAdmin)
-admin.site.register(P2PSportsBetChallenge, P2PSportsBetInvitationAdmin)
+admin.site.register(SportsWager, SportsWagerAdmin)
+admin.site.register(SportsWagerChallenge, SportsWagerChallengeAdmin)
 admin.site.register(SportsEvent, SportsEventAdmin)
 admin.site.register(Pricing, PricingAdmin)
 admin.site.register(Wallet, WalletAdmin)

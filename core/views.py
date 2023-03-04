@@ -14,15 +14,15 @@ from core.serializers import (
     PlaySerializer, UserAccountSerializer, UserAccountRegisterSerializer,
     SubscriptionSerializer, UserPricingSerializer, OwnerUserAccountSerializer,
     OwnerUserSerializer, CustomTokenObtainPairSerializer, UserWalletSerializer,
-    P2PSportsBetSerializer, P2PSportsBetInvitationSerializer, TransactionSerializer,
+    SportsWagerSerializer, SportsWagerChallengeSerializer, TransactionSerializer,
     SportsEventSerializer
 )
 from core.models.user import UserAccount, Wallet, Pricing
 from core.models.transaction import Transaction
 from core.models.play import Play
-from core.models.bet import P2PSportsBet, P2PSportsBetChallenge, SportsEvent
+from core.models.wager import SportsWager, SportsWagerChallenge, SportsEvent
 from core.models.subscription import Subscription
-from core.filters import PlayFilterSet, UserAccountFilterSet, SubscriptionFilterSet, P2PSportsBetFilterSet, SportsEventFilterSet
+from core.filters import PlayFilterSet, UserAccountFilterSet, SubscriptionFilterSet, SportsWagerFilterSet, SportsEventFilterSet
 from core.exceptions import SubscriptionError, PricingError, InsuficientFundError, NotFoundError, ForbiddenError, PermissionDeniedError
 from core.shared.helper import sync_records
 
@@ -387,26 +387,26 @@ class PlayAPIView(ModelViewSet):
 
 
 @permission_classes((permissions.IsAuthenticated, IsOwnerOrReadOnly))
-class P2PSportsBetAPIView(ModelViewSet):
-    p2psportsbet_filter_class = P2PSportsBetFilterSet
+class SportsWagerAPIView(ModelViewSet):
+    filter_class = SportsWagerFilterSet
 
     def get_wagers(self, request):
         filters = Q(backer=request.user.useraccount.id) | Q(layer=request.user.useraccount.id)
-        filterset = self.p2psportsbet_filter_class(
+        filterset = self.filter_class(
             data=request.query_params,
-            queryset=P2PSportsBet.objects.filter(filters).order_by("-placed_time")
+            queryset=SportsWager.objects.filter(filters).order_by("-placed_time")
         )
-        p2psportsbet_serializer = P2PSportsBetSerializer(filterset.qs, many=True)
+        serializer = SportsWagerSerializer(filterset.qs, many=True)
 
-        return Response(p2psportsbet_serializer.data)
+        return Response(serializer.data)
 
     def get_event_wagers(self, request, pk=None):
         try:
             events = SportsEvent.objects.get(pk=pk)
         except SportsEvent.DoesNotExist:
             raise NotFoundError(detail="Event not found")
-        queryset = events.p2psportsbet_set.all()
-        serializer = P2PSportsBetSerializer(queryset, many=True)
+        queryset = events.sports_wager_set.all()
+        serializer = SportsWagerSerializer(queryset, many=True)
 
         return Response(serializer.data)
 
@@ -415,51 +415,51 @@ class P2PSportsBetAPIView(ModelViewSet):
         self.check_object_permissions(request, data.get('backer'))
         if request.user.useraccount.wallet.balance < int(data.get("stake")):
             raise InsuficientFundError(detail="You don't have sufficient fund to stake")
-        p2psportsbet_serializer = P2PSportsBetSerializer(data=data, partial=True)
-        p2psportsbet_serializer.is_valid(raise_exception=True)
-        p2psportsbet = p2psportsbet_serializer.save()
+        serializer = SportsWagerSerializer(data=data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        sports_wager = serializer.save()
         useraccount_wallet = request.user.useraccount.wallet
         useraccount_wallet.withheld = useraccount_wallet.withheld + int(data.get("stake"))
         useraccount_wallet.balance = useraccount_wallet.balance - int(data.get("stake"))
         useraccount_wallet.save()
         transaction = Transaction.objects.create(
-            type=Transaction.BET,
-            amount=p2psportsbet.stake,
+            type=Transaction.WAGER,
+            amount=sports_wager.stake,
             balance=useraccount_wallet.balance,
             user=request.user.useraccount,
             status=Transaction.PENDING,
             currency=request.user.useraccount.currency
         )
-        p2psportsbet.transaction = transaction
-        p2psportsbet.save()
+        sports_wager.transaction = transaction
+        sports_wager.save()
         if data.get("opponent"):
-            self.handle_bet_invitation(p2psportsbet, requestee=data.get("opponent"), requestor=request.user.useraccount)
+            self.handle_wager_invitation(sports_wager, requestee=data.get("opponent"), requestor=request.user.useraccount)
         return Response({
-            'message': 'Bet Challenge Created Successfully',
-            'data': p2psportsbet_serializer.data
+            'message': 'Wager Challenge Created Successfully',
+            'data': serializer.data
         })
 
     def match_wager(self, request):
         # TODO: Send websocket notifications
         try:
-            p2psportsbet = P2PSportsBet.objects.select_related("backer", "event", "transaction").get(pk=request.data.get("bet"))
-        except P2PSportsBet.DoesNotExist:
+            sports_wager = SportsWager.objects.select_related("backer", "event", "transaction").get(pk=request.data.get("bet"))
+        except SportsWager.DoesNotExist:
             raise NotFoundError(detail="Wager not found")
 
-        if request.user.useraccount.wallet.balance < p2psportsbet.stake:
+        if request.user.useraccount.wallet.balance < sports_wager.stake:
             raise InsuficientFundError(detail="You don't have sufficient fund to stake")
 
-        if p2psportsbet.event.result:
+        if sports_wager.event.result:
             raise ForbiddenError(detail="Event no longer available for wager")
         
-        if p2psportsbet.matched:
+        if sports_wager.matched:
             raise ForbiddenError(detail="Wager no longer available to play")
 
-        if p2psportsbet.backer.id == request.user.useraccount.id:
+        if sports_wager.backer.id == request.user.useraccount.id:
             raise PermissionDeniedError(detail="Action not permitted")
 
         serializer = sync_records(
-            p2psportsbet,
+            sports_wager,
             request.user.useraccount,
             layer_option=request.data.get("layer_option")
         )
@@ -468,15 +468,15 @@ class P2PSportsBetAPIView(ModelViewSet):
             'data': serializer.data
         })
 
-    def handle_bet_invitation(self, bet, requestee=None, requestor=None):
+    def handle_wager_invitation(self, wager, requestee=None, requestor=None):
         # TODO: send SMS invitation with a generated link to signup, fund account
         # and accept invitation.
         # Send web socket notification after inviting a registered user
         user = UserAccount.objects.get(user__username=requestee)
         if requestor.id == user.id:
             raise PermissionDeniedError(detail="Action not permitted")
-        P2PSportsBetChallenge.objects.create(
-            bet=bet,
+        SportsWagerChallenge.objects.create(
+            wager=wager,
             requestor=requestor,
             requestee=user
         )
@@ -490,7 +490,7 @@ class P2PSportsEventAPIView(APIView):
         filterset = self.filter_class(
             data=request.query_params,
             queryset=SportsEvent.objects.filter()
-            .annotate(wager_count=Count("p2psportsbet"))
+            .annotate(wager_count=Count("sportswager"))
         )
         serializer = SportsEventSerializer(filterset.qs, many=True)
 
@@ -498,30 +498,30 @@ class P2PSportsEventAPIView(APIView):
 
 
 @permission_classes((permissions.IsAuthenticated, IsOwnerOrReadOnly))
-class P2PSportsBetChallengeAPIView(APIView):
+class SportsWagerChallengeAPIView(APIView):
     def get(self, request):
-        """Get bet challenges"""
-        # TODO: Add invitation date_initialized to the returned P2PSportsBet queryset
+        """Get wager challenges"""
+        # TODO: Add invitation date_initialized to the returned SportsWager queryset
         # Find better ways to optimize this operation
-        bet_list = [challenge.bet.id for challenge in P2PSportsBetChallenge.objects.filter(
+        wager_list = [challenge.wager.id for challenge in SportsWagerChallenge.objects.filter(
             requestee=request.user.useraccount.id,
             accepted=False
-        ).select_related("bet").order_by("-date_initialized")]
-        queryset = P2PSportsBet.objects.filter(id__in=bet_list)
-        serializer = P2PSportsBetSerializer(
+        ).select_related("wager").order_by("-date_initialized")]
+        queryset = SportsWager.objects.filter(id__in=wager_list)
+        serializer = SportsWagerSerializer(
             queryset, many=True
         )
 
         return Response(serializer.data)
     
     def post(self, request):
-        """Accept bet challenges"""
+        """Accept wager challenges"""
         # TODO: Send websocket notifications
         try:
-            queryset = P2PSportsBet.objects.select_related("backer").get(
-                id=request.data.get("bet")
+            queryset = SportsWager.objects.select_related("backer").get(
+                id=request.data.get("wager")
             )
-        except P2PSportsBet.DoesNotExist:
+        except SportsWager.DoesNotExist:
             raise NotFoundError(detail="Wager not found")
 
         if request.user.useraccount.wallet.balance < queryset.stake:

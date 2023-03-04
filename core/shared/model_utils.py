@@ -12,5 +12,5 @@ def generate_reference_code():
     return generate_unique_code(13)
 
 
-def generate_bet_id():
+def generate_wager_id():
     return generate_unique_code(6)

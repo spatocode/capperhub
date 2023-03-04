@@ -3,12 +3,12 @@ from datetime import datetime
 from django.db.models import Count
 from django_filters.rest_framework import FilterSet, DateTimeFilter, BooleanFilter
 from core.models.play import Play
-from core.models.bet import P2PSportsBet, SportsEvent
+from core.models.wager import SportsWager, SportsEvent
 from core.models.user import UserAccount
 from core.models.subscription import Subscription
 
 
-class P2PSportsBetFilterSet(FilterSet):
+class SportsWagerFilterSet(FilterSet):
     matched = BooleanFilter(field_name="matched")
     expired = BooleanFilter(method="expired_filter")
 
@@ -20,7 +20,7 @@ class P2PSportsBetFilterSet(FilterSet):
         return queryset
 
     class Meta:
-        model = P2PSportsBet
+        model = SportsWager
         fields = ['matched', 'expired']
 
 

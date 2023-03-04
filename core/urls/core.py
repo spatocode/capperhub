@@ -1,7 +1,7 @@
 from django.urls import path
 from core.views import (
     UserAPIView, UserSubscriptionModelViewSet, P2PSportsEventAPIView, PlayAPIView,
-    P2PSportsBetAPIView, UserTransactionAPIView, P2PSportsBetChallengeAPIView,
+    SportsWagerAPIView, UserTransactionAPIView, SportsWagerChallengeAPIView,
     PuntersAPIView
 )
 
@@ -35,16 +35,16 @@ plays = PlayAPIView.as_view({
     'post': 'create_plays'
 })
 
-wagers = P2PSportsBetAPIView.as_view({
+wagers = SportsWagerAPIView.as_view({
     'post': 'place_wagers',
     'get': 'get_wagers'
 })
 
-event_wagers = P2PSportsBetAPIView.as_view({
+event_wagers = SportsWagerAPIView.as_view({
     'get': 'get_event_wagers'
 })
 
-match_wager = P2PSportsBetAPIView.as_view({
+match_wager = SportsWagerAPIView.as_view({
     'post': 'match_wager'
 })
 
@@ -57,7 +57,7 @@ urlpatterns = [
     path('unsubscribe', unsubscribe_user, name='unsubscribe-user'),
     path('plays', plays, name='plays'),
     path('wagers', wagers, name='wagers'),
-    path('wager/chalenges', P2PSportsBetChallengeAPIView.as_view(), name='wager-challenge'),
+    path('wager/chalenges', SportsWagerChallengeAPIView.as_view(), name='wager-challenge'),
     path('wager/events', P2PSportsEventAPIView.as_view(), name='events'),
     path('wager/match', match_wager, name='match-wager'),
     path('event/<pk>/wagers', event_wagers, name='event-wagers'),

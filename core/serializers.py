@@ -7,7 +7,7 @@ from rest_framework_simplejwt import serializers as sjwt_serializers
 from django_countries.serializer_fields import CountryField
 from core.models.user import UserAccount, Pricing, Wallet
 from core.models.play import Play
-from core.models.bet import P2PSportsBet, SportsEvent, P2PSportsBetChallenge
+from core.models.wager import SportsWager, SportsEvent, SportsWagerChallenge
 from core.models.transaction import Currency, Transaction
 from core.models.subscription import Subscription
 
@@ -197,7 +197,7 @@ class SportsEventSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class P2PSportsBetSerializer(serializers.ModelSerializer):
+class SportsWagerSerializer(serializers.ModelSerializer):
     event = SportsEventSerializer()
     backer = UserAccountSerializer()
     layer = UserAccountSerializer()
@@ -222,7 +222,7 @@ class P2PSportsBetSerializer(serializers.ModelSerializer):
             sports_event[0].save()
         if sports_event[0].result:
             raise ValidationError(detail="Event no longer available for wager")
-        return P2PSportsBet.objects.create(
+        return SportsWager.objects.create(
             event=sports_event[0],
             market=validated_data.get("market"),
             backer=validated_data.get("backer"),
@@ -231,17 +231,17 @@ class P2PSportsBetSerializer(serializers.ModelSerializer):
         )
 
     class Meta:
-        model = P2PSportsBet
+        model = SportsWager
         exclude = ['transaction']
 
 
-class P2PSportsBetInvitationSerializer(serializers.ModelSerializer):
-    bet = P2PSportsBetSerializer()
+class SportsWagerChallengeSerializer(serializers.ModelSerializer):
+    wager = SportsWagerSerializer()
     requestor = UserAccountSerializer()
     requestee = UserAccountSerializer()
 
     class Meta:
-        model = P2PSportsBetChallenge
+        model = SportsWagerChallenge
         fields = '__all__'
 
 

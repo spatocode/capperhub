@@ -1,5 +1,5 @@
 from django.db import models
-from core.shared.model_utils import generate_bet_id
+from core.shared.model_utils import generate_wager_id
 
 class SportsEvent(models.Model):
     type = models.CharField(max_length=100)
@@ -15,7 +15,7 @@ class SportsEvent(models.Model):
         return f'{self.competition}-{self.home[0:3]}:{self.away[0:3]}'
 
 
-class P2PSportsBet(models.Model):
+class SportsWager(models.Model):
     VOID = 0
     SETTLED = 1
     PENDING = 2
@@ -24,9 +24,9 @@ class P2PSportsBet(models.Model):
         (SETTLED, "SETTLED"),
         (PENDING, "PENDING"),
     )
-    id = models.CharField(max_length=6, default=generate_bet_id, primary_key=True, editable=False)
-    backer = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE, related_name='backer_bet')
-    layer = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE, related_name='layer_bet', null=True)
+    id = models.CharField(max_length=6, default=generate_wager_id, primary_key=True, editable=False)
+    backer = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE, related_name='backer_wager')
+    layer = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE, related_name='layer_wager', null=True)
     event = models.ForeignKey('core.SportsEvent', on_delete=models.CASCADE)
     market = models.CharField(max_length=50)
     winner = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE, null=True)
@@ -45,12 +45,12 @@ class P2PSportsBet(models.Model):
         return f'{self.id}-{self.backer}'
 
 
-class P2PSportsBetChallenge(models.Model):
-    bet = models.ForeignKey('core.P2PSportsBet', on_delete=models.CASCADE, related_name="invitation")
+class SportsWagerChallenge(models.Model):
+    wager = models.ForeignKey('core.SportsWager', on_delete=models.CASCADE, related_name="invitation")
     requestor = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE, related_name='requestor_request')
     requestee = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE, related_name='requestee_request', null=True)
     date_initialized = models.DateTimeField(auto_now_add=True)
     accepted = models.BooleanField(default=False)
 
     def __str__(self):
-        return f'{self.requestor.user.username}-{self.bet.id}'
+        return f'{self.requestor.user.username}-{self.wager.id}'

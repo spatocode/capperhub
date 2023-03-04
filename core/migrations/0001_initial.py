@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='P2PSportsBet',
             fields=[
-                ('id', models.CharField(default=core.shared.model_utils.generate_bet_id, editable=False, max_length=6, primary_key=True, serialize=False)),
+                ('id', models.CharField(default=core.shared.model_utils.generate_wager_id, editable=False, max_length=6, primary_key=True, serialize=False)),
                 ('market', models.CharField(max_length=50)),
                 ('placed_time', models.DateTimeField(auto_now_add=True)),
                 ('matched_time', models.DateTimeField()),
