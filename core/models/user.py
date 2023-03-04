@@ -1,5 +1,5 @@
 import pytz
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
@@ -56,11 +56,14 @@ class UserAccount(models.Model):
         return f'{self.user.first_name} {self.user.last_name}'
 
     @property
-    def is_tipster(self):
-        active_plays = self.play_set.filter(match_day__gt=datetime.utcnow().replace(tzinfo=pytz.UTC))
-        if active_plays.count() > 0:
-            return True
-        return False
+    def is_punter(self):
+        try:
+            latest_play = self.play_set.latest('date_added')
+            if latest_play.date_added + timedelta(days=7) > datetime.utcnow().replace(tzinfo=pytz.UTC):
+                return True
+            return False
+        except:
+            return False
 
     @property
     def subscription_issuers(self):
