@@ -19,6 +19,7 @@ class Transaction(models.Model):
     DEPOSIT = 0
     WITHDRAWAL = 1
     WAGER = 2
+    PURCHASE = 3
     PAYSTACK = 0
     FAILED = 0
     SUCCEED = 1
@@ -31,7 +32,8 @@ class Transaction(models.Model):
     TRANSACTION_TYPE = (
         (DEPOSIT, 'DEPOSIT'),
         (WITHDRAWAL, 'WITHDRAWAL'),
-        (WAGER, 'WAGER')
+        (WAGER, 'WAGER'),
+        (PURCHASE, 'PURCHASE'),
     )
     PAYMENT_ISSUER = (
         (PAYSTACK, 'PAYSTACK'),

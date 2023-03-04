@@ -114,18 +114,16 @@ class UserSubscriptionModelViewSet(ModelViewSet):
         return subscription
 
     def record_transaction(self, subscriber, **kwargs):
-        status = kwargs.get('status')
         amount = kwargs.get('amount')
-        balance = subscriber.wallet.balance + amount if status == 1 else subscriber.wallet.balance
+        balance = subscriber.wallet.balance - amount
         transaction = Transaction.objects.create(
-            type=Transaction.DEPOSIT,
+            type=Transaction.PURCHASE,
             user=subscriber,
             payment_issuer=kwargs.get('payment_issuer'),
-            channel_type=kwargs.get('channel_type'),
             channel=kwargs.get('channel'),
             amount=amount,
             currency=kwargs.get('currency'),
-            status=status,
+            status=Transaction.SUCCEED,
             balance=balance 
         )
 
@@ -147,8 +145,9 @@ class UserSubscriptionModelViewSet(ModelViewSet):
         )
 
         if subscription_type == Subscription.PREMIUM:
-            self.record_transaction(subscriber, amount=amount, issuer=issuer, 
-            currency=tipster.currency)
+            if subscriber.wallet.balance < int(amount):
+                raise InsuficientFundError(detail="You don't have sufficient funds to subscribe")
+            self.record_transaction(subscriber, amount=amount, issuer=issuer, currency=tipster.currency)
 
         subscription = Subscription(
             type=subscription_type,

@@ -36,7 +36,7 @@ plays = PlayAPIView.as_view({
 })
 
 wagers = SportsWagerAPIView.as_view({
-    'post': 'place_wagers',
+    'post': 'place_wager',
     'get': 'get_wagers'
 })
 
@@ -57,7 +57,7 @@ urlpatterns = [
     path('unsubscribe', unsubscribe_user, name='unsubscribe-user'),
     path('plays', plays, name='plays'),
     path('wagers', wagers, name='wagers'),
-    path('wager/chalenges', SportsWagerChallengeAPIView.as_view(), name='wager-challenge'),
+    path('wager/challenges', SportsWagerChallengeAPIView.as_view(), name='wager-challenge'),
     path('wager/events', P2PSportsEventAPIView.as_view(), name='events'),
     path('wager/match', match_wager, name='match-wager'),
     path('event/<pk>/wagers', event_wagers, name='event-wagers'),
