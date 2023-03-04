@@ -2,7 +2,7 @@ from django.contrib import admin
 from core.models.user import UserAccount, Pricing, Wallet
 from core.models.transaction import Currency, Transaction
 from core.models.play import Play
-from core.models.bet import P2PSportsBet, SportsEvent, P2PSportsBetInvitation
+from core.models.bet import P2PSportsBet, SportsEvent, P2PSportsBetChallenge
 from core.models.subscription import Subscription
 
 class UserAccountAdmin(admin.ModelAdmin):
@@ -65,7 +65,7 @@ class SportsEventAdmin(admin.ModelAdmin):
 admin.site.register(UserAccount, UserAccountAdmin)
 admin.site.register(Play, PlayAdmin)
 admin.site.register(P2PSportsBet, P2PSportsBetAdmin)
-admin.site.register(P2PSportsBetInvitation, P2PSportsBetInvitationAdmin)
+admin.site.register(P2PSportsBetChallenge, P2PSportsBetInvitationAdmin)
 admin.site.register(SportsEvent, SportsEventAdmin)
 admin.site.register(Pricing, PricingAdmin)
 admin.site.register(Wallet, WalletAdmin)

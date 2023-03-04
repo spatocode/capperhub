@@ -45,7 +45,7 @@ class P2PSportsBet(models.Model):
         return f'{self.id}-{self.backer}'
 
 
-class P2PSportsBetInvitation(models.Model):
+class P2PSportsBetChallenge(models.Model):
     bet = models.ForeignKey('core.P2PSportsBet', on_delete=models.CASCADE, related_name="invitation")
     requestor = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE, related_name='requestor_request')
     requestee = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE, related_name='requestee_request', null=True)

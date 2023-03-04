@@ -7,7 +7,7 @@ from rest_framework_simplejwt import serializers as sjwt_serializers
 from django_countries.serializer_fields import CountryField
 from core.models.user import UserAccount, Pricing, Wallet
 from core.models.play import Play
-from core.models.bet import P2PSportsBet, SportsEvent, P2PSportsBetInvitation
+from core.models.bet import P2PSportsBet, SportsEvent, P2PSportsBetChallenge
 from core.models.transaction import Currency, Transaction
 from core.models.subscription import Subscription
 
@@ -143,6 +143,7 @@ class UserAccountSerializer(serializers.ModelSerializer):
     premium_subscribers = serializers.ListField()
     subscription_issuers = serializers.ListField()
     country = CountryField(name_only=True)
+    is_punter = serializers.BooleanField()
 
     class Meta:
         model = UserAccount
@@ -240,7 +241,7 @@ class P2PSportsBetInvitationSerializer(serializers.ModelSerializer):
     requestee = UserAccountSerializer()
 
     class Meta:
-        model = P2PSportsBetInvitation
+        model = P2PSportsBetChallenge
         fields = '__all__'
 
 

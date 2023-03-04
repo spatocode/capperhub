@@ -20,10 +20,11 @@ from core.serializers import (
 from core.models.user import UserAccount, Wallet, Pricing
 from core.models.transaction import Transaction
 from core.models.play import Play
-from core.models.bet import P2PSportsBet, P2PSportsBetInvitation, SportsEvent
+from core.models.bet import P2PSportsBet, P2PSportsBetChallenge, SportsEvent
 from core.models.subscription import Subscription
 from core.filters import PlayFilterSet, UserAccountFilterSet, SubscriptionFilterSet, P2PSportsBetFilterSet, SportsEventFilterSet
 from core.exceptions import SubscriptionError, PricingError, InsuficientFundError, NotFoundError, ForbiddenError, PermissionDeniedError
+from core.shared.helper import sync_records
 
 
 class CsrfExemptSessionAuthentication(authentication.SessionAuthentication):
@@ -267,6 +268,29 @@ class UserWalletAPIView(APIView):
         })
 
 
+@permission_classes((permissions.AllowAny,))
+class PuntersAPIView(APIView):
+    filter_class = UserAccountFilterSet
+
+    def get(self, request, username=None):
+        user_ids = [user.id for user in UserAccount.objects.filter(
+                user__is_active=True
+            ) if user.is_punter]
+        filterset = self.filter_class(
+            data=request.query_params,
+            queryset=UserAccount.objects.filter(id__in=user_ids).exclude(
+                user__first_name=None,
+                user__last_name=None,
+                wallet=None,
+                phone_number=None,
+                ip_address=None
+            )
+        )
+        serializer = UserAccountSerializer(filterset.qs, many=True)
+
+        return Response(serializer.data)
+
+
 @permission_classes((permissions.AllowAny, IsOwnerOrReadOnly))
 class UserAPIView(ModelViewSet):
     filter_class = UserAccountFilterSet
@@ -290,24 +314,6 @@ class UserAPIView(ModelViewSet):
     def get_user(self, request, username=None):
         data = self.get_object(username)
         serializer = UserAccountSerializer(data)
-        return Response(serializer.data)
-
-    def get_users(self, request, username=None):
-        user_ids = [user.id for user in UserAccount.objects.filter(
-                user__is_active=True
-            ) if user.is_tipster]
-        filterset = self.filter_class(
-            data=request.query_params,
-            queryset=UserAccount.objects.filter(id__in=user_ids).exclude(
-                user__first_name=None,
-                user__last_name=None,
-                wallet=None,
-                phone_number=None,
-                ip_address=None
-            )
-        )
-        serializer = UserAccountSerializer(filterset.qs, many=True)
-
         return Response(serializer.data)
 
     def update_user(self, request, username=None):
@@ -383,9 +389,8 @@ class PlayAPIView(ModelViewSet):
 @permission_classes((permissions.IsAuthenticated, IsOwnerOrReadOnly))
 class P2PSportsBetAPIView(ModelViewSet):
     p2psportsbet_filter_class = P2PSportsBetFilterSet
-    sportsevent_filter_class = SportsEventFilterSet
 
-    def get_bets(self, request):
+    def get_wagers(self, request):
         filters = Q(backer=request.user.useraccount.id) | Q(layer=request.user.useraccount.id)
         filterset = self.p2psportsbet_filter_class(
             data=request.query_params,
@@ -395,7 +400,7 @@ class P2PSportsBetAPIView(ModelViewSet):
 
         return Response(p2psportsbet_serializer.data)
 
-    def get_event_bets(self, request, pk=None):
+    def get_event_wagers(self, request, pk=None):
         try:
             events = SportsEvent.objects.get(pk=pk)
         except SportsEvent.DoesNotExist:
@@ -405,17 +410,7 @@ class P2PSportsBetAPIView(ModelViewSet):
 
         return Response(serializer.data)
 
-    def get_events(self, request):
-        filterset = self.sportsevent_filter_class(
-            data=request.query_params,
-            queryset=SportsEvent.objects.filter()
-            .annotate(wager_count=Count("p2psportsbet"))
-        )
-        sportsevent_serializer = SportsEventSerializer(filterset.qs, many=True)
-
-        return Response(sportsevent_serializer.data)
-
-    def place_bet(self, request):
+    def place_wager(self, request):
         data = request.data
         self.check_object_permissions(request, data.get('backer'))
         if request.user.useraccount.wallet.balance < int(data.get("stake")):
@@ -444,7 +439,7 @@ class P2PSportsBetAPIView(ModelViewSet):
             'data': p2psportsbet_serializer.data
         })
 
-    def match_bet(self, request):
+    def match_wager(self, request):
         # TODO: Send websocket notifications
         try:
             p2psportsbet = P2PSportsBet.objects.select_related("backer", "event", "transaction").get(pk=request.data.get("bet"))
@@ -463,55 +458,74 @@ class P2PSportsBetAPIView(ModelViewSet):
         if p2psportsbet.backer.id == request.user.useraccount.id:
             raise PermissionDeniedError(detail="Action not permitted")
 
-        serializer = self.update_records(
+        serializer = sync_records(
             p2psportsbet,
             request.user.useraccount,
             layer_option=request.data.get("layer_option")
         )
         return Response({
-            'message': 'Wager Matched Successfully',
+            'message': 'Wager matched successfully',
             'data': serializer.data
         })
 
-    def update_records(self, p2psportsbet, layer, **kwargs):
-        # Record Wagers
-        p2psportsbet.layer = layer
-        p2psportsbet.layer_option = kwargs.get("layer_option")
-        p2psportsbet.matched = True
-        p2psportsbet.matched_time = datetime.utcnow().replace(tzinfo=pytz.UTC)
-        p2psportsbet.save()
-
-        # Record Wallets
-        layer_wallet = layer.wallet
-        layer_wallet.balance = layer_wallet.balance - p2psportsbet.stake
-        layer_wallet.save()
-
-        backer = p2psportsbet.backer
-        backer_wallet = backer.wallet
-        backer_wallet.withheld = backer_wallet.withheld - p2psportsbet.stake
-        backer_wallet.save()
-
-        # Record Transaction
-        p2psportsbet.transaction.status = Transaction.SUCCEED
-        p2psportsbet.transaction.save()
-        Transaction.objects.create(
-            type=Transaction.BET,
-            amount=p2psportsbet.stake,
-            balance=layer_wallet.balance,
-            user=layer,
-            status=Transaction.SUCCEED,
-            currency=backer.currency
+    def handle_bet_invitation(self, bet, requestee=None, requestor=None):
+        # TODO: send SMS invitation with a generated link to signup, fund account
+        # and accept invitation.
+        # Send web socket notification after inviting a registered user
+        user = UserAccount.objects.get(user__username=requestee)
+        if requestor.id == user.id:
+            raise PermissionDeniedError(detail="Action not permitted")
+        P2PSportsBetChallenge.objects.create(
+            bet=bet,
+            requestor=requestor,
+            requestee=user
         )
 
-        serializer = P2PSportsBetSerializer(p2psportsbet)
-        return serializer
 
-    def accept_bet_invitation(self, request):
+@permission_classes((permissions.AllowAny,))
+class P2PSportsEventAPIView(APIView):
+    filter_class = SportsEventFilterSet
+
+    def get(self, request):
+        filterset = self.filter_class(
+            data=request.query_params,
+            queryset=SportsEvent.objects.filter()
+            .annotate(wager_count=Count("p2psportsbet"))
+        )
+        serializer = SportsEventSerializer(filterset.qs, many=True)
+
+        return Response(serializer.data)
+
+
+@permission_classes((permissions.IsAuthenticated, IsOwnerOrReadOnly))
+class P2PSportsBetChallengeAPIView(APIView):
+    def get(self, request):
+        """Get bet challenges"""
+        # TODO: Add invitation date_initialized to the returned P2PSportsBet queryset
+        # Find better ways to optimize this operation
+        bet_list = [challenge.bet.id for challenge in P2PSportsBetChallenge.objects.filter(
+            requestee=request.user.useraccount.id,
+            accepted=False
+        ).select_related("bet").order_by("-date_initialized")]
+        queryset = P2PSportsBet.objects.filter(id__in=bet_list)
+        serializer = P2PSportsBetSerializer(
+            queryset, many=True
+        )
+
+        return Response(serializer.data)
+    
+    def post(self, request):
+        """Accept bet challenges"""
         # TODO: Send websocket notifications
         try:
-            queryset = P2PSportsBet.objects.select_related("backer").get(id=request.data.get("bet"))
+            queryset = P2PSportsBet.objects.select_related("backer").get(
+                id=request.data.get("bet")
+            )
         except P2PSportsBet.DoesNotExist:
             raise NotFoundError(detail="Wager not found")
+
+        if request.user.useraccount.wallet.balance < queryset.stake:
+            raise InsuficientFundError(detail="You don't have sufficient fund to stake")
 
         try:
             invitation = queryset.invitation.get(requestee=request.user.useraccount)
@@ -524,49 +538,19 @@ class P2PSportsBetAPIView(ModelViewSet):
         if queryset.matched:
             raise ForbiddenError(detail="Wager no longer available to play")
 
-        if request.user.useraccount.wallet.balance < queryset.stake:
-            raise InsuficientFundError(detail="You don't have sufficient fund to stake")
-
         invitation.accepted = True
         invitation.save()
 
-        serializer = self.update_records(
+        serializer = sync_records(
             queryset,
             request.user.useraccount,
             layer_option=request.data.get("layer_option")
         )
 
         return Response({
-            "message": "Wager Matched Successfully",
+            "message": "Challenge accepted",
             "data": serializer.data
         })
-
-    def handle_bet_invitation(self, bet, requestee=None, requestor=None):
-        # TODO: send SMS invitation with a generated link to signup, fund account
-        # and accept invitation.
-        # Send web socket notification after inviting a registered user
-        user = UserAccount.objects.get(user__username=requestee)
-        if requestor.id == user.id:
-            raise PermissionDeniedError(detail="Action not permitted")
-        P2PSportsBetInvitation.objects.create(
-            bet=bet,
-            requestor=requestor,
-            requestee=user
-        )
-
-    def get_bet_invitation(self, request):
-        # TODO: Add invitation date_initialized to the returned P2PSportsBet queryset
-        # Find better ways to optimize this operation
-        bet_list = [invitation.bet.id for invitation in P2PSportsBetInvitation.objects.filter(
-            requestee=request.user.useraccount.id,
-            accepted=False
-        ).select_related("bet").order_by("-date_initialized")]
-        queryset = P2PSportsBet.objects.filter(id__in=bet_list)
-        p2psportsbet_invitation_serializer = P2PSportsBetSerializer(
-            queryset, many=True
-        )
-
-        return Response(p2psportsbet_invitation_serializer.data)
 
 
 @permission_classes((permissions.IsAuthenticated, IsOwnerOrReadOnly))
