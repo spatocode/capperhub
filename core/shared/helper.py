@@ -2,7 +2,27 @@ import pytz
 from datetime import datetime
 
 from core.models.transaction import Transaction
+from core.models.subscription import Subscription
 from core.serializers import SportsWagerSerializer
+
+def sync_subscriptions(self, **kwargs):
+    if kwargs.get("issuer"):
+        premium_subscriptions = Subscription.objects.filter(
+            issuer=kwargs.get("issuer"),
+            type=1,
+            is_active=True,
+            expiration_date__lt=datetime.utcnow().replace(tzinfo=pytz.UTC)
+        )
+    else:
+        premium_subscriptions = Subscription.objects.filter(
+            subscriber=kwargs.get("subscriber"),
+            type=1,
+            is_active=True,
+            expiration_date__lt=datetime.utcnow().replace(tzinfo=pytz.UTC)
+        )
+    for premium in premium_subscriptions:
+        premium.is_active = False
+        premium.save()
 
 def sync_records(self, sports_wager, layer, **kwargs):
     # Record Wagers

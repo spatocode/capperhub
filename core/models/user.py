@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django_countries.fields import CountryField
 from .subscription import Subscription
 
@@ -114,3 +116,12 @@ class UserAccount(models.Model):
         if len(subscriber_count) > 0:
             return True
         return False
+
+    @receiver(post_save, sender=User)
+    def create_user_profile(sender, instance, created, **kwargs):
+        if created:
+            UserAccount.objects.create(user=instance)
+
+    @receiver(post_save, sender=User)
+    def save_user_profile(sender, instance, **kwargs):
+        instance.useraccount.save()

@@ -24,7 +24,7 @@ from core.models.wager import SportsWager, SportsWagerChallenge, SportsEvent
 from core.models.subscription import Subscription
 from core.filters import PlayFilterSet, UserAccountFilterSet, SubscriptionFilterSet, SportsWagerFilterSet, SportsEventFilterSet
 from core.exceptions import SubscriptionError, PricingError, InsuficientFundError, NotFoundError, ForbiddenError, PermissionDeniedError
-from core.shared.helper import sync_records
+from core.shared.helper import sync_records, sync_subscriptions
 
 
 class CsrfExemptSessionAuthentication(authentication.SessionAuthentication):
@@ -65,6 +65,7 @@ class UserSubscriptionModelViewSet(ModelViewSet):
 
     def subscriptions(self, request):
         useraccount = self.request.user.useraccount
+        sync_subscriptions(subscriber=useraccount.id)
         subscriptions = Subscription.objects.filter(subscriber=useraccount.id, is_active=True).order_by("-subscription_date")
         subscriptions_serializer = self.serializer_class(subscriptions, many=True)
 
@@ -72,6 +73,7 @@ class UserSubscriptionModelViewSet(ModelViewSet):
 
     def subscribers(self, request):
         useraccount = self.request.user.useraccount
+        sync_subscriptions(issuer=useraccount.id)
         subscribers = Subscription.objects.filter(issuer=useraccount.id, is_active=True).order_by("-subscription_date")
         subscribers_serializer = self.serializer_class(subscribers, many=True)
 
@@ -345,7 +347,6 @@ class PlayAPIView(ModelViewSet):
     filter_class = PlayFilterSet
 
     def get_plays(self, request):
-
         free_subscriptions = Subscription.objects.filter(
             subscriber=request.user.useraccount.id,
             type=0,
@@ -375,7 +376,7 @@ class PlayAPIView(ModelViewSet):
         #TODO: Confirm the match is valid from probably an API before saving to the DB
         data = request.data
         self.check_object_permissions(request, data.get('issuer'))
-
+        sync_subscriptions(issuer=request.user.useraccount.id)
         play_serializer = PlaySerializer(data=data)
         play_serializer.is_valid(raise_exception=True)
         play_serializer.save()
