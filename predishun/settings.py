@@ -59,6 +59,8 @@ INSTALLED_APPS = [
 
 SITE_ID = 1
 
+# REST_USE_JWT = True
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -116,10 +118,28 @@ CORS_ALLOWED_ORIGINS = [
 
 WSGI_APPLICATION = 'predishun.wsgi.application'
 
-ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
 
-# TODO: Add email backend later for sending verification email
-# EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+ACCOUNT_EMAIL_REQUIRED = True
+
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+
+ACCOUNT_CONFIRM_EMAIL_ON_GET = True
+
+LOGIN_URL = 'http://localhost:8000/users/login'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_USE_TLS = True
+
+EMAIL_HOST = 'smtp.gmail.com'
+
+EMAIL_HOST_USER = 'ekeneizukanne@gmail.com'
+
+EMAIL_HOST_PASSWORD = "********"
+
+EMAIL_PORT = 587
+
 # EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'tmp/email')
 
 
