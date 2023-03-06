@@ -5,7 +5,7 @@ from core.models.transaction import Transaction
 from core.models.subscription import Subscription
 from core.serializers import SportsWagerSerializer
 
-def sync_subscriptions(self, **kwargs):
+def sync_subscriptions(**kwargs):
     if kwargs.get("issuer"):
         premium_subscriptions = Subscription.objects.filter(
             issuer=kwargs.get("issuer"),

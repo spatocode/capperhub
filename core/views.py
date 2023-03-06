@@ -25,6 +25,7 @@ from core.models.subscription import Subscription
 from core.filters import PlayFilterSet, UserAccountFilterSet, SubscriptionFilterSet, SportsWagerFilterSet, SportsEventFilterSet
 from core.exceptions import SubscriptionError, PricingError, InsuficientFundError, NotFoundError, ForbiddenError, PermissionDeniedError
 from core.shared.helper import sync_records, sync_subscriptions
+from core import ws
 
 
 class CsrfExemptSessionAuthentication(authentication.SessionAuthentication):
@@ -167,6 +168,7 @@ class UserSubscriptionModelViewSet(ModelViewSet):
 
         subscription.save()
         serializer = self.serializer_class(instance=subscription)
+        ws.notify_update_user_subscribe(subscription.issuer.id, serializer.data)
         return Response({
             "message": "Subscribed successfully",
             "data": serializer.data
@@ -199,6 +201,7 @@ class UserSubscriptionModelViewSet(ModelViewSet):
         subscription.is_active = False
         subscription.save()
         serializer = self.serializer_class(instance=subscription)
+        ws.notify_update_user_unsubscribe(subscription.issuer.id, serializer.data)
         return Response({"message": "Unsubscribed successfully", "data": serializer.data})
 
 
@@ -380,6 +383,7 @@ class PlayAPIView(ModelViewSet):
         play_serializer = PlaySerializer(data=data)
         play_serializer.is_valid(raise_exception=True)
         play_serializer.save()
+        ws.notify_update_user_play(request, play_serializer.data)
         return Response({
             'message': 'Play Created Successfully',
             'data': play_serializer.data
@@ -418,6 +422,7 @@ class SportsWagerAPIView(ModelViewSet):
         serializer = SportsWagerSerializer(data=data, partial=True)
         serializer.is_valid(raise_exception=True)
         sports_wager = serializer.save()
+        ws.notify_update_game_event()
         useraccount_wallet = request.user.useraccount.wallet
         useraccount_wallet.withheld = useraccount_wallet.withheld + int(data.get("stake"))
         useraccount_wallet.balance = useraccount_wallet.balance - int(data.get("stake"))

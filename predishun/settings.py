@@ -39,6 +39,7 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]']
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -54,8 +55,18 @@ INSTALLED_APPS = [
     'dj_rest_auth.registration',
     'allauth.socialaccount',
     'corsheaders',
+    'channels',
     'core',
 ]
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
 
 SITE_ID = 1
 
@@ -117,6 +128,8 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 WSGI_APPLICATION = 'predishun.wsgi.application'
+
+ASGI_APPLICATION = 'predishun.asgi.application'
 
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 
