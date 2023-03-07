@@ -422,7 +422,8 @@ class SportsWagerAPIView(ModelViewSet):
         serializer = SportsWagerSerializer(data=data, partial=True)
         serializer.is_valid(raise_exception=True)
         sports_wager = serializer.save()
-        ws.notify_update_game_event(sports_wager.event)
+        event_serializer = SportsEventSerializer(sports_wager.event)
+        ws.notify_update_game_event(event_serializer.data)
         useraccount_wallet = request.user.useraccount.wallet
         useraccount_wallet.withheld = useraccount_wallet.withheld + int(data.get("stake"))
         useraccount_wallet.balance = useraccount_wallet.balance - int(data.get("stake"))
