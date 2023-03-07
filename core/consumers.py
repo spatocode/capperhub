@@ -30,7 +30,6 @@ class UserUpdatesConsumer(WebsocketConsumer):
         plus current request user data in a separate key
 
         """
-        print("RECEIVE", text_data)
         text_data_json = json.loads(text_data)
         message = text_data_json.get('echo_message')
         if message:
@@ -47,7 +46,6 @@ class UserUpdatesConsumer(WebsocketConsumer):
     def user_update(self, event):
         payload = event.get('payload', {})
         event_type = event.get('event_type')
-        print("UPDATE", payload)
         self.send(text_data=json.dumps({
             'payload': payload,
             'event_type': event_type

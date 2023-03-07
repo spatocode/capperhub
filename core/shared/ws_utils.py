@@ -6,15 +6,13 @@ USER_GROUP_NAME_TPL = 'user_updates'
 
 class EventTypes:
     TEST_ECHO = 'TEST_ECHO'
-    USER_SUBSCRIBED = 'USER_SUBSCRIBED'
-    USER_UNSUBSCRIBED = 'USER_UNSUBSCRIBED'
-    USER_BROADCAST_PLAY = 'USER_BROADCAST_PLAY'
-    USER_CREATE_GAME_EVENT = 'USER_CREATE_GAME_EVENT'
+    SUBSCRIBE = 'SUBSCRIBE'
+    UNSUBSCRIBE = 'UNSUBSCRIBE'
+    NEW_PLAY = 'NEW_PLAY'
+    NEW_SPORTS_EVENT = 'NEW_SPORTS_EVENT'
 
 
-def notify_user_ws(user_pk, event_type, payload):
-    assert type(user_pk) is int
-    # todo validate event_type?
+def notify_user_ws(event_type, payload):
     assert isinstance(payload, dict), "event_data is not a dict"
 
     # Send a message to user updates group
