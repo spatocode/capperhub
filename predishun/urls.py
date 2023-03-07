@@ -7,4 +7,5 @@ urlpatterns = [
     path('auth/', include('core.urls.auth')),
     path('user/', include('core.urls.user')),
     path('core/', include('core.urls.core')),
+    path('webhook/', include('core.urls.webhook')),
 ]

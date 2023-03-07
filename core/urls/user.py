@@ -13,6 +13,7 @@ get_user = UserAPIView.as_view({
 urlpatterns = [
     path('account', account_owner, name='account-owner'),
     path('<username>', get_user, name='users-action'),
-    path('<pk>/pricing', UserPricingAPIView.as_view(), name='user-pricing'),
-    path('<pk>/wallet', UserWalletAPIView.as_view(), name='user-wallet'),
+    path('pricing', UserPricingAPIView.as_view(), name='user-pricing'),
+    path('wallet/bank', UserWalletAPIView.as_view({"post": "update_bank_details"}), name='wallet-update-bank'),
+    path('wallet/deposit/initialize', UserWalletAPIView.as_view({"post": "initialize_deposit"}), name='initialize-deposit'),
 ]

@@ -1,3 +1,5 @@
+import json
+import hashlib
 import pytz
 from datetime import datetime, timedelta
 from django.conf import settings
@@ -7,8 +9,10 @@ from rest_framework import authentication, permissions
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
+from rest_framework import status
 from dj_rest_auth.registration.views import RegisterView
 from rest_framework_simplejwt.views import TokenObtainPairView
+from paystackapi.transaction import Transaction as PaystackTransaction
 from core.permissions import IsOwnerOrReadOnly
 from core.serializers import (
     PlaySerializer, UserAccountSerializer, UserAccountRegisterSerializer,
@@ -205,18 +209,11 @@ class UserSubscriptionModelViewSet(ModelViewSet):
         return Response({"message": "Unsubscribed successfully", "data": serializer.data})
 
 
-@permission_classes((permissions.IsAuthenticated, IsOwnerOrReadOnly))
+@permission_classes((permissions.IsAuthenticated,))
 class UserPricingAPIView(APIView):
 
-    def get_object(self, pk):
-        try:
-            return UserAccount.objects.select_related('user', 'pricing').get(pk=pk, user__is_active=True)
-        except UserAccount.DoesNotExist:
-            raise NotFoundError(detail="User not found")
-
-    def post(self, request, pk=None):
-        self.check_object_permissions(request, pk)
-        user_account = self.get_object(pk)
+    def post(self, request):
+        user_account = request.user.useraccount
         # Make sure pricing can be updated once in 60days
         if user_account.pricing and int(request.data.get("amount")) != user_account.pricing.amount:
             date_due_for_update = user_account.pricing.last_update + timedelta(days=60)
@@ -239,18 +236,60 @@ class UserPricingAPIView(APIView):
         })
 
 
-@permission_classes((permissions.IsAuthenticated, IsOwnerOrReadOnly))
-class UserWalletAPIView(APIView):
+@permission_classes((permissions.AllowAny,))
+class WebhookAPIView(ModelViewSet):
 
-    def get_object(self, pk):
-        try:
-            return UserAccount.objects.select_related('wallet').get(pk=pk, user__is_active=True)
-        except UserAccount.DoesNotExist:
-            raise NotFoundError(detail="User not found")
+    def record_successfull_transaction(request):
+        data = request.data.get("data")
+        user = UserAccount.objects.get(user__email=data["customer"]["email"])
+        wallet = user.wallet
+        wallet.balance = wallet.balance + data.get("amount")
+        wallet.authorizations = [data.get("authorization")] + wallet.authorizations
+        wallet.save()
+        Transaction.objects.create(
+            type=Transaction.DEPOSIT,
+            status=Transaction.SUCCEED,
+            amount=data.get("amount"),
+            channel=data.get("channel"),
+            currency=data.get("currency"),
+            time=data.get("paid_at"),
+            reference=data.get("reference"),
+            payment_issuer=Transaction.PAYSTACK,
+            balance=wallet.balance,
+            user=user
+        )
 
-    def post(self, request, pk=None):
-        self.check_object_permissions(request, pk)
-        user_account = self.get_object(pk)
+    def verify_origin(self, request):
+        xps_header = request.headers.get("x-paystack-signature")
+        secret = settings.PAYSTACK_SECRET_KEY
+        body_bytes = json.dumps(request.data).encode("utf-8")
+        hash = hashlib.new("sha512", secret)
+        hash.update(body_bytes)
+        hash_digest = hash.hexdigest()
+        return hash_digest == xps_header
+
+    def paystack_webhook(self, request):
+        event = request.data.get("event")
+        is_verified_origin = self.verify_origin(request)
+        if is_verified_origin:
+            #TODO: Handle more events
+            if event == "charge.success":
+                self.record_successfull_transaction(request.data)
+
+        return Response(status=status.HTTP_200_OK)
+
+
+@permission_classes((permissions.IsAuthenticated,))
+class UserWalletAPIView(ModelViewSet):
+    def initialize_deposit(self, request):
+        response = PaystackTransaction.initialize(
+            amount=int(request.data.get("amount")) * 100,
+            email=request.user.email
+        )
+        return Response(response)
+
+    def update_bank_details(self, request):
+        user_account = request.user.useraccount
         first_name = request.data.get("first_name")
         last_name = request.data.get("last_name")
 

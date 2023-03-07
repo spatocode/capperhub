@@ -122,7 +122,7 @@ class OwnerUserAccountSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserAccount
-        exclude = ['currency']
+        fields = '__all__'
         extra_kwargs = {
             'bio': {
                 'required': False,

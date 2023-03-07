@@ -9,22 +9,24 @@ from django_countries.fields import CountryField
 from .subscription import Subscription
 
 
+def default_free_features():
+    return ["Free plays forever"]
+
+def default_premium_features():
+    return ["Carefully picked plays"]
+
+
 class Wallet(models.Model):
     currency = models.ForeignKey('core.Currency', on_delete=models.PROTECT, null=True)
     balance = models.FloatField(default=0.00)
     withheld = models.FloatField(default=0.00)
     bank_name = models.CharField(max_length=50, default="")
     bank_account_number = models.CharField(max_length=50, default="")
+    authorizations = ArrayField(models.JSONField(), size=5, null=True)
 
     def __str__(self) -> str:
         return f'{self.balance} - {self.bank_name}'
 
-
-def default_free_features():
-    return ["Free plays forever"]
-
-def default_premium_features():
-    return ["Carefully picked plays"]
 
 class Pricing(models.Model):
     amount = models.IntegerField(default=0)
