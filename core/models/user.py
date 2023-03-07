@@ -10,6 +10,7 @@ from .subscription import Subscription
 
 
 class Wallet(models.Model):
+    currency = models.ForeignKey('core.Currency', on_delete=models.PROTECT, null=True)
     balance = models.FloatField(default=0.00)
     withheld = models.FloatField(default=0.00)
     bank_name = models.CharField(max_length=50, default="")
@@ -43,7 +44,6 @@ class UserAccount(models.Model):
     country = CountryField(default="")
     phone_number = models.CharField(null=True, unique=True, max_length=22)
     email_verified = models.BooleanField(default=False)
-    currency = models.ForeignKey('core.Currency', on_delete=models.PROTECT, null=True)
     pricing = models.ForeignKey('core.Pricing', on_delete=models.PROTECT, null=True)
     wallet = models.ForeignKey(Wallet, on_delete=models.PROTECT, null=True, related_name='wallet_owner')
     ip_address = models.GenericIPAddressField(null=True)
