@@ -244,7 +244,7 @@ class UserPricingAPIView(APIView):
 @permission_classes((permissions.AllowAny,))
 class WebhookAPIView(ModelViewSet):
 
-    def record_successfull_transaction(request):
+    def record_successful_deposit_transaction(request):
         data = request.data.get("data")
         user = UserAccount.objects.get(user__email=data["customer"]["email"])
         wallet = user.wallet
@@ -264,6 +264,13 @@ class WebhookAPIView(ModelViewSet):
             user=user
         )
 
+    def record_successful_withdrawal_transaction(request):
+        data = request.data.get("data")
+        transaction = Transaction.objects.select_related("user").get(reference=data.get("reference"))
+        transaction.status = Transaction.SUCCEED
+        transaction.updated_at = data.get("updated_at")
+        transaction.save()
+
     def verify_origin(self, request):
         xps_header = request.headers.get("x-paystack-signature")
         secret = settings.PAYSTACK_SECRET_KEY
@@ -279,8 +286,9 @@ class WebhookAPIView(ModelViewSet):
         if is_verified_origin:
             #TODO: Handle more events
             if event == "charge.success":
-                self.record_successfull_transaction(request.data)
-
+                self.record_successful_deposit_transaction(request)
+            elif event == "transfer.success":
+                self.record_successful_withdrawal_transaction(request)
         return Response(status=status.HTTP_200_OK)
 
 
@@ -305,6 +313,8 @@ class UserWalletAPIView(ModelViewSet):
         user = request.user.useraccount
         userwallet = user.wallet
         amount = request.data.get("amount")
+        if userwallet.balance < int(amount):
+            raise InsuficientFundError(detail="You don't have sufficient fund to withdraw")
         type = "nuban" if user.country.name == "Nigeria" else "mobile_money"
         tr_response = TransferRecipient.create(
             type=type,
@@ -327,19 +337,21 @@ class UserWalletAPIView(ModelViewSet):
                 reference=reference
             )
             if response.get("status") == True:
+                userwallet.balance = userwallet.balance - int(amount)
+                userwallet.save()
+                Transaction.objects.create(
+                    type=Transaction.WITHDRAWAL,
+                    status=Transaction.PENDING,
+                    amount=amount,
+                    channel="bank",
+                    currency=userwallet.currency,
+                    reference=reference,
+                    payment_issuer=Transaction.PAYSTACK,
+                    balance=userwallet.balance,
+                    user=user
+                )
                 return Response(response)
-            Transaction.objects.create(
-                type=Transaction.WITHDRAWAL,
-                status=Transaction.PENDING,
-                amount=amount,
-                channel="bank",
-                currency=user.wallet.currency,
-                time=datetime.utcnow().replace(tzinfo=pytz.UTC),
-                reference=reference,
-                payment_issuer=Transaction.PAYSTACK,
-                balance=userwallet.balance,
-                user=user
-            )
+
         return Response(tr_response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def list_banks(self, request):

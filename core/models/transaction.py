@@ -47,4 +47,5 @@ class Transaction(models.Model):
     status = models.PositiveIntegerField(choices=TRANSACTION_STATUS, editable=False)
     user = models.ForeignKey('core.UserAccount', on_delete=models.PROTECT, related_name='user_transactions', editable=False)
     currency = models.ForeignKey('core.Currency', on_delete=models.CASCADE, related_name='currency_transaction', editable=False)
-    time = models.DateTimeField(auto_now=True, editable=False)
+    time = models.DateTimeField(auto_now_add=True, editable=False)
+    last_update = models.DateTimeField(auto_now=True, editable=False)

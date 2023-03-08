@@ -50,6 +50,7 @@ class UserAccount(models.Model):
     pricing = models.ForeignKey('core.Pricing', on_delete=models.PROTECT, null=True)
     wallet = models.ForeignKey(Wallet, on_delete=models.PROTECT, null=True, related_name='wallet_owner')
     ip_address = models.GenericIPAddressField(null=True)
+    last_updated = models.DateTimeField(auto_now=True, editable=False)
 
     def __str__(self):
         return f'{self.user.username}'
