@@ -9,8 +9,8 @@ def generate_unique_code(length):
 
 
 def generate_reference_code():
-    return generate_unique_code(13)
+    return generate_unique_code(16)
 
 
 def generate_wager_id():
-    return generate_unique_code(6)
+    return generate_unique_code(10)

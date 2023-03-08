@@ -286,6 +286,7 @@ class WebhookAPIView(ModelViewSet):
 
 @permission_classes((permissions.IsAuthenticated,))
 class UserWalletAPIView(ModelViewSet):
+    #TODO: Handle all errors from payment processor
     def initialize_deposit(self, request):
         if request.data.get("authorization_code"):
             response = PaystackTransaction.charge(
