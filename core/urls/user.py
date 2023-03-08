@@ -15,5 +15,8 @@ urlpatterns = [
     path('<username>', get_user, name='users-action'),
     path('pricing', UserPricingAPIView.as_view(), name='user-pricing'),
     path('wallet/bank', UserWalletAPIView.as_view({"post": "update_bank_details"}), name='wallet-update-bank'),
+    path('wallet/bank/list', UserWalletAPIView.as_view({"get": "list_banks"}), name='wallet-update-bank'),
+    path('wallet/bank/resolve', UserWalletAPIView.as_view({"post": "resolve_bank_details"}), name='wallet-update-bank'),
     path('wallet/deposit/initialize', UserWalletAPIView.as_view({"post": "initialize_deposit"}), name='initialize-deposit'),
+    path('wallet/withdraw/initialize', UserWalletAPIView.as_view({"post": "initialize_withdrawal"}), name='initialize-withdrawal'),
 ]

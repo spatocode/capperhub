@@ -13,6 +13,10 @@ from rest_framework import status
 from dj_rest_auth.registration.views import RegisterView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from paystackapi.transaction import Transaction as PaystackTransaction
+from paystackapi.verification import Verification
+from paystackapi.misc import Misc
+from paystackapi.trecipient import TransferRecipient
+from paystackapi.transfer import Transfer
 from core.permissions import IsOwnerOrReadOnly
 from core.serializers import (
     PlaySerializer, UserAccountSerializer, UserAccountRegisterSerializer,
@@ -29,6 +33,7 @@ from core.models.subscription import Subscription
 from core.filters import PlayFilterSet, UserAccountFilterSet, SubscriptionFilterSet, SportsWagerFilterSet, SportsEventFilterSet
 from core.exceptions import SubscriptionError, PricingError, InsuficientFundError, NotFoundError, ForbiddenError, PermissionDeniedError
 from core.shared.helper import sync_records, sync_subscriptions
+from core.shared.model_utils import generate_reference_code
 from core import ws
 
 
@@ -282,9 +287,68 @@ class WebhookAPIView(ModelViewSet):
 @permission_classes((permissions.IsAuthenticated,))
 class UserWalletAPIView(ModelViewSet):
     def initialize_deposit(self, request):
+        if request.data.get("authorization_code"):
+            response = PaystackTransaction.charge(
+                amount=int(request.data.get("amount")) * 100,
+                email=request.user.email,
+                authorization_code=request.data.get("authorization_code")
+            )
+            return Response(response)
         response = PaystackTransaction.initialize(
             amount=int(request.data.get("amount")) * 100,
             email=request.user.email
+        )
+        return Response(response)
+
+    def initialize_withdrawal(self, request):
+        user = request.user.useraccount
+        userwallet = user.wallet
+        amount = request.data.get("amount")
+        type = "nuban" if user.country.name == "Nigeria" else "mobile_money"
+        tr_response = TransferRecipient.create(
+            type=type,
+            name=request.data.get("name"),
+            account_number=request.data.get("account_number"),
+            bank_code=request.data.get("bank_code"),
+            currency=userwallet.currency.code,
+        )
+
+        if tr_response.get("status") == True:
+            recipient_code = tr_response.get("data")["recipient_code"]
+            userwallet.recipent_code = recipient_code
+            reference = generate_reference_code()
+            userwallet.save()
+            response = Transfer.initiate(
+                source="balance",
+                recipient=recipient_code,
+                amount=amount,
+                reason="Predishun Gaming Ltd. Withdrawal",
+                reference=reference
+            )
+            if response.get("status") == True:
+                return Response(response)
+            Transaction.objects.create(
+                type=Transaction.WITHDRAWAL,
+                status=Transaction.PENDING,
+                amount=amount,
+                channel="bank",
+                currency=user.wallet.currency,
+                time=datetime.utcnow().replace(tzinfo=pytz.UTC),
+                reference=reference,
+                payment_issuer=Transaction.PAYSTACK,
+                balance=userwallet.balance,
+                user=user
+            )
+        return Response(tr_response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def list_banks(self, request):
+        response = Misc.list_banks(country=request.user.useraccount.country.name)
+        return Response(response)
+
+    def resolve_bank_details(self, request):
+        response = Verification.verify_account(
+            account_number=request.data.get("account_number"),
+            bank_code=request.data.get("bank_code")
         )
         return Response(response)
 

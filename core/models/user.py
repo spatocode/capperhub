@@ -22,7 +22,8 @@ class Wallet(models.Model):
     withheld = models.FloatField(default=0.00)
     bank_name = models.CharField(max_length=50, default="")
     bank_account_number = models.CharField(max_length=50, default="")
-    authorizations = ArrayField(models.JSONField(), size=5, null=True)
+    authorizations = ArrayField(models.JSONField(), size=5, default=list)
+    receipent_code = models.CharField(max_length=50, default="")
 
     def __str__(self) -> str:
         return f'{self.balance} - {self.bank_name}'
