@@ -21,9 +21,8 @@ from core.permissions import IsOwnerOrReadOnly
 from core.serializers import (
     PlaySerializer, UserAccountSerializer, UserAccountRegisterSerializer,
     SubscriptionSerializer, UserPricingSerializer, OwnerUserAccountSerializer,
-    OwnerUserSerializer, CustomTokenObtainPairSerializer, UserWalletSerializer,
-    SportsWagerSerializer, SportsWagerChallengeSerializer, TransactionSerializer,
-    SportsEventSerializer
+    OwnerUserSerializer, CustomTokenObtainPairSerializer, OwnerUserWalletSerializer,
+    SportsWagerSerializer, TransactionSerializer, SportsEventSerializer
 )
 from core.models.user import UserAccount, Wallet, Pricing
 from core.models.transaction import Transaction
@@ -371,9 +370,9 @@ class UserWalletAPIView(ModelViewSet):
         last_name = request.data.get("last_name")
 
         if not user_account.wallet:
-            serializer = UserWalletSerializer(data=request.data)
+            serializer = OwnerUserWalletSerializer(data=request.data)
         else:
-            serializer = UserWalletSerializer(instance=user_account.wallet, data=request.data)
+            serializer = OwnerUserWalletSerializer(instance=user_account.wallet, data=request.data)
         serializer.is_valid(raise_exception=True)
         user_wallet = serializer.save()
         user_account.wallet = user_wallet

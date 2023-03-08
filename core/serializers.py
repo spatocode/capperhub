@@ -98,7 +98,7 @@ class UserPricingSerializer(serializers.ModelSerializer):
 
 
 
-class UserWalletSerializer(serializers.ModelSerializer):
+class OwnerUserWalletSerializer(serializers.ModelSerializer):
     class Meta:
         model = Wallet
         fields = '__all__'
@@ -117,7 +117,7 @@ class OwnerUserAccountSerializer(serializers.ModelSerializer):
     premium_subscribers = serializers.ListField()
     subscription_issuers = serializers.ListField()
     full_name = serializers.CharField()
-    wallet = UserWalletSerializer()
+    wallet = OwnerUserWalletSerializer()
     country = CountryField(name_only=True)
 
     class Meta:
@@ -144,6 +144,7 @@ class UserAccountSerializer(serializers.ModelSerializer):
     subscription_issuers = serializers.ListField()
     country = CountryField(name_only=True)
     is_punter = serializers.BooleanField()
+    currency = serializers.CharField(source="wallet.currency.code")
 
     class Meta:
         model = UserAccount
