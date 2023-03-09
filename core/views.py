@@ -161,9 +161,7 @@ class UserSubscriptionModelViewSet(ModelViewSet):
                 raise InsuficientFundError(detail="You don't have sufficient funds to subscribe")
             self.record_transaction(subscriber, amount=amount, issuer=issuer, currency=tipster.currency)
 
-        # TODO: To avoid bloating the db with lots of subscription table,
-        # use the same subscription table
-        subscription = Subscription(
+        subscription = Subscription.objects.get_or_create(
             type=subscription_type,
             issuer=tipster,
             subscriber=subscriber,
@@ -193,6 +191,7 @@ class UserSubscriptionModelViewSet(ModelViewSet):
 
         try:
             subscription = Subscription.objects.filter(
+                type=subscription_type,
                 subscriber=subscriber,
                 issuer=tipster,
                 is_active=True
