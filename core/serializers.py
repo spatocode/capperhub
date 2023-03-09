@@ -7,7 +7,8 @@ from rest_framework_simplejwt import serializers as sjwt_serializers
 from django_countries.serializer_fields import CountryField
 from core.models.user import UserAccount, Pricing, Wallet
 from core.models.play import Play
-from core.models.wager import SportsWager, SportsEvent, SportsWagerChallenge
+from core.models.wager import SportsWager, SportsWagerChallenge
+from core.models.games import SportsGame
 from core.models.transaction import Currency, Transaction
 from core.models.subscription import Subscription
 
@@ -189,17 +190,17 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class SportsEventSerializer(serializers.ModelSerializer):
+class SportsGameSerializer(serializers.ModelSerializer):
     added_by = serializers.CharField(source="added_by.user.username")
     wager_count = serializers.IntegerField(read_only=True)
 
     class Meta:
-        model = SportsEvent
+        model = SportsGame
         fields = '__all__'
 
 
 class SportsWagerSerializer(serializers.ModelSerializer):
-    event = SportsEventSerializer()
+    game = SportsGameSerializer()
     backer = UserAccountSerializer()
     layer = UserAccountSerializer()
     winner = UserAccountSerializer()
@@ -211,20 +212,20 @@ class SportsWagerSerializer(serializers.ModelSerializer):
         return new_data
 
     def create(self, validated_data):
-        sports_event = SportsEvent.objects.get_or_create(
-            type=validated_data.get("event").pop("type"),
-            competition=validated_data.get("event").pop("competition"),
-            home=validated_data.get("event").pop("home"),
-            away=validated_data.get("event").pop("away"),
-            match_day=validated_data.get("event").pop("match_day")
+        sports_game = SportsGame.objects.get_or_create(
+            type=validated_data.get("game").pop("type"),
+            competition=validated_data.get("game").pop("competition"),
+            home=validated_data.get("game").pop("home"),
+            away=validated_data.get("game").pop("away"),
+            match_day=validated_data.get("game").pop("match_day")
         )
-        if sports_event[1]:
-            sports_event[0].added_by = validated_data.get("backer")            
-            sports_event[0].save()
-        if sports_event[0].result:
-            raise ValidationError(detail="Event no longer available for wager")
+        if sports_game[1]:
+            sports_game[0].added_by = validated_data.get("backer")            
+            sports_game[0].save()
+        if sports_game[0].result:
+            raise ValidationError(detail="Game no longer available for wager")
         return SportsWager.objects.create(
-            event=sports_event[0],
+            game=sports_game[0],
             market=validated_data.get("market"),
             backer=validated_data.get("backer"),
             backer_option=validated_data.get("backer_option"),

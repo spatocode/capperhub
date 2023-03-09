@@ -12,6 +12,6 @@ def notify_update_user_play(payload):
     notify_user_ws(EventTypes.NEW_PLAY, payload)
     print("channels event ->", EventTypes.NEW_PLAY)
 
-def notify_update_game_event(payload):
+def notify_update_game(payload):
     notify_user_ws(EventTypes.NEW_SPORTS_EVENT, payload)
-    print("channels event ->", EventTypes.NEW_SPORTS_EVENT)
+    print("channels event ->", EventTypes.NEW_SPORTS_GAME)

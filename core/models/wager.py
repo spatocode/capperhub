@@ -1,20 +1,6 @@
 from django.db import models
 from core.shared.model_utils import generate_wager_id
 
-class SportsEvent(models.Model):
-    type = models.CharField(max_length=100)
-    competition = models.CharField(max_length=100)
-    home = models.CharField(max_length=100)
-    away = models.CharField(max_length=100)
-    match_day = models.DateTimeField()
-    result = models.CharField(max_length=10, null=True)
-    added_by = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE, null=True)
-    time_added = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f'{self.competition}-{self.home[0:3]}:{self.away[0:3]}'
-
-
 class SportsWager(models.Model):
     VOID = 0
     SETTLED = 1
@@ -27,7 +13,7 @@ class SportsWager(models.Model):
     id = models.CharField(max_length=6, default=generate_wager_id, primary_key=True, editable=False)
     backer = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE, related_name='backer_wager')
     layer = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE, related_name='layer_wager', null=True)
-    event = models.ForeignKey('core.SportsEvent', on_delete=models.CASCADE)
+    game = models.ForeignKey('core.SportsGame', on_delete=models.CASCADE)
     market = models.CharField(max_length=50)
     winner = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE, null=True)
     placed_time = models.DateTimeField(auto_now_add=True)
@@ -36,10 +22,9 @@ class SportsWager(models.Model):
     layer_option = models.BooleanField(null=True)
     stake = models.FloatField()
     matched = models.BooleanField(default=False)
-    currency = models.ForeignKey('core.Currency', on_delete=models.CASCADE, null=True)
     is_public = models.BooleanField(default=True)
     status = models.PositiveIntegerField(choices=STATUS, default=PENDING)
-    transaction = models.ForeignKey('core.Transaction', on_delete=models.CASCADE, null=True)
+    transaction = models.ForeignKey('core.Transaction', on_delete=models.CASCADE)
 
     def __str__(self):
         return f'{self.id}-{self.backer}'

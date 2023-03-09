@@ -1,6 +1,6 @@
 from django.urls import path
 from core.views import (
-    UserAPIView, UserSubscriptionModelViewSet, P2PSportsEventAPIView, PlayAPIView,
+    UserAPIView, UserSubscriptionModelViewSet, P2PSportsGameAPIView, PlayAPIView,
     SportsWagerAPIView, UserTransactionAPIView, SportsWagerChallengeAPIView,
     PuntersAPIView
 )
@@ -40,8 +40,8 @@ wagers = SportsWagerAPIView.as_view({
     'get': 'get_wagers'
 })
 
-event_wagers = SportsWagerAPIView.as_view({
-    'get': 'get_event_wagers'
+game_wagers = SportsWagerAPIView.as_view({
+    'get': 'get_game_wagers'
 })
 
 match_wager = SportsWagerAPIView.as_view({
@@ -58,7 +58,7 @@ urlpatterns = [
     path('plays', plays, name='plays'),
     path('wagers', wagers, name='wagers'),
     path('wager/challenges', SportsWagerChallengeAPIView.as_view(), name='wager-challenge'),
-    path('wager/events', P2PSportsEventAPIView.as_view(), name='events'),
+    path('wager/games', P2PSportsGameAPIView.as_view(), name='games'),
     path('wager/match', match_wager, name='match-wager'),
-    path('event/<pk>/wagers', event_wagers, name='event-wagers'),
+    path('game/<pk>/wagers', game_wagers, name='game-wagers'),
 ]

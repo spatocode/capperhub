@@ -22,14 +22,15 @@ from core.serializers import (
     PlaySerializer, UserAccountSerializer, UserAccountRegisterSerializer,
     SubscriptionSerializer, UserPricingSerializer, OwnerUserAccountSerializer,
     OwnerUserSerializer, CustomTokenObtainPairSerializer, OwnerUserWalletSerializer,
-    SportsWagerSerializer, TransactionSerializer, SportsEventSerializer
+    SportsWagerSerializer, TransactionSerializer, SportsGameSerializer
 )
 from core.models.user import UserAccount, Wallet, Pricing
 from core.models.transaction import Transaction
 from core.models.play import Play
-from core.models.wager import SportsWager, SportsWagerChallenge, SportsEvent
+from core.models.wager import SportsWager, SportsWagerChallenge
+from core.models.games import SportsGame
 from core.models.subscription import Subscription
-from core.filters import PlayFilterSet, UserAccountFilterSet, SubscriptionFilterSet, SportsWagerFilterSet, SportsEventFilterSet
+from core.filters import PlayFilterSet, UserAccountFilterSet, SubscriptionFilterSet, SportsWagerFilterSet, SportsGameFilterSet
 from core.exceptions import SubscriptionError, PricingError, InsuficientFundError, NotFoundError, ForbiddenError, PermissionDeniedError
 from core.shared.helper import sync_records, sync_subscriptions
 from core.shared.model_utils import generate_reference_code
@@ -160,6 +161,8 @@ class UserSubscriptionModelViewSet(ModelViewSet):
                 raise InsuficientFundError(detail="You don't have sufficient funds to subscribe")
             self.record_transaction(subscriber, amount=amount, issuer=issuer, currency=tipster.currency)
 
+        # TODO: To avoid bloating the db with lots of subscription table,
+        # use the same subscription table
         subscription = Subscription(
             type=subscription_type,
             issuer=tipster,
@@ -519,12 +522,12 @@ class SportsWagerAPIView(ModelViewSet):
 
         return Response(serializer.data)
 
-    def get_event_wagers(self, request, pk=None):
+    def get_game_wagers(self, request, pk=None):
         try:
-            events = SportsEvent.objects.get(pk=pk)
-        except SportsEvent.DoesNotExist:
-            raise NotFoundError(detail="Event not found")
-        queryset = events.sportswager_set.all()
+            games = SportsGame.objects.get(pk=pk)
+        except SportsGame.DoesNotExist:
+            raise NotFoundError(detail="Game not found")
+        queryset = games.sportswager_set.all()
         serializer = SportsWagerSerializer(queryset, many=True)
 
         return Response(serializer.data)
@@ -537,8 +540,8 @@ class SportsWagerAPIView(ModelViewSet):
         serializer = SportsWagerSerializer(data=data, partial=True)
         serializer.is_valid(raise_exception=True)
         sports_wager = serializer.save()
-        event_serializer = SportsEventSerializer(sports_wager.event)
-        ws.notify_update_game_event(event_serializer.data)
+        game_serializer = SportsGameSerializer(sports_wager.game)
+        ws.notify_update_game(game_serializer.data)
         useraccount_wallet = request.user.useraccount.wallet
         useraccount_wallet.withheld = useraccount_wallet.withheld + int(data.get("stake"))
         useraccount_wallet.balance = useraccount_wallet.balance - int(data.get("stake"))
@@ -563,15 +566,15 @@ class SportsWagerAPIView(ModelViewSet):
     def match_wager(self, request):
         # TODO: Send websocket notifications
         try:
-            sports_wager = SportsWager.objects.select_related("backer", "event", "transaction").get(pk=request.data.get("bet"))
+            sports_wager = SportsWager.objects.select_related("backer", "game", "transaction").get(pk=request.data.get("bet"))
         except SportsWager.DoesNotExist:
             raise NotFoundError(detail="Wager not found")
 
         if request.user.useraccount.wallet.balance < sports_wager.stake:
             raise InsuficientFundError(detail="You don't have sufficient fund to stake")
 
-        if sports_wager.event.result:
-            raise ForbiddenError(detail="Event no longer available for wager")
+        if sports_wager.game.result:
+            raise ForbiddenError(detail="Game no longer available for wager")
         
         if sports_wager.matched:
             raise ForbiddenError(detail="Wager no longer available to play")
@@ -604,16 +607,16 @@ class SportsWagerAPIView(ModelViewSet):
 
 
 @permission_classes((permissions.AllowAny,))
-class P2PSportsEventAPIView(APIView):
-    filter_class = SportsEventFilterSet
+class P2PSportsGameAPIView(APIView):
+    filter_class = SportsGameFilterSet
 
     def get(self, request):
         filterset = self.filter_class(
             data=request.query_params,
-            queryset=SportsEvent.objects.filter()
+            queryset=SportsGame.objects.filter()
             .annotate(wager_count=Count("sportswager"))
         )
-        serializer = SportsEventSerializer(filterset.qs, many=True)
+        serializer = SportsGameSerializer(filterset.qs, many=True)
 
         return Response(serializer.data)
 

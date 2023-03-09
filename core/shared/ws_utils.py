@@ -9,7 +9,7 @@ class EventTypes:
     SUBSCRIBE = 'SUBSCRIBE'
     UNSUBSCRIBE = 'UNSUBSCRIBE'
     NEW_PLAY = 'NEW_PLAY'
-    NEW_SPORTS_EVENT = 'NEW_SPORTS_EVENT'
+    NEW_SPORTS_GAME = 'NEW_SPORTS_GAME'
 
 
 def notify_user_ws(event_type, payload):
