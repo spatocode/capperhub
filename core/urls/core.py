@@ -2,7 +2,7 @@ from django.urls import path
 from core.views import (
     UserAPIView, UserSubscriptionModelViewSet, P2PSportsGameAPIView, PlayAPIView,
     SportsWagerAPIView, UserTransactionAPIView, SportsWagerChallengeAPIView,
-    PuntersAPIView
+    PuntersAPIView, SportAPIView, TeamAPIView, CompetitionAPIView, MarketAPIView
 )
 
 subscriptions = UserSubscriptionModelViewSet.as_view({
@@ -61,4 +61,8 @@ urlpatterns = [
     path('wager/games', P2PSportsGameAPIView.as_view(), name='games'),
     path('wager/match', match_wager, name='match-wager'),
     path('game/<pk>/wagers', game_wagers, name='game-wagers'),
+    path('sports', SportAPIView.as_view({"get": "list"}), name='sport-list'),
+    path('competitions', CompetitionAPIView.as_view({"get": "list"}), name='competition-list'),
+    path('teams', TeamAPIView.as_view({"get": "list"}), name='teams-list'),
+    path('markets', MarketAPIView.as_view({"get": "list"}), name='market-list'),
 ]

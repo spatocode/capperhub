@@ -8,7 +8,7 @@ from django_countries.serializer_fields import CountryField
 from core.models.user import UserAccount, Pricing, Wallet
 from core.models.play import Play
 from core.models.wager import SportsWager, SportsWagerChallenge
-from core.models.games import SportsGame
+from core.models.games import SportsGame, Team, Sport, Competition, Market
 from core.models.transaction import Currency, Transaction
 from core.models.subscription import Subscription
 
@@ -190,8 +190,15 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class SportSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Sport
+        fields = '__all__'
+
+
 class SportsGameSerializer(serializers.ModelSerializer):
-    added_by = serializers.CharField(source="added_by.user.username")
+    type = SportSerializer()
     wager_count = serializers.IntegerField(read_only=True)
 
     class Meta:
@@ -212,25 +219,35 @@ class SportsWagerSerializer(serializers.ModelSerializer):
         return new_data
 
     def create(self, validated_data):
+        sport = Sport.objects.get(name=validated_data.get("game").pop("type"))
         sports_game = SportsGame.objects.get_or_create(
-            type=validated_data.get("game").pop("type"),
+            type=sport,
             competition=validated_data.get("game").pop("competition"),
             home=validated_data.get("game").pop("home"),
             away=validated_data.get("game").pop("away"),
             match_day=validated_data.get("game").pop("match_day")
         )
-        if sports_game[1]:
-            sports_game[0].added_by = validated_data.get("backer")            
-            sports_game[0].save()
         if sports_game[0].result:
             raise ValidationError(detail="Game no longer available for wager")
-        return SportsWager.objects.create(
+        transaction = Transaction.objects.create(
+            type=Transaction.WAGER,
+            amount=validated_data.get("stake"),
+            balance=validated_data.get("backer").wallet.balance,
+            user=validated_data.get("backer"),
+            status=Transaction.PENDING,
+            currency=validated_data.get("backer").wallet.currency
+        )
+        sports_wager = SportsWager.objects.create(
             game=sports_game[0],
             market=validated_data.get("market"),
             backer=validated_data.get("backer"),
             backer_option=validated_data.get("backer_option"),
             stake=validated_data.get("stake"),
+            transaction=transaction,
         )
+        sports_game[0].is_wager_played = True
+        sports_game[0].save()
+        return sports_wager
 
     class Meta:
         model = SportsWager
@@ -253,4 +270,25 @@ class TransactionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Transaction
+        fields = '__all__'
+
+
+class TeamSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Team
+        fields = '__all__'
+
+
+class CompetitionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Competition
+        fields = '__all__'
+
+
+class MarketSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Market
         fields = '__all__'

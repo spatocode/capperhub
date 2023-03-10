@@ -10,10 +10,10 @@ class SportsWager(models.Model):
         (SETTLED, "SETTLED"),
         (PENDING, "PENDING"),
     )
-    id = models.CharField(max_length=6, default=generate_wager_id, primary_key=True, editable=False)
+    id = models.CharField(max_length=10, default=generate_wager_id, primary_key=True, editable=False)
     backer = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE, related_name='backer_wager')
     layer = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE, related_name='layer_wager', null=True)
-    game = models.ForeignKey('core.SportsGame', on_delete=models.CASCADE)
+    game = models.ForeignKey('core.SportsGame', on_delete=models.CASCADE, related_name="wagers")
     market = models.CharField(max_length=50)
     winner = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE, null=True)
     placed_time = models.DateTimeField(auto_now_add=True)

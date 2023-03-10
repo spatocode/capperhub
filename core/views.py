@@ -22,13 +22,14 @@ from core.serializers import (
     PlaySerializer, UserAccountSerializer, UserAccountRegisterSerializer,
     SubscriptionSerializer, UserPricingSerializer, OwnerUserAccountSerializer,
     OwnerUserSerializer, CustomTokenObtainPairSerializer, OwnerUserWalletSerializer,
-    SportsWagerSerializer, TransactionSerializer, SportsGameSerializer
+    SportsWagerSerializer, TransactionSerializer, SportsGameSerializer, TeamSerializer,
+    CompetitionSerializer, SportSerializer, MarketSerializer
 )
 from core.models.user import UserAccount, Wallet, Pricing
 from core.models.transaction import Transaction
 from core.models.play import Play
 from core.models.wager import SportsWager, SportsWagerChallenge
-from core.models.games import SportsGame
+from core.models.games import SportsGame, Sport, Competition, Team, Market
 from core.models.subscription import Subscription
 from core.filters import PlayFilterSet, UserAccountFilterSet, SubscriptionFilterSet, SportsWagerFilterSet, SportsGameFilterSet
 from core.exceptions import SubscriptionError, PricingError, InsuficientFundError, NotFoundError, ForbiddenError, PermissionDeniedError
@@ -545,16 +546,6 @@ class SportsWagerAPIView(ModelViewSet):
         useraccount_wallet.withheld = useraccount_wallet.withheld + int(data.get("stake"))
         useraccount_wallet.balance = useraccount_wallet.balance - int(data.get("stake"))
         useraccount_wallet.save()
-        transaction = Transaction.objects.create(
-            type=Transaction.WAGER,
-            amount=sports_wager.stake,
-            balance=useraccount_wallet.balance,
-            user=request.user.useraccount,
-            status=Transaction.PENDING,
-            currency=request.user.useraccount.currency
-        )
-        sports_wager.transaction = transaction
-        sports_wager.save()
         if data.get("opponent"):
             self.handle_wager_invitation(sports_wager, requestee=data.get("opponent"), requestor=request.user.useraccount)
         return Response({
@@ -565,7 +556,7 @@ class SportsWagerAPIView(ModelViewSet):
     def match_wager(self, request):
         # TODO: Send websocket notifications
         try:
-            sports_wager = SportsWager.objects.select_related("backer", "game", "transaction").get(pk=request.data.get("bet"))
+            sports_wager = SportsWager.objects.select_related("backer", "game", "transaction").get(pk=request.data.get("wager"))
         except SportsWager.DoesNotExist:
             raise NotFoundError(detail="Wager not found")
 
@@ -612,8 +603,8 @@ class P2PSportsGameAPIView(APIView):
     def get(self, request):
         filterset = self.filter_class(
             data=request.query_params,
-            queryset=SportsGame.objects.filter()
-            .annotate(wager_count=Count("sportswager"))
+            queryset=SportsGame.objects.all()
+            .annotate(wager_count=Count("wagers"))
         )
         serializer = SportsGameSerializer(filterset.qs, many=True)
 
@@ -691,3 +682,45 @@ class UserTransactionAPIView(APIView):
         transactions = useraccount.user_transactions.all()
         serializer = TransactionSerializer(instance=transactions, many=True)
         return Response(serializer.data)
+
+
+@permission_classes((permissions.IsAuthenticated,))
+class TeamAPIView(ModelViewSet):
+    serializer_class = TeamSerializer
+
+    def get_queryset(self):
+        queryset = Team.objects.filter(
+            competition__name=self.request.query_params.get('competition')
+        )
+        return queryset
+
+
+@permission_classes((permissions.IsAuthenticated,))
+class SportAPIView(ModelViewSet):
+    serializer_class = SportSerializer
+
+    def get_queryset(self):
+        queryset = Sport.objects.filter()
+        return queryset
+
+
+@permission_classes((permissions.IsAuthenticated,))
+class CompetitionAPIView(ModelViewSet):
+    serializer_class = CompetitionSerializer
+
+    def get_queryset(self):
+        queryset = Competition.objects.filter(
+            sport__name=self.request.query_params.get('sport')
+        )
+        return queryset
+
+
+@permission_classes((permissions.IsAuthenticated,))
+class MarketAPIView(ModelViewSet):
+    serializer_class = MarketSerializer
+
+    def get_queryset(self):
+        queryset = Market.objects.filter(
+            sport__name=self.request.query_params.get('sport')
+        )
+        return queryset

@@ -24,7 +24,7 @@ def sync_subscriptions(**kwargs):
         premium.is_active = False
         premium.save()
 
-def sync_records(self, sports_wager, layer, **kwargs):
+def sync_records(sports_wager, layer, **kwargs):
     # Record Wagers
     sports_wager.layer = layer
     sports_wager.layer_option = kwargs.get("layer_option")
@@ -46,7 +46,7 @@ def sync_records(self, sports_wager, layer, **kwargs):
     sports_wager.transaction.status = Transaction.SUCCEED
     sports_wager.transaction.save()
     Transaction.objects.create(
-        type=Transaction.wager,
+        type=Transaction.WAGER,
         amount=sports_wager.stake,
         balance=layer_wallet.balance,
         user=layer,

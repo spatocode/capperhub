@@ -30,28 +30,33 @@ class SportsGameFilterSet(FilterSet):
     open = BooleanFilter(method="open_filter")
     latest = BooleanFilter(method="latest_filter")
     expired = BooleanFilter(method="expired_filter")
+    fixtures = BooleanFilter(method="fixtures_filter")
 
     def top_filter(self, queryset, name, value):
         if value:
-            return queryset.order_by('-wager_count')
+            return queryset.filter(is_wager_played=True).order_by('-wager_count')
         return queryset
 
     def open_filter(self, queryset, name, value):
         if value:
-            return queryset.filter(match_day__gt=datetime.utcnow().replace(tzinfo=pytz.UTC))
+            return queryset.filter(is_wager_played=True, match_day__gt=datetime.utcnow().replace(tzinfo=pytz.UTC))
         return queryset
 
     def expired_filter(self, queryset, name, value):
         if value:
             return queryset.filter(
+                is_wager_played=True,
                 match_day__lt=datetime.utcnow().replace(tzinfo=pytz.UTC)
             )
         return queryset
 
     def latest_filter(self, queryset, name, value):
         if value:
-            return queryset.order_by('-time_added')
+            return queryset.filter(is_wager_played=True).order_by('-time_added')
         return queryset
+
+    def fixtures_filter(self, queryset, name, value):
+        return queryset.order_by('-competition', 'match_day')
 
     class Meta:
         model = SportsGame

@@ -3,7 +3,7 @@ from core.models.user import UserAccount, Pricing, Wallet
 from core.models.transaction import Currency, Transaction
 from core.models.play import Play
 from core.models.wager import SportsWager, SportsWagerChallenge
-from core.models.games import SportsGame, Sport
+from core.models.games import SportsGame, Sport, Competition, Team, Market
 from core.models.subscription import Subscription
 
 class UserAccountAdmin(admin.ModelAdmin):
@@ -66,12 +66,25 @@ class SportsGameAdmin(admin.ModelAdmin):
 class SportsAdmin(admin.ModelAdmin):
     list_display = ['name']
 
+class CompetitionAdmin(admin.ModelAdmin):
+    list_display = ['name']
+
+class TeamAdmin(admin.ModelAdmin):
+    list_display = ['name']
+
+class MarketAdmin(admin.ModelAdmin):
+    list_display = ['name']
+
+
 admin.site.register(UserAccount, UserAccountAdmin)
 admin.site.register(Play, PlayAdmin)
 admin.site.register(SportsWager, SportsWagerAdmin)
 admin.site.register(SportsWagerChallenge, SportsWagerChallengeAdmin)
 admin.site.register(SportsGame, SportsGameAdmin)
 admin.site.register(Sport, SportsAdmin)
+admin.site.register(Team, TeamAdmin)
+admin.site.register(Market, MarketAdmin)
+admin.site.register(Competition, CompetitionAdmin)
 admin.site.register(Pricing, PricingAdmin)
 admin.site.register(Wallet, WalletAdmin)
 admin.site.register(Subscription, SubscriptionAdmin)
