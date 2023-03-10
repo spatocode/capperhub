@@ -6,7 +6,7 @@ from rest_framework_simplejwt.serializers import TokenObtainSerializer, RefreshT
 from rest_framework_simplejwt import serializers as sjwt_serializers
 from django_countries.serializer_fields import CountryField
 from core.models.user import UserAccount, Pricing, Wallet
-from core.models.play import Play
+from core.models.play import Play, PlaySlip
 from core.models.wager import SportsWager, SportsWagerChallenge
 from core.models.games import SportsGame, Team, Sport, Competition, Market
 from core.models.transaction import Currency, Transaction
@@ -153,16 +153,24 @@ class UserAccountSerializer(serializers.ModelSerializer):
 
 
 class PlaySerializer(serializers.ModelSerializer):
-    issuer = UserAccountSerializer()
-    
-    def to_internal_value(self, data):
-        new_data = data
-        issuer = UserAccount.objects.get(id=data.get("issuer"))
-        new_data['issuer'] = issuer
-        return new_data
 
     class Meta:
         model = Play
+        fields = '__all__'
+        read_only_fields = ['id']
+
+
+class PlaySlipSerializer(serializers.ModelSerializer):
+    issuer = UserAccountSerializer()
+    plays = serializers.SerializerMethodField()
+
+    def get_plays(self, instance):
+        serializer = PlaySerializer(data=instance.play_set.all(), many=True)
+        serializer.is_valid()
+        return serializer.data
+
+    class Meta:
+        model = PlaySlip
         fields = '__all__'
         read_only_fields = ['id']
 

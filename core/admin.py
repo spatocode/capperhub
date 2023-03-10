@@ -1,7 +1,7 @@
 from django.contrib import admin
 from core.models.user import UserAccount, Pricing, Wallet
 from core.models.transaction import Currency, Transaction
-from core.models.play import Play
+from core.models.play import Play, PlaySlip
 from core.models.wager import SportsWager, SportsWagerChallenge
 from core.models.games import SportsGame, Sport, Competition, Team, Market
 from core.models.subscription import Subscription
@@ -40,8 +40,13 @@ class SubscriptionAdmin(admin.ModelAdmin):
     list_filter = ['type', 'is_active']
 
 class PlayAdmin(admin.ModelAdmin):
-    list_display = ['issuer', 'sports', 'home_team', 'away_team', 'match_day', 'prediction', 'status']
-    list_filter = ['issuer', 'sports', 'match_day', 'status']
+    list_display = ['sports', 'home_team', 'away_team', 'match_day', 'prediction', 'status']
+    list_filter = ['sports', 'match_day', 'status']
+
+
+class PlaySlipAdmin(admin.ModelAdmin):
+    list_display = ['issuer', 'title', 'date_added', 'is_premium']
+    list_filter = ['is_premium']
 
 class PricingAdmin(admin.ModelAdmin):
     list_display = ['amount']
@@ -78,6 +83,7 @@ class MarketAdmin(admin.ModelAdmin):
 
 admin.site.register(UserAccount, UserAccountAdmin)
 admin.site.register(Play, PlayAdmin)
+admin.site.register(PlaySlip, PlaySlipAdmin)
 admin.site.register(SportsWager, SportsWagerAdmin)
 admin.site.register(SportsWagerChallenge, SportsWagerChallengeAdmin)
 admin.site.register(SportsGame, SportsGameAdmin)

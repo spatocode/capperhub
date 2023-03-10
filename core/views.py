@@ -23,11 +23,11 @@ from core.serializers import (
     SubscriptionSerializer, UserPricingSerializer, OwnerUserAccountSerializer,
     OwnerUserSerializer, CustomTokenObtainPairSerializer, OwnerUserWalletSerializer,
     SportsWagerSerializer, TransactionSerializer, SportsGameSerializer, TeamSerializer,
-    CompetitionSerializer, SportSerializer, MarketSerializer
+    CompetitionSerializer, SportSerializer, MarketSerializer, PlaySlipSerializer
 )
 from core.models.user import UserAccount, Wallet, Pricing
 from core.models.transaction import Transaction
-from core.models.play import Play
+from core.models.play import Play, PlaySlip
 from core.models.wager import SportsWager, SportsWagerChallenge
 from core.models.games import SportsGame, Sport, Competition, Team, Market
 from core.models.subscription import Subscription
@@ -482,29 +482,36 @@ class PlayAPIView(ModelViewSet):
         free_sub_issuers = free_subscriptions.values_list("issuer__id", flat=True)
         pre_sub_issuers = premium_subscriptions.values_list("issuer__id", flat=True)
         filters = Q(issuer=request.user.useraccount.id) | Q(issuer__in=free_sub_issuers, is_premium=False) | Q(issuer__in=pre_sub_issuers, is_premium=True)
-        plays = Play.objects.filter(filters).order_by("-date_added")
+        plays = PlaySlip.objects.filter(filters).order_by("-date_added")
 
         query_params = request.query_params
         filterset = self.filter_class(
             data=query_params,
             queryset= plays
         )
-        play_serializer = PlaySerializer(filterset.qs, many=True)
+        play_serializer = PlaySlipSerializer(filterset.qs, many=True)
 
         return Response(play_serializer.data)
 
     def create_plays(self, request):
         #TODO: Confirm the match is valid from probably an API before saving to the DB
-        data = request.data
-        self.check_object_permissions(request, data.get('issuer'))
+        data = request.data.copy()
+        self.check_object_permissions(request, request.user.useraccount.id)
         sync_subscriptions(issuer=request.user.useraccount.id)
-        play_serializer = PlaySerializer(data=data)
-        play_serializer.is_valid(raise_exception=True)
-        play_serializer.save()
-        ws.notify_update_user_play(play_serializer.data)
+        play_slip = PlaySlip.objects.create(
+            issuer=request.user.useraccount,
+            is_premium=data.get("is_premium"),
+            title=data.get("title"),
+        )
+        data['slip'] = play_slip
+        PlaySerializer(data=data.get("plays"), many=True)
+        plays = [Play(slip=play_slip, **play) for play in data.get("plays")]
+        Play.objects.bulk_create(plays)
+        play_slip_serializer = PlaySlipSerializer(PlaySlip.objects.get(id=play_slip.id))
+        ws.notify_update_user_play(play_slip_serializer.data)
         return Response({
             'message': 'Play Created Successfully',
-            'data': play_serializer.data
+            'data': play_slip_serializer.data
         })
 
 
@@ -527,7 +534,7 @@ class SportsWagerAPIView(ModelViewSet):
             games = SportsGame.objects.get(pk=pk)
         except SportsGame.DoesNotExist:
             raise NotFoundError(detail="Game not found")
-        queryset = games.sportswager_set.all()
+        queryset = games.wagers.all()
         serializer = SportsWagerSerializer(queryset, many=True)
 
         return Response(serializer.data)

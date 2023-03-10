@@ -70,7 +70,7 @@ class PlayFilterSet(FilterSet):
 
     class Meta:
         model = Play
-        fields = ['issuer', 'match_day', 'status']
+        fields = ['match_day', 'status']
 
 
 class UserAccountFilterSet(FilterSet):

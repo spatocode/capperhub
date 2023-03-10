@@ -1,5 +1,15 @@
 from django.db import models
 
+class PlaySlip(models.Model):
+    title = models.CharField(max_length=20, default="")
+    issuer = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE)
+    date_added = models.DateTimeField(auto_now_add=True)
+    is_premium = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f'{self.title}'
+
+
 class Play(models.Model):
     LOSS = 0
     WIN = 1
@@ -9,17 +19,15 @@ class Play(models.Model):
         (WIN, "WIN"),
         (PENDING, "PENDING")
     )
+    slip = models.ForeignKey('core.PlaySlip', on_delete=models.CASCADE)
     sports = models.CharField(max_length=20)
-    issuer = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE)
     competition = models.CharField(max_length=50)
     home_team = models.CharField(max_length=50)
     away_team = models.CharField(max_length=50)
     prediction = models.CharField(max_length=50)
     match_day = models.DateTimeField()
-    date_added = models.DateTimeField(auto_now_add=True)
     result = models.CharField(max_length=10, null=True)
-    is_premium = models.BooleanField(default=True)
     status = models.PositiveIntegerField(choices=STATUS, default=PENDING)
 
     def __str__(self):
-        return f'{self.sports}-{self.issuer.user.username}'
+        return f'{self.sports}-{self.slip.issuer.user.username}'
