@@ -19,6 +19,9 @@ yarn-error.log*
 /node_modules/
 
 *.env
+*.env.dev
+*.env.prod
+*.env.prod.db
 *.sqlite3
 
 *-debug.log
