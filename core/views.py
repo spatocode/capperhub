@@ -70,7 +70,7 @@ class UserSubscriptionModelViewSet(ModelViewSet):
 
     def get_object(self, pk):
         try:
-            return UserAccount.objects.select_related('pricing', 'currency').get(pk=pk, user__is_active=True)
+            return UserAccount.objects.select_related('pricing').get(pk=pk, user__is_active=True)
         except UserAccount.DoesNotExist:
             raise NotFoundError(detail="User not found")
 
@@ -166,18 +166,18 @@ class UserSubscriptionModelViewSet(ModelViewSet):
             type=subscription_type,
             issuer=tipster,
             subscriber=subscriber,
+            is_active=True
         )
 
         if period:
-            subscription.period = period
-            subscription.expiration_date = datetime.utcnow().replace(tzinfo=pytz.UTC) + timedelta(days=period)
+            subscription[0].period = period
+            subscription[0].expiration_date = datetime.utcnow().replace(tzinfo=pytz.UTC) + timedelta(days=period)
 
         if previous_subscription and previous_subscription.type == Subscription.FREE and subscription_type == Subscription.PREMIUM:
             previous_subscription.is_active = False
             previous_subscription.save()
 
-        subscription.save()
-        serializer = self.serializer_class(instance=subscription)
+        serializer = self.serializer_class(instance=subscription[0])
         ws.notify_update_user_subscribe(serializer.data)
         return Response({
             "message": "Subscribed successfully",
