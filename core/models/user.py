@@ -64,8 +64,8 @@ class UserAccount(models.Model):
     @property
     def is_punter(self):
         try:
-            latest_play = self.play_set.latest('date_added')
-            if latest_play.date_added + timedelta(days=7) > datetime.utcnow().replace(tzinfo=pytz.UTC):
+            latest_play = self.playslip_set.latest('date_added')
+            if latest_play.date_added + timedelta(days=14) > datetime.utcnow().replace(tzinfo=pytz.UTC):
                 return True
             return False
         except:
