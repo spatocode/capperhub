@@ -1,10 +1,19 @@
+from django.conf import settings
 from django.contrib.auth.models import User
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.sites.shortcuts import get_current_site
+from django.urls.base import reverse
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from rest_framework_simplejwt.serializers import TokenObtainSerializer, RefreshToken, get_user_model
 from rest_framework_simplejwt import serializers as sjwt_serializers
 from django_countries.serializer_fields import CountryField
+from allauth.account import app_settings
+from allauth.account.adapter import get_adapter
+from allauth.account.utils import user_pk_to_url_str, user_username
+from dj_rest_auth.forms import AllAuthPasswordResetForm
+from dj_rest_auth.serializers import PasswordResetSerializer
 from core.models.user import UserAccount, Pricing, Wallet
 from core.models.play import Play, PlaySlip
 from core.models.wager import SportsWager, SportsWagerChallenge
@@ -14,24 +23,21 @@ from core.models.subscription import Subscription
 
 class UserAccountRegisterSerializer(RegisterSerializer):
     username = serializers.CharField(required=False)
-    first_name = serializers.CharField(required=False)
-    last_name = serializers.CharField(required=False)
     display_name = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
+    country = CountryField(required=True)
     password1 = serializers.CharField(write_only=True, required=True)
     password2 = serializers.CharField(write_only=True, required=True)
 
     def get_cleaned_data(self):
         super(UserAccountRegisterSerializer, self).get_cleaned_data()
-
         return {
             'username': self.validated_data.get('username', ''),
-            'first_name': self.validated_data.get('first_name', ''),
-            'last_name': self.validated_data.get('last_name', ''),
             'display_name': self.validated_data.get('display_name', ''),
             'password1': self.validated_data.get('password1', ''),
             'password2': self.validated_data.get('password2', ''),
             'email': self.validated_data.get('email', ''),
+            'country': self.validated_data.get('country', ''),
         }
 
 
@@ -149,7 +155,7 @@ class UserAccountSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserAccount
-        exclude = ['ip_address', 'phone_number', 'email_verified']
+        exclude = ['ip_address', 'phone_number']
 
 
 class PlaySerializer(serializers.ModelSerializer):
@@ -300,3 +306,55 @@ class MarketSerializer(serializers.ModelSerializer):
     class Meta:
         model = Market
         fields = '__all__'
+
+class CustomAllAuthPasswordResetForm(AllAuthPasswordResetForm):
+    def save(self, request, **kwargs):
+        current_site = get_current_site(request)
+        email = self.cleaned_data['email']
+        token_generator = kwargs.get('token_generator', default_token_generator)
+
+        for user in self.users:
+
+            temp_key = token_generator.make_token(user)
+
+            # save it to the password reset model
+            # password_reset = PasswordReset(user=user, temp_key=temp_key)
+            # password_reset.save()
+
+            # send the password reset email
+            path = reverse(
+                'password_reset_confirm',
+                args=[user_pk_to_url_str(user), temp_key],
+            )
+            splitedPath = path.split('/')
+            token = splitedPath[len(splitedPath) - 1]
+            uid = splitedPath[len(splitedPath) - 2]
+            # url = build_absolute_uri(None, path) # PASS NONE INSTEAD OF REQUEST
+            url = settings.CLIENT_RESET_PASSWORD_URL + '/' + uid + '/' + token
+            context = {
+                'current_site': current_site,
+                'user': user,
+                'display_name': user.useraccount.display_name,
+                'password_reset_url': url,
+                'request': request,
+            }
+            if app_settings.AUTHENTICATION_METHOD != app_settings.AuthenticationMethod.EMAIL:
+                context['username'] = user_username(user)
+            get_adapter(request).send_mail('account/email/password_reset_key',
+                                           email, context)
+        return self.cleaned_data['email']
+
+class CustomPasswordResetSerializer(PasswordResetSerializer):
+    def get_email_options(self):
+        return {
+            'subject_template_name': 'account/email/password_reset_key_subject.txt',
+            'email_template_name': 'account/email/password_reset_key_message.txt',
+            'html_email_template_name': 'account/email/password_reset_key_message.html',
+            'extra_email_context': {
+                'pass_reset_obj': {}
+            }
+        }
+
+    @property
+    def password_reset_form_class(self):
+        return CustomAllAuthPasswordResetForm

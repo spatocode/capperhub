@@ -97,7 +97,8 @@ REST_FRAMEWORK = {
 REST_AUTH = {
     'USE_JWT': True,
     'JWT_AUTH_COOKIE': 'predishun-auth',
-    'JWT_AUTH_REFRESH_COOKIE': 'predishun-refresh'
+    'JWT_AUTH_REFRESH_COOKIE': 'predishun-refresh',
+    'PASSWORD_RESET_SERIALIZER': 'core.serializers.CustomPasswordResetSerializer',
 }
 
 AUTHENTICATION_BACKENDS = [
@@ -112,10 +113,6 @@ SIMPLE_JWT = {
 
 REST_AUTH_REGISTER_SERIALIZERS = {
     'REGISTER_SERIALIZER': 'core.serializers.UserAccountRegisterSerializer',
-}
-
-REST_AUTH_SERIALIZERS = {
-    'PASSWORD_RESET_SERIALIZER': 'core.serializers.CustomPasswordResetSerializer',
 }
 
 #AUTH_USER_MODEL = 'core.UserAccount'
@@ -162,6 +159,8 @@ ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 LOGIN_URL = os.environ.get("CLIENT_LOGIN_URL")
 
 CLIENT_ACTIVATE_ACCOUNT_URL = os.environ.get("CLIENT_ACTIVATE_ACCOUNT_URL")
+
+CLIENT_RESET_PASSWORD_URL = os.environ.get("CLIENT_RESET_PASSWORD_URL")
 
 PAYSTACK_SECRET_KEY = os.environ.get("PAYSTACK_SECRET_KEY")
 
