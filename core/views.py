@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from dj_rest_auth.registration.views import RegisterView
 from rest_framework_simplejwt.views import TokenObtainPairView
+from dj_rest_auth.registration.views import ConfirmEmailView
 from paystackapi.transaction import Transaction as PaystackTransaction
 from paystackapi.verification import Verification
 from paystackapi.misc import Misc
@@ -52,7 +53,9 @@ class UserAccountRegisterView(RegisterView):
 
     def perform_create(self, serializer):
         user = super().perform_create(serializer)
-        user_account = UserAccount(user=user)
+        user.is_active = False
+        user.save()
+        user_account = user.useraccount
         display_name = serializer.data.get('display_name')
         wallet = Wallet.objects.create()
         pricing = Pricing.objects.create()
@@ -61,6 +64,15 @@ class UserAccountRegisterView(RegisterView):
         user_account.pricing = pricing
         user_account.save()
         return user
+
+
+class CustomConfirmEmailView(ConfirmEmailView):
+    def post(self, *args, **kwargs):
+        redirect = super().post(*args, **kwargs)
+        user = self.object.email_address.user
+        user.is_active = True
+        user.save()
+        return redirect
 
 
 @permission_classes((permissions.IsAuthenticated,))

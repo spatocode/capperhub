@@ -1,0 +1,9 @@
+Thank you for creating a Predishun account. To activate your account, please verify your email address.
+Your account will not be created until your email address is verified.
+
+If you’re having trouble clicking the "Verify email address" button, copy and paste 
+the URL below into your web browser:
+{{ activate_url }}
+
+Best Regards,
+The Predishun Team!

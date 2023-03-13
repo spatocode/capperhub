@@ -1,0 +1,22 @@
+{% extends "account/email/base.html" %}
+
+{% block title %}
+  <title>Predishun Email Verification</title>
+{% endblock %}
+
+{% block content %}
+  <div>
+    <p>
+      Thank you for creating a Predishun account. To activate your account, please verify your email address.
+      Your account will not be created until your email address is verified.
+    </p>
+    <a class='buttonLink' href="{{ activate_url }}">
+      <div class="button">Verify email address</div>
+    </a>
+    <p>
+      If you're having trouble clicking the "Verify email address" button, copy and paste 
+      the URL below into your web browser:
+      {{ activate_url }}
+    </p>
+  </div>
+{% endblock %}

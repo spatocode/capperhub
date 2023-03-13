@@ -7,8 +7,8 @@ from core.models.games import SportsGame, Sport, Competition, Team, Market
 from core.models.subscription import Subscription
 
 class UserAccountAdmin(admin.ModelAdmin):
-    list_display = ['username', 'email', 'first_name', 'last_name', 'display_name', 'country', 'phone_number', 'email_verified']
-    list_filter = ['email_verified', 'country']
+    list_display = ['username', 'email', 'first_name', 'last_name', 'display_name', 'country', 'phone_number']
+    list_filter = ['country']
 
     def username(self, obj):
         return obj.user.username

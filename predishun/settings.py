@@ -85,13 +85,25 @@ MIDDLEWARE = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     )
 }
+
+REST_AUTH = {
+    'USE_JWT': True,
+    'JWT_AUTH_COOKIE': 'predishun-auth',
+    'JWT_AUTH_REFRESH_COOKIE': 'predishun-refresh'
+}
+
+AUTHENTICATION_BACKENDS = [
+    'allauth.account.auth_backends.AuthenticationBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=25),
@@ -102,12 +114,18 @@ REST_AUTH_REGISTER_SERIALIZERS = {
     'REGISTER_SERIALIZER': 'core.serializers.UserAccountRegisterSerializer',
 }
 
+REST_AUTH_SERIALIZERS = {
+    'PASSWORD_RESET_SERIALIZER': 'core.serializers.CustomPasswordResetSerializer',
+}
+
+#AUTH_USER_MODEL = 'core.UserAccount'
+
 ROOT_URLCONF = 'predishun.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'core/templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -131,6 +149,8 @@ WSGI_APPLICATION = 'predishun.wsgi.application'
 
 ASGI_APPLICATION = 'predishun.asgi.application'
 
+ACCOUNT_ADAPTER = 'core.adapter.CustomDefaultAccountAdapter'
+
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 
 ACCOUNT_EMAIL_REQUIRED = True
@@ -139,7 +159,9 @@ ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 
-LOGIN_URL = 'http://localhost:8000/users/login'
+LOGIN_URL = os.environ.get("CLIENT_LOGIN_URL")
+
+CLIENT_ACTIVATE_ACCOUNT_URL = os.environ.get("CLIENT_ACTIVATE_ACCOUNT_URL")
 
 PAYSTACK_SECRET_KEY = os.environ.get("PAYSTACK_SECRET_KEY")
 
@@ -147,11 +169,11 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 EMAIL_USE_TLS = True
 
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST = os.environ.get("EMAIL_HOST")
 
-EMAIL_HOST_USER = 'ekeneizukanne@gmail.com'
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 
-EMAIL_HOST_PASSWORD = "********"
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 
 EMAIL_PORT = 587
 

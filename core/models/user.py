@@ -46,7 +46,6 @@ class UserAccount(models.Model):
     bio = models.TextField(default="")
     country = CountryField(default="")
     phone_number = models.CharField(null=True, unique=True, max_length=22)
-    email_verified = models.BooleanField(default=False)
     pricing = models.ForeignKey('core.Pricing', on_delete=models.PROTECT, null=True)
     wallet = models.ForeignKey(Wallet, on_delete=models.PROTECT, null=True, related_name='wallet_owner')
     ip_address = models.GenericIPAddressField(null=True)

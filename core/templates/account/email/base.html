@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+      {% block title %} {% endblock %}
+    <style>
+      body {
+        font-family: "Arial";
+        font-size: 18px;
+      }
+      .letter-wrapper {
+        font-size: 17px;
+        background-color: #f4f7fa;
+        position: absolute;
+        top: 20%;
+        left: 25%;
+        margin-top: -50px;
+        margin-left: -50px;
+        padding: 40px;
+        padding-left: 100px;
+        padding-right: 100px;
+        width: 650px;
+        height: 600px;
+      }
+      .letter {
+        background-color: white;
+        padding: 40px;
+      }
+      .greetings, .logo, .letter_body {
+        margin-bottom: 50px;
+      }
+      a {
+        color: #9c43ff
+      }
+      a:visited {
+        color: #591db3
+      }
+      .buttonLink {
+        text-decoration: none;
+      }
+      .button {
+        background: #3c769c;
+        padding: 13px 23px;
+        width: 150px;
+        font-size: 16px;
+        border-radius: 5px;
+        cursor: pointer;
+        color: white;
+        outline: 0;
+        border: 0;
+        margin: 0 auto;
+        align-items: center;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="letter-wrapper">
+      <div class="letter">
+        <div class="letter_body">
+          {% block content %} {% endblock %}
+        </div>
+        <div class="closing">
+          <p>
+            Best Regards,<br>
+            The Predishun Team
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
