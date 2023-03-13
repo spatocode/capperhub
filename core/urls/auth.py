@@ -2,7 +2,7 @@ from django.urls import path, re_path
 from dj_rest_auth.registration.views import VerifyEmailView
 from dj_rest_auth.views import (
     LoginView, LogoutView, PasswordResetConfirmView,
-    PasswordResetView
+    PasswordResetView, PasswordChangeView
 )
 from core.views import UserAccountRegisterView, CustomConfirmEmailView
 
@@ -19,4 +19,6 @@ urlpatterns = [
     path('password-reset', PasswordResetView.as_view()),
     path('password-reset-confirm/<uidb64>/<token>', PasswordResetConfirmView.as_view(),
         name='password_reset_confirm'),
+    path('password/change', PasswordChangeView.as_view(),
+        name='password_change'),
 ]
