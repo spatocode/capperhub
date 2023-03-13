@@ -44,10 +44,6 @@ class CsrfExemptSessionAuthentication(authentication.SessionAuthentication):
         return
 
 
-class EmailTokenObtainPairView(TokenObtainPairView):
-    serializer_class = CustomTokenObtainPairSerializer
-
-
 class UserAccountRegisterView(RegisterView):
     serializer_class = UserAccountRegisterSerializer
 
