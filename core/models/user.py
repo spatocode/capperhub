@@ -44,7 +44,7 @@ class UserAccount(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     display_name = models.CharField(default="", max_length=50)
     bio = models.TextField(default="")
-    country = CountryField(default="")
+    country = CountryField(default="", blank=True, blank_label="(Select country)")
     phone_number = models.CharField(null=True, unique=True, max_length=22)
     pricing = models.ForeignKey('core.Pricing', on_delete=models.PROTECT, null=True)
     wallet = models.ForeignKey(Wallet, on_delete=models.PROTECT, null=True, related_name='wallet_owner')

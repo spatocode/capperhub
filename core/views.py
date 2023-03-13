@@ -27,7 +27,7 @@ from core.serializers import (
     CompetitionSerializer, SportSerializer, MarketSerializer, PlaySlipSerializer
 )
 from core.models.user import UserAccount, Wallet, Pricing
-from core.models.transaction import Transaction
+from core.models.transaction import Transaction, Currency
 from core.models.play import Play, PlaySlip
 from core.models.wager import SportsWager, SportsWagerChallenge
 from core.models.games import SportsGame, Sport, Competition, Team, Market
@@ -56,10 +56,10 @@ class UserAccountRegisterView(RegisterView):
         user.is_active = False
         user.save()
         user_account = user.useraccount
-        display_name = serializer.data.get('display_name')
-        wallet = Wallet.objects.create()
+        user_account.display_name = serializer.data.get('display_name')
+        user_account.country = serializer.data.get('country')
+        wallet = Wallet.objects.create(currency=Currency.objects.get(country=user_account.country))
         pricing = Pricing.objects.create()
-        user_account.display_name = display_name
         user_account.wallet = wallet
         user_account.pricing = pricing
         user_account.save()
