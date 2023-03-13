@@ -49,8 +49,6 @@ class UserAccountRegisterView(RegisterView):
 
     def perform_create(self, serializer):
         user = super().perform_create(serializer)
-        user.is_active = False
-        user.save()
         user_account = user.useraccount
         user_account.display_name = serializer.data.get('display_name')
         user_account.country = serializer.data.get('country')
@@ -60,15 +58,6 @@ class UserAccountRegisterView(RegisterView):
         user_account.pricing = pricing
         user_account.save()
         return user
-
-
-class CustomConfirmEmailView(ConfirmEmailView):
-    def post(self, *args, **kwargs):
-        redirect = super().post(*args, **kwargs)
-        user = self.object.email_address.user
-        user.is_active = True
-        user.save()
-        return redirect
 
 
 @permission_classes((permissions.IsAuthenticated,))
