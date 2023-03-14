@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 import os
+import logging.config
+from django.utils.log import DEFAULT_LOGGING
 from pathlib import Path
 import environ
 from datetime import timedelta
@@ -26,6 +28,9 @@ root = environ.Path(__file__) - 2
 dotenv = root(os.environ.get('dotenv', '.env'))
 if os.path.exists(dotenv):
     environ.Env.read_env(dotenv)
+
+# Create a directory for storing the log if necessary
+os.makedirs(os.path.join(root, 'log'), mode=0o755, exist_ok=True)
 
 SECRET_KEY = os.environ.get("SECRET_KEY") or 'cdhj6q8r&68+0n@l*t9&s$r-!&1%n=uq4x2i(v72ua=23df4dd567d/d89t24,nl0m.s33si&++='
 
@@ -55,6 +60,8 @@ INSTALLED_APPS = [
     'dj_rest_auth.registration',
     'allauth.socialaccount',
     'corsheaders',
+    'django_redis',
+    'debug_toolbar',
     'channels',
     'core',
 ]
@@ -81,6 +88,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+]
+
+INTERNAL_IPS = [
+    "127.0.0.1",
 ]
 
 REST_FRAMEWORK = {
@@ -99,6 +111,10 @@ REST_AUTH = {
     'JWT_AUTH_COOKIE': 'predishun-auth',
     'JWT_AUTH_REFRESH_COOKIE': 'predishun-refresh',
     'PASSWORD_RESET_SERIALIZER': 'core.serializers.CustomPasswordResetSerializer',
+}
+
+DEBUG_TOOLBAR_CONFIG = {
+    'SHOW_TOOLBAR_CALLBACK': lambda _request: DEBUG
 }
 
 AUTHENTICATION_BACKENDS = [
@@ -142,9 +158,71 @@ CORS_ALLOWED_ORIGINS = [
     'http://predishun.com',
 ]
 
+if os.environ.get('DEBUG') != '1':
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'verbose': {
+                'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+            },
+            'simple': {
+                'format': '%(levelname)s %(message)s'
+            },
+        },
+        'handlers': {
+            'file': {
+                'level': 'DEBUG',
+                'class': 'logging.handlers.RotatingFileHandler',
+                'filename': 'log/debug.log',
+                'maxBytes' : 1024*1024*10,
+                'backupCount' : 10,
+                'formatter': 'verbose',
+            },
+            'console': {  # allow werkzeug debugger in runserver_plus to log console
+                'level': 'DEBUG',
+                'class': 'logging.StreamHandler',
+            },
+        },
+        'loggers': {
+            'django': {  # for all django-internal messages
+                'handlers': ['console', 'file'],
+                'level': 'ERROR',
+                'propagate': True,
+            },
+            'django.db.backends': {  # for database-related messages
+                'handlers': ['file'],
+                'level': 'DEBUG',
+            },
+            'debug': {
+                'handlers': ['file'],
+                'level': 'DEBUG',
+                'propagate': True,
+            },
+            'werkzeug': {  # allow werkzeug debugger in runserver_plus to log console
+                'handlers': ['console'],
+                'level': 'DEBUG',
+                'propagate': True,
+            }
+        },
+    }
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient"
+        },
+        "KEY_PREFIX": "predishun"
+    }
+}
+
 WSGI_APPLICATION = 'predishun.wsgi.application'
 
 ASGI_APPLICATION = 'predishun.asgi.application'
+
+CACHE_TTL = 15
 
 ACCOUNT_ADAPTER = 'core.adapter.CustomDefaultAccountAdapter'
 
