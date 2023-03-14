@@ -4,6 +4,8 @@ import pytz
 from datetime import datetime, timedelta
 from django.conf import settings
 from django.db.models import Count, Q
+from django.core.cache import cache
+from django.core.cache.backends.base import DEFAULT_TIMEOUT
 from rest_framework.decorators import permission_classes
 from rest_framework import authentication, permissions
 from rest_framework.views import APIView
@@ -74,10 +76,15 @@ class UserSubscriptionModelViewSet(ModelViewSet):
     def subscriptions(self, request):
         useraccount = self.request.user.useraccount
         sync_subscriptions(subscriber=useraccount.id)
-        subscriptions = Subscription.objects.filter(subscriber=useraccount.id, is_active=True).order_by("-subscription_date")
-        subscriptions_serializer = self.serializer_class(subscriptions, many=True)
-
-        return Response(subscriptions_serializer.data)
+        cache_key = f'{useraccount.id}__subscriptions'
+        if cache_key in cache:
+            data = cache.get(cache_key)
+        else:
+            subscriptions = Subscription.objects.filter(subscriber=useraccount.id, is_active=True).order_by("-subscription_date")
+            subscriptions_serializer = self.serializer_class(subscriptions, many=True)
+            data = subscriptions_serializer.data
+            cache.set(cache_key, data, DEFAULT_TIMEOUT)
+        return Response(data)
 
     def subscribers(self, request):
         useraccount = self.request.user.useraccount
@@ -245,7 +252,7 @@ class WebhookAPIView(ModelViewSet):
 
     def record_successful_deposit_transaction(request):
         data = request.data.get("data")
-        user = UserAccount.objects.get(user__email=data["customer"]["email"])
+        user = UserAccount.objects.select_related("wallet").get(user__email=data["customer"]["email"])
         wallet = user.wallet
         wallet.balance = wallet.balance + data.get("amount")
         wallet.authorizations = [data.get("authorization")] + wallet.authorizations
@@ -392,22 +399,28 @@ class PuntersAPIView(APIView):
     filter_class = UserAccountFilterSet
 
     def get(self, request, username=None):
-        user_ids = [user.id for user in UserAccount.objects.filter(
-                user__is_active=True
-            ) if user.is_punter]
-        filterset = self.filter_class(
-            data=request.query_params,
-            queryset=UserAccount.objects.filter(id__in=user_ids).exclude(
-                user__first_name=None,
-                user__last_name=None,
-                wallet=None,
-                phone_number=None,
-                ip_address=None
+        cache_key = 'punters'
+        if cache_key in cache:
+            data = cache.get(cache_key)
+        else:
+            user_ids = [user.id for user in UserAccount.objects.filter(
+                    user__is_active=True
+                ) if user.is_punter]
+            filterset = self.filter_class(
+                data=request.query_params,
+                queryset=UserAccount.objects.filter(id__in=user_ids).exclude(
+                    user__first_name=None,
+                    user__last_name=None,
+                    wallet=None,
+                    phone_number=None,
+                    ip_address=None
+                )
             )
-        )
-        serializer = UserAccountSerializer(filterset.qs, many=True)
+            serializer = UserAccountSerializer(filterset.qs, many=True)
+            data = serializer.data
+            cache.set(cache_key, data, timeout=DEFAULT_TIMEOUT)
 
-        return Response(serializer.data)
+        return Response(data)
 
 
 @permission_classes((permissions.AllowAny, IsOwnerOrReadOnly))
@@ -421,14 +434,20 @@ class UserAPIView(ModelViewSet):
             raise NotFoundError(detail="User not found")
 
     def get_account_owner(self, request):
-        user_account = UserAccount.objects.get(
-            user=request.user.id,
-            user__is_active=True
-        )
-        self.check_object_permissions(request, user_account.id)
-        serializer = OwnerUserAccountSerializer(user_account)
+        cache_key = f'{request.user.useraccount.id}_owner'
+        if cache_key in cache:
+            data = cache.get(cache_key)
+        else:
+            user_account = UserAccount.objects.get(
+                user=request.user.id,
+                user__is_active=True
+            )
+            self.check_object_permissions(request, user_account.id)
+            serializer = OwnerUserAccountSerializer(user_account)
+            data = serializer.data
+            cache.set(cache_key, data, timeout=settings.CACHE_TTL)
 
-        return Response(serializer.data)
+        return Response(data)
 
     def get_user(self, request, username=None):
         data = self.get_object(username)
@@ -454,9 +473,12 @@ class UserAPIView(ModelViewSet):
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        data = serializer.data
+        cache_key = f'{request.user.useraccount.id}_owner'
+        cache.set(cache_key, data, timeout=settings.CACHE_TTL)
         return Response({
             'message': 'User updated Successfully',
-            'data': serializer.data
+            'data': data
         })
 
 
@@ -673,7 +695,6 @@ class SportsWagerChallengeAPIView(APIView):
 
 @permission_classes((permissions.IsAuthenticated, IsOwnerOrReadOnly))
 class UserTransactionAPIView(APIView):
-
     def get_object(self, pk):
         try:
             return UserAccount.objects.get(pk=pk, user__is_active=True)
@@ -693,9 +714,15 @@ class TeamAPIView(ModelViewSet):
     serializer_class = TeamSerializer
 
     def get_queryset(self):
-        queryset = Team.objects.filter(
-            competition__name=self.request.query_params.get('competition')
-        )
+        cache_key = 'team'
+        if cache_key in cache:
+            data = cache.get(cache_key)
+        else:
+            queryset = Team.objects.filter(
+                competition__name=self.request.query_params.get('competition')
+            )
+            data = queryset
+            cache.set(cache_key, data, timeout=settings.CACHE_TTL)
         return queryset
 
 
@@ -704,8 +731,14 @@ class SportAPIView(ModelViewSet):
     serializer_class = SportSerializer
 
     def get_queryset(self):
-        queryset = Sport.objects.filter()
-        return queryset
+        cache_key = 'sport'
+        if cache_key in cache:
+            data = cache.get(cache_key)
+        else:
+            queryset = Sport.objects.filter()
+            data = queryset
+            cache.set(cache_key, data, timeout=settings.CACHE_TTL)
+        return data
 
 
 @permission_classes((permissions.IsAuthenticated,))
@@ -713,10 +746,16 @@ class CompetitionAPIView(ModelViewSet):
     serializer_class = CompetitionSerializer
 
     def get_queryset(self):
-        queryset = Competition.objects.filter(
-            sport__name=self.request.query_params.get('sport')
-        )
-        return queryset
+        cache_key = 'competition'
+        if cache_key in cache:
+            data = cache.get(cache_key)
+        else:
+            queryset = Competition.objects.filter(
+                sport__name=self.request.query_params.get('sport')
+            )
+            data = queryset
+            cache.set(cache_key, data, timeout=settings.CACHE_TTL)
+        return data
 
 
 @permission_classes((permissions.IsAuthenticated,))
@@ -724,7 +763,13 @@ class MarketAPIView(ModelViewSet):
     serializer_class = MarketSerializer
 
     def get_queryset(self):
-        queryset = Market.objects.filter(
-            sport__name=self.request.query_params.get('sport')
-        )
-        return queryset
+        cache_key = 'market'
+        if cache_key in cache:
+            data = cache.get(cache_key)
+        else:
+            queryset = Market.objects.filter(
+                sport__name=self.request.query_params.get('sport')
+            )
+            data = queryset
+            cache.set(cache_key, data, timeout=settings.CACHE_TTL)
+            return data
