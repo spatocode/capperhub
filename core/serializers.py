@@ -124,6 +124,9 @@ class OwnerUserAccountSerializer(serializers.ModelSerializer):
     premium_subscribers = serializers.ListField()
     subscription_issuers = serializers.ListField()
     full_name = serializers.CharField()
+    facebook = serializers.CharField(required=False, allow_blank=True)
+    twitter = serializers.CharField(required=False, allow_blank=True)
+    instagram = serializers.CharField(required=False, allow_blank=True)
     wallet = OwnerUserWalletSerializer()
     country = CountryField(name_only=True)
 
