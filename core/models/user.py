@@ -30,11 +30,12 @@ class Wallet(models.Model):
 
 
 class Pricing(models.Model):
-    amount = models.IntegerField(default=0)
+    amount = models.FloatField(default=0.00)
     percentage_discount = models.DecimalField(default=0.0, max_digits=19, decimal_places=10)
     last_update = models.DateTimeField(auto_now=True)
     free_features = ArrayField(models.CharField(max_length=50), default=default_free_features, size=7, null=True)
     premium_features = ArrayField(models.CharField(max_length=50), default=default_premium_features, size=7, null=True)
+    # play_frequency = models.CharField()
 
     def __str__(self):
         return f'{self.amount}'

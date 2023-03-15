@@ -28,6 +28,7 @@ class Play(models.Model):
     match_day = models.DateTimeField()
     result = models.CharField(max_length=10, null=True)
     status = models.PositiveIntegerField(choices=STATUS, default=PENDING)
+    # analysis = models.TextField(default="")
 
     def __str__(self):
         return f'{self.sports}-{self.slip.issuer.user.username}'

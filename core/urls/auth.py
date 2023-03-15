@@ -4,7 +4,7 @@ from dj_rest_auth.views import (
     LoginView, LogoutView, PasswordResetConfirmView,
     PasswordResetView, PasswordChangeView
 )
-from core.views import UserAccountRegisterView
+from core.views.auth import UserAccountRegisterView
 
 urlpatterns = [
     path('register', UserAccountRegisterView.as_view(), name='account_signup'),

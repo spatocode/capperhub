@@ -1,6 +1,6 @@
 from django.urls import path
-from core.views import (
-    UserAPIView, UserSubscriptionModelViewSet, P2PSportsGameAPIView, PlayAPIView,
+from core.views.core import (
+    UserSubscriptionModelViewSet, P2PSportsGameAPIView, PlayAPIView,
     SportsWagerAPIView, UserTransactionAPIView, SportsWagerChallengeAPIView,
     PuntersAPIView, SportAPIView, TeamAPIView, CompetitionAPIView, MarketAPIView
 )
@@ -19,15 +19,6 @@ subscribe_user = UserSubscriptionModelViewSet.as_view({
 
 unsubscribe_user = UserSubscriptionModelViewSet.as_view({
     'post': 'unsubscribe'
-})
-
-account_owner = UserAPIView.as_view({
-    'get': 'get_account_owner'
-})
-
-get_user = UserAPIView.as_view({
-    'get': 'get_user',
-    'put': 'update_user',
 })
 
 plays = PlayAPIView.as_view({

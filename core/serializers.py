@@ -20,6 +20,7 @@ from core.models.wager import SportsWager, SportsWagerChallenge
 from core.models.games import SportsGame, Team, Sport, Competition, Market
 from core.models.transaction import Currency, Transaction
 from core.models.subscription import Subscription
+from core.models.misc import TermsOfUse, PrivacyPolicy, Feedback, Waitlist
 
 class UserAccountRegisterSerializer(RegisterSerializer):
     username = serializers.CharField(required=False)
@@ -309,6 +310,35 @@ class MarketSerializer(serializers.ModelSerializer):
     class Meta:
         model = Market
         fields = '__all__'
+
+
+class PrivacyPolicySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = PrivacyPolicy
+        fields = '__all__'
+
+
+class TermsOfUseSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TermsOfUse
+        fields = '__all__'
+
+
+class WaitlistSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Waitlist
+        fields = '__all__'
+
+
+class FeedbackSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Feedback
+        fields = '__all__'
+
 
 class CustomAllAuthPasswordResetForm(AllAuthPasswordResetForm):
     def save(self, request, **kwargs):

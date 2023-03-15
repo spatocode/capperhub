@@ -1,5 +1,5 @@
 from django.urls import path
-from core.views import UserAPIView, UserWalletAPIView, UserPricingAPIView
+from core.views.user import UserAPIView, UserWalletAPIView, UserPricingAPIView
 
 account_owner = UserAPIView.as_view({
     'get': 'get_account_owner'
