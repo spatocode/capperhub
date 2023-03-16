@@ -199,22 +199,21 @@ class PuntersAPIView(APIView):
         if cache_key in cache:
             data = cache.get(cache_key)
         else:
-            user_ids = [user.id for user in UserAccount.objects.filter(
-                    user__is_active=True
-                ) if user.is_punter]
             filterset = self.filter_class(
-                data=request.query_params,
-                queryset=UserAccount.objects.filter(id__in=user_ids).exclude(
-                    user__first_name=None,
-                    user__last_name=None,
-                    wallet=None,
-                    phone_number=None,
-                    ip_address=None
+            data=request.query_params,
+            queryset=UserAccount.objects.filter(
+                playslip__date_added__gt=datetime.utcnow().replace(tzinfo=pytz.UTC)-timedelta(days=14)
+            ).distinct().exclude(
+                user__first_name=None,
+                user__last_name=None,
+                wallet=None,
+                phone_number=None,
+                ip_address=None
                 )
             )
             serializer = UserAccountSerializer(filterset.qs, many=True)
             data = serializer.data
-            cache.set(cache_key, data, timeout=DEFAULT_TIMEOUT)
+            cache.set(cache_key, data, timeout=settings.CACHE_TTL)
 
         return Response(data)
 
