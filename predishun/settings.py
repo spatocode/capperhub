@@ -39,7 +39,7 @@ DEBUG = int(os.environ.get("DEBUG", 1))
 
 # 'ALLOWED_HOSTS' should be a single string of hosts with a space between each.
 # For example: 'ALLOWED_HOSTS=localhost 127.0.0.1 [::1]'
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]']
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS").split(',')
 
 # Application definition
 
