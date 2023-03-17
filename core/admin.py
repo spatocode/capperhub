@@ -5,6 +5,7 @@ from core.models.play import Play, PlaySlip
 from core.models.wager import SportsWager, SportsWagerChallenge
 from core.models.games import SportsGame, Sport, Competition, Team, Market
 from core.models.subscription import Subscription
+from core.models.misc import Waitlist, Feedback, TermsOfUse, PrivacyPolicy
 
 class UserAccountAdmin(admin.ModelAdmin):
     list_display = ['username', 'email', 'first_name', 'last_name', 'display_name', 'country', 'phone_number']
@@ -80,6 +81,17 @@ class TeamAdmin(admin.ModelAdmin):
 class MarketAdmin(admin.ModelAdmin):
     list_display = ['name']
 
+class TermsOfUseAdmin(admin.ModelAdmin):
+    list_display = ['text', 'last_update']
+
+class PrivacyPolicyAdmin(admin.ModelAdmin):
+    list_display = ['text', 'last_update']
+
+class FeedbackAdmin(admin.ModelAdmin):
+    list_display = ['email', 'message', 'date_added']
+
+class WaitlistAdmin(admin.ModelAdmin):
+    list_display = ['email', 'date_added']
 
 admin.site.register(UserAccount, UserAccountAdmin)
 admin.site.register(Play, PlayAdmin)
@@ -96,3 +108,7 @@ admin.site.register(Wallet, WalletAdmin)
 admin.site.register(Subscription, SubscriptionAdmin)
 admin.site.register(Currency, CurrencyAdmin)
 admin.site.register(Transaction, TransactionAdmin)
+admin.site.register(TermsOfUse, TermsOfUseAdmin)
+admin.site.register(PrivacyPolicy, PrivacyPolicyAdmin)
+admin.site.register(Feedback, FeedbackAdmin)
+admin.site.register(Waitlist, WaitlistAdmin)
