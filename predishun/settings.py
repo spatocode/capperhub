@@ -207,6 +207,10 @@ if os.environ.get('DEBUG') != '1':
         },
     }
 
+    CSRF_COOKIE_SECURE = True
+
+    SESSION_COOKIE_SECURE = True
+
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
