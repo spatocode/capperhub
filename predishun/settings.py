@@ -262,7 +262,7 @@ EMAIL_PORT = 587
 
 
 # Percentage charge for tipster's pricing
-PERCENTAGE_CHARGE = 0.15
+PERCENTAGE_CHARGE = os.environ.get("PERCENTAGE_CHARGE", 0.15)
 
 
 # Database

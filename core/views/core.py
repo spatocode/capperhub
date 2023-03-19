@@ -39,7 +39,7 @@ class UserSubscriptionModelViewSet(ModelViewSet):
 
     def get_object(self, pk):
         try:
-            return UserAccount.objects.select_related('pricing').get(pk=pk, user__is_active=True)
+            return UserAccount.objects.select_related('pricing', 'wallet').get(pk=pk, user__is_active=True)
         except UserAccount.DoesNotExist:
             raise NotFoundError(detail="User not found")
 
@@ -116,12 +116,23 @@ class UserSubscriptionModelViewSet(ModelViewSet):
 
         return transaction
 
+    def sync_wallet_records(self, amount, **kwargs):
+        charge_fee = settings.PERCENTAGE_CHARGE * amount
+        amount_after_charge = amount - charge_fee
+
+        tipster_wallet = kwargs.get("tipster_wallet")
+        tipster_wallet.balance = tipster_wallet.balance + amount_after_charge
+        tipster_wallet.save()
+
+        subscriber_wallet = kwargs.get("subscriber_wallet")
+        subscriber_wallet.balance = subscriber_wallet.balance - amount
+        subscriber_wallet.save()
+
     def subscribe(self, request):
         subscription_type = request.data.get('type')
         tipster_id = request.data.get('tipster')
         period = request.data.get('period')
         amount = request.data.get('amount')
-        issuer = request.data.get('issuer')
         subscriber = request.user.useraccount
         tipster = self.get_object(tipster_id)
 
@@ -134,7 +145,6 @@ class UserSubscriptionModelViewSet(ModelViewSet):
         if subscription_type == Subscription.PREMIUM:
             if subscriber.wallet.balance < int(amount):
                 raise InsuficientFundError(detail="You don't have sufficient funds to subscribe")
-            self.record_transaction(subscriber, amount=amount, issuer=issuer, currency=tipster.currency)
 
         subscription = Subscription.objects.get_or_create(
             type=subscription_type,
@@ -150,6 +160,9 @@ class UserSubscriptionModelViewSet(ModelViewSet):
         if previous_subscription and previous_subscription.type == Subscription.FREE and subscription_type == Subscription.PREMIUM:
             previous_subscription.is_active = False
             previous_subscription.save()
+
+        if subscription_type == Subscription.PREMIUM:
+            self.sync_wallet_records(amount, tipster_wallet=tipster.wallet, subscriber_wallet=subscriber.wallet)
 
         serializer = self.serializer_class(instance=subscription[0])
         ws.notify_update_user_subscribe(serializer.data)
