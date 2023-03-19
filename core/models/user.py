@@ -22,7 +22,7 @@ class Wallet(models.Model):
     withheld = models.FloatField(default=0.00)
     bank_name = models.CharField(max_length=50, default="", blank=True)
     bank_account_number = models.CharField(max_length=50, default="", blank=True)
-    authorizations = ArrayField(models.JSONField(), size=5, default=list)
+    authorizations = ArrayField(models.JSONField(), size=5, default=list, blank=True)
     receipent_code = models.CharField(max_length=50, default="", blank=True)
 
     def __str__(self) -> str:
@@ -52,7 +52,7 @@ class UserAccount(models.Model):
     instagram_handle = models.CharField(default="", max_length=22, blank=True)
     pricing = models.ForeignKey('core.Pricing', on_delete=models.PROTECT, null=True)
     wallet = models.ForeignKey(Wallet, on_delete=models.PROTECT, null=True, related_name='wallet_owner')
-    ip_address = models.GenericIPAddressField(null=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
     last_updated = models.DateTimeField(auto_now=True, editable=False)
 
     def __str__(self):

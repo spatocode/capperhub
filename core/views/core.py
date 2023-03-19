@@ -163,6 +163,7 @@ class UserSubscriptionModelViewSet(ModelViewSet):
 
         if subscription_type == Subscription.PREMIUM:
             self.sync_wallet_records(amount, tipster_wallet=tipster.wallet, subscriber_wallet=subscriber.wallet)
+            self.record_transaction(subscriber, amount=amount, currency=tipster.currency)
 
         serializer = self.serializer_class(instance=subscription[0])
         ws.notify_update_user_subscribe(serializer.data)
