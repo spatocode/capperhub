@@ -102,7 +102,6 @@ class UserSubscriptionModelViewSet(ModelViewSet):
 
     def record_transaction(self, subscriber, **kwargs):
         amount = kwargs.get('amount')
-        balance = subscriber.wallet.balance - amount
         transaction = Transaction.objects.create(
             type=Transaction.PURCHASE,
             user=subscriber,
@@ -111,7 +110,7 @@ class UserSubscriptionModelViewSet(ModelViewSet):
             amount=amount,
             currency=kwargs.get('currency'),
             status=Transaction.SUCCEED,
-            balance=balance 
+            balance=kwargs.get("subscriber_balance")
         )
 
         return transaction
@@ -125,7 +124,7 @@ class UserSubscriptionModelViewSet(ModelViewSet):
         tipster_wallet.save()
 
         subscriber_wallet = kwargs.get("subscriber_wallet")
-        subscriber_wallet.balance = subscriber_wallet.balance - amount
+        subscriber_wallet.balance = kwargs.get("subscriber_balance")
         subscriber_wallet.save()
 
     def subscribe(self, request):
@@ -150,20 +149,22 @@ class UserSubscriptionModelViewSet(ModelViewSet):
             type=subscription_type,
             issuer=tipster,
             subscriber=subscriber,
-            is_active=True
+            is_active=True,
         )
 
         if period:
             subscription[0].period = period
             subscription[0].expiration_date = datetime.utcnow().replace(tzinfo=pytz.UTC) + timedelta(days=period)
+            subscription[0].save()
 
         if previous_subscription and previous_subscription.type == Subscription.FREE and subscription_type == Subscription.PREMIUM:
             previous_subscription.is_active = False
             previous_subscription.save()
 
         if subscription_type == Subscription.PREMIUM:
-            self.sync_wallet_records(amount, tipster_wallet=tipster.wallet, subscriber_wallet=subscriber.wallet)
-            self.record_transaction(subscriber, amount=amount, currency=tipster.wallet.currency)
+            subscriber_balance = subscriber.wallet.balance - amount
+            self.sync_wallet_records(amount, tipster_wallet=tipster.wallet, subscriber_wallet=subscriber.wallet, subscriber_balance=subscriber_balance)
+            self.record_transaction(subscriber, amount=amount, currency=tipster.wallet.currency, subscriber_balance=subscriber_balance)
 
         serializer = self.serializer_class(instance=subscription[0])
         ws.notify_update_user_subscribe(serializer.data)
