@@ -53,7 +53,7 @@ class UserSubscriptionModelViewSet(ModelViewSet):
             subscriptions = Subscription.objects.filter(subscriber=useraccount.id, is_active=True).order_by("-subscription_date")
             subscriptions_serializer = self.serializer_class(subscriptions, many=True)
             data = subscriptions_serializer.data
-            cache.set(cache_key, data, DEFAULT_TIMEOUT)
+            cache.set(cache_key, data, timeout=settings.CACHE_TTL)
         return Response(data)
 
     def subscribers(self, request):
@@ -161,16 +161,22 @@ class UserSubscriptionModelViewSet(ModelViewSet):
             previous_subscription.is_active = False
             previous_subscription.save()
 
+        subscriber_balance = subscriber.wallet.balance - amount
         if subscription_type == Subscription.PREMIUM:
-            subscriber_balance = subscriber.wallet.balance - amount
             self.sync_wallet_records(amount, tipster_wallet=tipster.wallet, subscriber_wallet=subscriber.wallet, subscriber_balance=subscriber_balance)
             self.record_transaction(subscriber, amount=amount, currency=tipster.wallet.currency, subscriber_balance=subscriber_balance)
 
-        serializer = self.serializer_class(instance=subscription[0])
-        ws.notify_update_user_subscribe(serializer.data)
+        data = self.serializer_class(instance=subscription[0]).data
+        cache_key = f'{subscriber.id}__subscriptions'
+        if cache_key in cache:
+            cached_data = cache.get(cache_key)
+            cached_data.insert(0, data)
+            cache.set(cache_key, cached_data)
+
+        ws.notify_update_user_subscribe(data)
         return Response({
             "message": "Subscribed successfully",
-            "data": serializer.data
+            "data": data
         })
 
     def unsubscribe(self, request, pk=None):

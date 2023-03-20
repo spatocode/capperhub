@@ -226,7 +226,7 @@ WSGI_APPLICATION = 'predishun.wsgi.application'
 
 ASGI_APPLICATION = 'predishun.asgi.application'
 
-CACHE_TTL = 15
+CACHE_TTL = 15 * 60
 
 ACCOUNT_ADAPTER = 'core.adapter.CustomDefaultAccountAdapter'
 
