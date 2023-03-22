@@ -26,7 +26,7 @@ from core.exceptions import PricingError, InsuficientFundError, NotFoundError
 from core.shared.model_utils import generate_reference_code
 
 @permission_classes((permissions.AllowAny, IsOwnerOrReadOnly))
-class UserAPIView(ModelViewSet):
+class UserAccountOwnerAPIView(ModelViewSet):
     filter_class = UserAccountFilterSet
 
     def get_object(self, username):
@@ -50,6 +50,17 @@ class UserAPIView(ModelViewSet):
             cache.set(cache_key, data, timeout=settings.CACHE_TTL)
 
         return Response(data)
+
+
+@permission_classes((permissions.AllowAny, IsOwnerOrReadOnly))
+class UserAPIView(ModelViewSet):
+    filter_class = UserAccountFilterSet
+
+    def get_object(self, username):
+        try:
+            return UserAccount.objects.select_related('user').get(user__username=username, user__is_active=True)
+        except UserAccount.DoesNotExist:
+            raise NotFoundError(detail="User not found")
 
     def get_user(self, request, username=None):
         data = self.get_object(username)
@@ -87,15 +98,15 @@ class UserAPIView(ModelViewSet):
 @permission_classes((permissions.IsAuthenticated,))
 class UserPricingAPIView(APIView):
 
-    def post(self, request):
+    def post(self, request, format=None):
         user_account = request.user.useraccount
         # Make sure pricing can be updated once in 60days
-        if user_account.pricing and int(request.data.get("amount")) != user_account.pricing.amount:
+        if user_account.pricing and float(request.data.get("amount")) != user_account.pricing.amount:
             date_due_for_update = user_account.pricing.last_update + timedelta(days=60)
             if date_due_for_update > datetime.utcnow().replace(tzinfo=pytz.UTC):
                 raise PricingError(
                     detail='Pricing can only be updated once in 60 days',
-                    code=400
+                    code=403
                 )
         if not user_account.wallet:
             serializer = UserPricingSerializer(data=request.data)
@@ -134,9 +145,10 @@ class UserWalletAPIView(ModelViewSet):
         if userwallet.balance < int(amount):
             raise InsuficientFundError(detail="You don't have sufficient fund to withdraw")
         type = "nuban" if user.country.name == "Nigeria" else "mobile_money"
+        name = request.data.get("name")
         tr_response = TransferRecipient.create(
             type=type,
-            name=request.data.get("name"),
+            name=name,
             account_number=request.data.get("account_number"),
             bank_code=request.data.get("bank_code"),
             currency=userwallet.currency.code,
@@ -151,7 +163,7 @@ class UserWalletAPIView(ModelViewSet):
                 source="balance",
                 recipient=recipient_code,
                 amount=amount,
-                reason="Predishun Gaming Ltd. Withdrawal",
+                reason="Predishun Withdrawal",
                 reference=reference
             )
             if response.get("status") == True:
@@ -168,6 +180,16 @@ class UserWalletAPIView(ModelViewSet):
                     balance=userwallet.balance,
                     user=user
                 )
+                splited_name = name.split(' ')
+                if len(splited_name) > 1:
+                    first_name = splited_name[0]
+                    last_name = splited_name[1:]
+                    request.user.first_name = first_name
+                    request.user.last_name = last_name
+                    request.user.save()
+                else:
+                    request.user.first_name = name
+                    request.user.save()
                 return Response(response)
 
         return Response(tr_response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -183,24 +205,3 @@ class UserWalletAPIView(ModelViewSet):
         )
         return Response(response)
 
-    def update_bank_details(self, request):
-        user_account = request.user.useraccount
-        first_name = request.data.get("first_name")
-        last_name = request.data.get("last_name")
-
-        if not user_account.wallet:
-            serializer = OwnerUserWalletSerializer(data=request.data)
-        else:
-            serializer = OwnerUserWalletSerializer(instance=user_account.wallet, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user_wallet = serializer.save()
-        user_account.wallet = user_wallet
-        if  first_name and last_name:
-            user_account.user.first_name = first_name
-            user_account.user.last_name = last_name
-        user_account.user.save()
-        user_account.save()
-        return Response({
-            'message': 'User Bank Details Added Successfully',
-            'data': serializer.data
-        })

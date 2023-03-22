@@ -17,7 +17,7 @@ def default_premium_features():
 
 
 class Wallet(models.Model):
-    currency = models.ForeignKey('core.Currency', on_delete=models.PROTECT, null=True)
+    currency = models.ForeignKey('core.Currency', on_delete=models.PROTECT)
     balance = models.FloatField(default=0.00)
     withheld = models.FloatField(default=0.00)
     bank_name = models.CharField(max_length=50, default="", blank=True)
@@ -30,11 +30,11 @@ class Wallet(models.Model):
 
 
 class Pricing(models.Model):
-    amount = models.FloatField(default=0.00)
+    amount = models.DecimalField(default=0.00, max_digits=15, decimal_places=2)
     percentage_discount = models.DecimalField(default=0.0, max_digits=19, decimal_places=10)
     last_update = models.DateTimeField(auto_now=True)
-    free_features = ArrayField(models.CharField(max_length=50), default=default_free_features, size=7, null=True)
-    premium_features = ArrayField(models.CharField(max_length=50), default=default_premium_features, size=7, null=True)
+    free_features = ArrayField(models.CharField(max_length=50), default=default_free_features, size=7)
+    premium_features = ArrayField(models.CharField(max_length=50), default=default_premium_features, size=7)
     # play_frequency = models.CharField()
 
     def __str__(self):
@@ -50,8 +50,8 @@ class UserAccount(models.Model):
     twitter_handle = models.CharField(default="", max_length=22, blank=True)
     facebook_handle = models.CharField(default="", max_length=22, blank=True)
     instagram_handle = models.CharField(default="", max_length=22, blank=True)
-    pricing = models.ForeignKey('core.Pricing', on_delete=models.PROTECT, null=True)
-    wallet = models.ForeignKey(Wallet, on_delete=models.PROTECT, null=True, related_name='wallet_owner')
+    pricing = models.ForeignKey('core.Pricing', on_delete=models.PROTECT)
+    wallet = models.ForeignKey(Wallet, on_delete=models.PROTECT, related_name='wallet_owner')
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     last_updated = models.DateTimeField(auto_now=True, editable=False)
 
@@ -126,7 +126,7 @@ class UserAccount(models.Model):
 
     @receiver(post_save, sender=User)
     def create_user_profile(sender, instance, created, **kwargs):
-        if created:
+        if created and not kwargs.get("raw", False):
             UserAccount.objects.create(user=instance)
 
     @receiver(post_save, sender=User)
