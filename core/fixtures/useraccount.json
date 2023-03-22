@@ -158,7 +158,7 @@
         "pricing": 81,
         "wallet": 71,
         "ip_address": null,
-        "last_updated": "2023-03-15T18:52:13.648Z"
+        "last_updated": "2023-03-22T12:47:14.784Z"
     }
 },
 {
@@ -227,8 +227,8 @@
         "twitter_handle": "",
         "facebook_handle": "",
         "instagram_handle": "",
-        "pricing": null,
-        "wallet": null,
+        "pricing": 3,
+        "wallet": 3,
         "ip_address": null,
         "last_updated": "2023-03-19T10:20:38.914Z"
     }

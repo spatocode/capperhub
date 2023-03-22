@@ -1,23 +1,23 @@
 from django.urls import path
 from core.views.core import (
-    UserSubscriptionModelViewSet, P2PSportsGameAPIView, PlayAPIView,
+    UserSubscriptionView, P2PSportsGameAPIView, PlayAPIView,
     SportsWagerAPIView, UserTransactionAPIView, SportsWagerChallengeAPIView,
     PuntersAPIView, SportAPIView, TeamAPIView, CompetitionAPIView, MarketAPIView
 )
 
-subscriptions = UserSubscriptionModelViewSet.as_view({
+subscriptions = UserSubscriptionView.as_view({
     'get': 'subscriptions'
 })
 
-subscribers = UserSubscriptionModelViewSet.as_view({
+subscribers = UserSubscriptionView.as_view({
     'get': 'subscribers'
 })
 
-subscribe_user = UserSubscriptionModelViewSet.as_view({
+subscribe_user = UserSubscriptionView.as_view({
     'post': 'subscribe'
 })
 
-unsubscribe_user = UserSubscriptionModelViewSet.as_view({
+unsubscribe_user = UserSubscriptionView.as_view({
     'post': 'unsubscribe'
 })
 

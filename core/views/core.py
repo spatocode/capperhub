@@ -33,7 +33,7 @@ class CsrfExemptSessionAuthentication(authentication.SessionAuthentication):
 
 
 @permission_classes((permissions.IsAuthenticated,))
-class UserSubscriptionModelViewSet(ModelViewSet):
+class UserSubscriptionView(ModelViewSet):
     serializer_class = SubscriptionSerializer
     filter_class = SubscriptionFilterSet
 
@@ -180,7 +180,7 @@ class UserSubscriptionModelViewSet(ModelViewSet):
         })
 
     def unsubscribe(self, request, pk=None):
-        subscription_type = request.data.get('type')
+        subscription_type = int(request.data.get('type'))
         tipster_id = request.data.get('tipster')
         subscriber = request.user.useraccount
         tipster = self.get_object(tipster_id)

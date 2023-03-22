@@ -65,19 +65,15 @@ class UserAPIViewTest(APITestCase):
         self.assertEqual(actual, useraccount)
 
     def test_view_get_url_exists_at_desired_location(self):
-        useraccount = UserAccount.objects.get(id=3)
         useraccount2 = UserAccount.objects.get(id=2)
         url = reverse(self.API_URL, kwargs={'username': useraccount2.user.username})
-        self.client.force_authenticate(user=useraccount.user, token=self.user_jwt)
         response = self.client.get(url, format=self.test_format)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response['content-type'], 'application/json')
 
     def test_view_get_response_json(self):
-        useraccount = UserAccount.objects.get(id=3)
         useraccount2 = UserAccount.objects.get(id=2)
         url = reverse(self.API_URL, kwargs={'username': useraccount2.user.username})
-        self.client.force_authenticate(user=useraccount.user, token=self.user_jwt)
         response = self.client.get(url, format=self.test_format)
         self.assertEqual(response.json().get('id'), self.expected_data.get('id'))
 
