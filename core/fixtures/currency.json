@@ -1,0 +1,30 @@
+[
+{
+    "model": "core.currency",
+    "pk": "GHS",
+    "fields": {
+        "country": "GH"
+    }
+},
+{
+    "model": "core.currency",
+    "pk": "NGN",
+    "fields": {
+        "country": "NG"
+    }
+},
+{
+    "model": "core.currency",
+    "pk": "USD",
+    "fields": {
+        "country": "US"
+    }
+},
+{
+    "model": "core.currency",
+    "pk": "ZAR",
+    "fields": {
+        "country": "ZA"
+    }
+}
+]

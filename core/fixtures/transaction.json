@@ -1,0 +1,19 @@
+[
+{
+    "model": "core.transaction",
+    "pk": 51,
+    "fields": {
+        "type": 3,
+        "amount": 5890,
+        "balance": 94110,
+        "reference": "142JY3AM%TcFMYPW",
+        "payment_issuer": null,
+        "channel": null,
+        "status": 1,
+        "user": 98,
+        "currency": "NGN",
+        "time": "2023-03-19T10:22:49.554Z",
+        "last_update": "2023-03-19T10:53:11.503Z"
+    }
+}
+]

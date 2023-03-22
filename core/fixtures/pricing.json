@@ -1,0 +1,783 @@
+[
+{
+    "model": "core.pricing",
+    "pk": 2,
+    "fields": {
+        "amount": 5000.0,
+        "percentage_discount": "0.0500000000",
+        "last_update": "2023-02-26T23:24:22.147Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 3,
+    "fields": {
+        "amount": 7500.0,
+        "percentage_discount": "0.0200000000",
+        "last_update": "2022-02-25T14:27:28.916Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 15,
+    "fields": {
+        "amount": 3400.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2022-03-01T15:55:50.068Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 16,
+    "fields": {
+        "amount": 8400.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-01T15:56:13.718Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 17,
+    "fields": {
+        "amount": 5600.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-01T15:57:21.066Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 18,
+    "fields": {
+        "amount": 500.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-01T15:59:07.270Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 19,
+    "fields": {
+        "amount": 5890.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-01T16:00:29.762Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 21,
+    "fields": {
+        "amount": 9000.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-01T16:02:56.416Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 22,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-11T19:20:28.248Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 23,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-11T19:21:18.938Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 24,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-11T19:23:03.043Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 25,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-11T19:24:01.036Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 26,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-11T19:26:24.279Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 27,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-11T19:40:13.454Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 28,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T08:54:28.768Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 29,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T10:57:39.781Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 30,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T11:01:50.089Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 31,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T11:12:15.064Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 32,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T11:17:38.665Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 33,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T11:26:13.457Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 34,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T11:29:05.760Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 35,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T11:43:17.218Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 36,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T11:53:47.633Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 37,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T12:13:27.625Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 38,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T12:55:44.580Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 39,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T13:06:06.171Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 40,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T13:07:41.073Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 41,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T13:20:19.885Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 42,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T13:24:30.215Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 43,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T13:29:26.093Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 44,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T13:35:22.306Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 45,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T13:46:38.013Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 46,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T13:48:43.270Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 47,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T13:52:46.255Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 48,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T13:53:15.488Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 49,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T13:56:28.860Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 50,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T14:04:36.029Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 51,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T17:16:47.480Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 52,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T17:25:38.550Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 53,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T17:29:58.876Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 54,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T17:59:47.874Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 55,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T18:03:08.942Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 56,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T18:05:29.294Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 57,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T18:12:16.681Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 58,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T19:04:11.973Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 59,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T21:25:07.137Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 60,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T21:48:22.831Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 61,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T21:50:42.045Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 62,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T22:14:32.140Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 63,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T22:18:38.189Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 64,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T22:34:31.686Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 65,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T23:02:52.891Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 66,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T23:18:15.756Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 67,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-12T23:29:35.978Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 68,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-13T08:57:03.040Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 69,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-13T09:21:23.195Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 70,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-13T10:25:54.674Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 71,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-13T10:28:06.461Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 72,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-13T10:30:02.322Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 73,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-13T10:34:20.349Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 74,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-13T10:44:38.650Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 75,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-13T10:46:14.281Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 76,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-13T10:51:43.775Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 77,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-13T10:57:58.427Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 78,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-13T11:00:02.084Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 79,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-13T11:00:53.052Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 80,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-13T11:03:16.465Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 81,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-13T11:07:24.301Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 82,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-13T20:30:19.478Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 83,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-13T20:32:02.070Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+},
+{
+    "model": "core.pricing",
+    "pk": 84,
+    "fields": {
+        "amount": 0.0,
+        "percentage_discount": "0E-10",
+        "last_update": "2023-03-13T21:13:09.750Z",
+        "free_features": "[\"Free plays forever\"]",
+        "premium_features": "[\"Carefully picked plays\"]"
+    }
+}
+]

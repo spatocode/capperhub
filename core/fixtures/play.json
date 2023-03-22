@@ -1,0 +1,182 @@
+[
+{
+    "model": "core.play",
+    "pk": 82,
+    "fields": {
+        "slip": 35,
+        "sports": "Soccer",
+        "competition": "UEFA Europa League",
+        "home_team": "Man United",
+        "away_team": "Arsenal",
+        "prediction": "1",
+        "match_day": "2023-03-19T23:51:00Z",
+        "result": null,
+        "status": 2
+    }
+},
+{
+    "model": "core.play",
+    "pk": 83,
+    "fields": {
+        "slip": 35,
+        "sports": "Soccer",
+        "competition": "English Premier League",
+        "home_team": "Chelsea",
+        "away_team": "Liverpool",
+        "prediction": "X",
+        "match_day": "2023-03-19T23:51:00Z",
+        "result": null,
+        "status": 2
+    }
+},
+{
+    "model": "core.play",
+    "pk": 84,
+    "fields": {
+        "slip": 36,
+        "sports": "Soccer",
+        "competition": "English Premier League",
+        "home_team": "Man United",
+        "away_team": "Chelsea",
+        "prediction": "1",
+        "match_day": "2023-03-23T23:59:00Z",
+        "result": null,
+        "status": 2
+    }
+},
+{
+    "model": "core.play",
+    "pk": 85,
+    "fields": {
+        "slip": 37,
+        "sports": "Soccer",
+        "competition": "English Premier League",
+        "home_team": "Chelsea",
+        "away_team": "Bournemouth",
+        "prediction": "2",
+        "match_day": "2023-03-11T00:01:00Z",
+        "result": null,
+        "status": 2
+    }
+},
+{
+    "model": "core.play",
+    "pk": 86,
+    "fields": {
+        "slip": 38,
+        "sports": "Soccer",
+        "competition": "English Premier League",
+        "home_team": "Man United",
+        "away_team": "Arsenal",
+        "prediction": "1",
+        "match_day": "2023-03-18T00:02:00Z",
+        "result": null,
+        "status": 2
+    }
+},
+{
+    "model": "core.play",
+    "pk": 87,
+    "fields": {
+        "slip": 39,
+        "sports": "Soccer",
+        "competition": "UEFA Europa League",
+        "home_team": "Arsenal",
+        "away_team": "Man United",
+        "prediction": "2",
+        "match_day": "2023-03-25T00:17:00Z",
+        "result": null,
+        "status": 2
+    }
+},
+{
+    "model": "core.play",
+    "pk": 88,
+    "fields": {
+        "slip": 40,
+        "sports": "Soccer",
+        "competition": "English Premier League",
+        "home_team": "Chelsea",
+        "away_team": "Bournemouth",
+        "prediction": "2",
+        "match_day": "2023-03-25T00:19:00Z",
+        "result": null,
+        "status": 2
+    }
+},
+{
+    "model": "core.play",
+    "pk": 89,
+    "fields": {
+        "slip": 41,
+        "sports": "Soccer",
+        "competition": "English Premier League",
+        "home_team": "Leeds United",
+        "away_team": "Chelsea",
+        "prediction": "1",
+        "match_day": "2023-03-19T00:41:00Z",
+        "result": null,
+        "status": 2
+    }
+},
+{
+    "model": "core.play",
+    "pk": 90,
+    "fields": {
+        "slip": 44,
+        "sports": "Soccer",
+        "competition": "English Premier League",
+        "home_team": "Man United",
+        "away_team": "Liverpool",
+        "prediction": "1",
+        "match_day": "2023-03-26T16:00:00Z",
+        "result": null,
+        "status": 2
+    }
+},
+{
+    "model": "core.play",
+    "pk": 91,
+    "fields": {
+        "slip": 45,
+        "sports": "Soccer",
+        "competition": "English Premier League",
+        "home_team": "Man United",
+        "away_team": "Arsenal",
+        "prediction": "1",
+        "match_day": "2023-03-19T21:34:00Z",
+        "result": null,
+        "status": 2
+    }
+},
+{
+    "model": "core.play",
+    "pk": 92,
+    "fields": {
+        "slip": 45,
+        "sports": "Soccer",
+        "competition": "English Premier League",
+        "home_team": "Chelsea",
+        "away_team": "Bournemouth",
+        "prediction": "2",
+        "match_day": "2023-03-19T21:34:00Z",
+        "result": null,
+        "status": 2
+    }
+},
+{
+    "model": "core.play",
+    "pk": 93,
+    "fields": {
+        "slip": 45,
+        "sports": "Soccer",
+        "competition": "English Premier League",
+        "home_team": "Man United",
+        "away_team": "Chelsea",
+        "prediction": "1",
+        "match_day": "2023-03-19T21:34:00Z",
+        "result": null,
+        "status": 2
+    }
+}
+]

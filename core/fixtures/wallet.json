@@ -1,0 +1,938 @@
+[
+{
+    "model": "core.wallet",
+    "pk": 3,
+    "fields": {
+        "currency": "USD",
+        "balance": 53000.0,
+        "withheld": 89000.0,
+        "bank_name": "Access Bank",
+        "bank_account_number": "0061526494",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 5,
+    "fields": {
+        "currency": "NGN",
+        "balance": 80000.0,
+        "withheld": 0.0,
+        "bank_name": "Union Bank of Nigeria",
+        "bank_account_number": "0045972721",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 6,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 32000.0,
+        "bank_name": "United Bank for Nigeria",
+        "bank_account_number": "3003055480",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 7,
+    "fields": {
+        "currency": "ZAR",
+        "balance": 95000.0,
+        "withheld": 0.0,
+        "bank_name": "Kuda Microfinance Bank",
+        "bank_account_number": "2001470877",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 8,
+    "fields": {
+        "currency": "GHS",
+        "balance": 1498500.0,
+        "withheld": 6000.0,
+        "bank_name": "Access Bank",
+        "bank_account_number": "0061526494",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 9,
+    "fields": {
+        "currency": "NGN",
+        "balance": 541239.5,
+        "withheld": 44000.0,
+        "bank_name": "United Bank for Africa",
+        "bank_account_number": "2148776027",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 10,
+    "fields": {
+        "currency": "NGN",
+        "balance": 900000.0,
+        "withheld": 0.0,
+        "bank_name": "Union Bank of Nigeria",
+        "bank_account_number": "0045972721",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 11,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "Access Bank",
+        "bank_account_number": "0061526494",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 12,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 13,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 14,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 15,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 16,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 17,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 18,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 19,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 20,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 21,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 22,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 23,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 24,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 25,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 26,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 27,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 28,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 29,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 30,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 31,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 32,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 33,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 34,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 35,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 36,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 37,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 38,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 39,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 40,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 41,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 42,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 43,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 44,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 45,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 46,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 47,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 48,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 49,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 50,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 51,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 52,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 53,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 54,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 55,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 56,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 57,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 58,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 59,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 60,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 61,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 62,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 63,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 64,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 65,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 66,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 67,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 68,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 69,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 70,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 71,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 72,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 73,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 74,
+    "fields": {
+        "currency": "NGN",
+        "balance": 0.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+},
+{
+    "model": "core.wallet",
+    "pk": 75,
+    "fields": {
+        "currency": "NGN",
+        "balance": 94110.0,
+        "withheld": 0.0,
+        "bank_name": "",
+        "bank_account_number": "",
+        "authorizations": "[]",
+        "receipent_code": ""
+    }
+}
+]

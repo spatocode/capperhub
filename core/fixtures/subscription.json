@@ -1,0 +1,327 @@
+[
+{
+    "model": "core.subscription",
+    "pk": 105,
+    "fields": {
+        "type": 0,
+        "issuer": 9,
+        "subscriber": 1,
+        "period": -1,
+        "subscription_date": "2023-03-11T08:52:41.353Z",
+        "expiration_date": null,
+        "is_active": false
+    }
+},
+{
+    "model": "core.subscription",
+    "pk": 106,
+    "fields": {
+        "type": 0,
+        "issuer": 9,
+        "subscriber": 1,
+        "period": -1,
+        "subscription_date": "2023-03-11T09:07:37.341Z",
+        "expiration_date": null,
+        "is_active": false
+    }
+},
+{
+    "model": "core.subscription",
+    "pk": 107,
+    "fields": {
+        "type": 0,
+        "issuer": 9,
+        "subscriber": 1,
+        "period": -1,
+        "subscription_date": "2023-03-11T09:08:06.419Z",
+        "expiration_date": null,
+        "is_active": false
+    }
+},
+{
+    "model": "core.subscription",
+    "pk": 108,
+    "fields": {
+        "type": 0,
+        "issuer": 9,
+        "subscriber": 1,
+        "period": -1,
+        "subscription_date": "2023-03-11T09:08:14.814Z",
+        "expiration_date": null,
+        "is_active": false
+    }
+},
+{
+    "model": "core.subscription",
+    "pk": 109,
+    "fields": {
+        "type": 0,
+        "issuer": 9,
+        "subscriber": 1,
+        "period": -1,
+        "subscription_date": "2023-03-11T09:10:32.317Z",
+        "expiration_date": null,
+        "is_active": false
+    }
+},
+{
+    "model": "core.subscription",
+    "pk": 110,
+    "fields": {
+        "type": 0,
+        "issuer": 9,
+        "subscriber": 1,
+        "period": -1,
+        "subscription_date": "2023-03-11T09:10:56.991Z",
+        "expiration_date": null,
+        "is_active": false
+    }
+},
+{
+    "model": "core.subscription",
+    "pk": 111,
+    "fields": {
+        "type": 0,
+        "issuer": 9,
+        "subscriber": 1,
+        "period": -1,
+        "subscription_date": "2023-03-11T09:12:17.093Z",
+        "expiration_date": null,
+        "is_active": false
+    }
+},
+{
+    "model": "core.subscription",
+    "pk": 112,
+    "fields": {
+        "type": 0,
+        "issuer": 9,
+        "subscriber": 1,
+        "period": -1,
+        "subscription_date": "2023-03-11T09:13:50.074Z",
+        "expiration_date": null,
+        "is_active": false
+    }
+},
+{
+    "model": "core.subscription",
+    "pk": 113,
+    "fields": {
+        "type": 0,
+        "issuer": 9,
+        "subscriber": 1,
+        "period": -1,
+        "subscription_date": "2023-03-11T09:14:47.442Z",
+        "expiration_date": null,
+        "is_active": false
+    }
+},
+{
+    "model": "core.subscription",
+    "pk": 114,
+    "fields": {
+        "type": 0,
+        "issuer": 9,
+        "subscriber": 1,
+        "period": -1,
+        "subscription_date": "2023-03-11T09:15:20.245Z",
+        "expiration_date": null,
+        "is_active": false
+    }
+},
+{
+    "model": "core.subscription",
+    "pk": 115,
+    "fields": {
+        "type": 0,
+        "issuer": 9,
+        "subscriber": 1,
+        "period": -1,
+        "subscription_date": "2023-03-11T09:15:56.628Z",
+        "expiration_date": null,
+        "is_active": false
+    }
+},
+{
+    "model": "core.subscription",
+    "pk": 116,
+    "fields": {
+        "type": 0,
+        "issuer": 9,
+        "subscriber": 1,
+        "period": -1,
+        "subscription_date": "2023-03-11T09:19:38.571Z",
+        "expiration_date": null,
+        "is_active": false
+    }
+},
+{
+    "model": "core.subscription",
+    "pk": 117,
+    "fields": {
+        "type": 0,
+        "issuer": 9,
+        "subscriber": 1,
+        "period": -1,
+        "subscription_date": "2023-03-11T09:19:42.167Z",
+        "expiration_date": null,
+        "is_active": false
+    }
+},
+{
+    "model": "core.subscription",
+    "pk": 118,
+    "fields": {
+        "type": 0,
+        "issuer": 9,
+        "subscriber": 1,
+        "period": -1,
+        "subscription_date": "2023-03-11T09:20:55.806Z",
+        "expiration_date": null,
+        "is_active": false
+    }
+},
+{
+    "model": "core.subscription",
+    "pk": 119,
+    "fields": {
+        "type": 0,
+        "issuer": 9,
+        "subscriber": 1,
+        "period": -1,
+        "subscription_date": "2023-03-11T09:21:18.739Z",
+        "expiration_date": null,
+        "is_active": false
+    }
+},
+{
+    "model": "core.subscription",
+    "pk": 120,
+    "fields": {
+        "type": 0,
+        "issuer": 9,
+        "subscriber": 1,
+        "period": -1,
+        "subscription_date": "2023-03-11T09:21:21.725Z",
+        "expiration_date": null,
+        "is_active": false
+    }
+},
+{
+    "model": "core.subscription",
+    "pk": 121,
+    "fields": {
+        "type": 0,
+        "issuer": 9,
+        "subscriber": 1,
+        "period": -1,
+        "subscription_date": "2023-03-11T09:21:23.966Z",
+        "expiration_date": null,
+        "is_active": false
+    }
+},
+{
+    "model": "core.subscription",
+    "pk": 122,
+    "fields": {
+        "type": 0,
+        "issuer": 9,
+        "subscriber": 1,
+        "period": -1,
+        "subscription_date": "2023-03-11T09:21:37.321Z",
+        "expiration_date": null,
+        "is_active": false
+    }
+},
+{
+    "model": "core.subscription",
+    "pk": 123,
+    "fields": {
+        "type": 0,
+        "issuer": 9,
+        "subscriber": 1,
+        "period": -1,
+        "subscription_date": "2023-03-11T09:21:40.010Z",
+        "expiration_date": null,
+        "is_active": false
+    }
+},
+{
+    "model": "core.subscription",
+    "pk": 124,
+    "fields": {
+        "type": 0,
+        "issuer": 9,
+        "subscriber": 1,
+        "period": -1,
+        "subscription_date": "2023-03-11T09:21:42.006Z",
+        "expiration_date": null,
+        "is_active": false
+    }
+},
+{
+    "model": "core.subscription",
+    "pk": 125,
+    "fields": {
+        "type": 0,
+        "issuer": 9,
+        "subscriber": 1,
+        "period": -1,
+        "subscription_date": "2023-03-11T09:33:26.593Z",
+        "expiration_date": null,
+        "is_active": true
+    }
+},
+{
+    "model": "core.subscription",
+    "pk": 126,
+    "fields": {
+        "type": 0,
+        "issuer": 9,
+        "subscriber": 98,
+        "period": -1,
+        "subscription_date": "2023-03-19T01:01:56.387Z",
+        "expiration_date": null,
+        "is_active": false
+    }
+},
+{
+    "model": "core.subscription",
+    "pk": 127,
+    "fields": {
+        "type": 1,
+        "issuer": 9,
+        "subscriber": 98,
+        "period": -1,
+        "subscription_date": "2023-03-19T01:20:41.538Z",
+        "expiration_date": null,
+        "is_active": false
+    }
+},
+{
+    "model": "core.subscription",
+    "pk": 128,
+    "fields": {
+        "type": 1,
+        "issuer": 9,
+        "subscriber": 98,
+        "period": -1,
+        "subscription_date": "2023-03-19T10:22:28.730Z",
+        "expiration_date": null,
+        "is_active": false
+    }
+},
+{
+    "model": "core.subscription",
+    "pk": 129,
+    "fields": {
+        "type": 1,
+        "issuer": 9,
+        "subscriber": 98,
+        "period": 30,
+        "subscription_date": "2023-03-19T10:39:19.567Z",
+        "expiration_date": "2023-04-19T10:39:16Z",
+        "is_active": true
+    }
+}
+]

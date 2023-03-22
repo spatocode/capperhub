@@ -1,0 +1,92 @@
+[
+{
+    "model": "core.playslip",
+    "pk": 35,
+    "fields": {
+        "title": "secret-atom",
+        "issuer": 9,
+        "date_added": "2023-03-10T22:51:49.231Z",
+        "is_premium": true
+    }
+},
+{
+    "model": "core.playslip",
+    "pk": 36,
+    "fields": {
+        "title": "surface-life",
+        "issuer": 9,
+        "date_added": "2023-03-10T23:00:01.526Z",
+        "is_premium": false
+    }
+},
+{
+    "model": "core.playslip",
+    "pk": 37,
+    "fields": {
+        "title": "shelf-rubbed",
+        "issuer": 9,
+        "date_added": "2023-03-10T23:01:14.706Z",
+        "is_premium": true
+    }
+},
+{
+    "model": "core.playslip",
+    "pk": 38,
+    "fields": {
+        "title": "introduced-curious",
+        "issuer": 9,
+        "date_added": "2023-03-10T23:02:58.526Z",
+        "is_premium": true
+    }
+},
+{
+    "model": "core.playslip",
+    "pk": 39,
+    "fields": {
+        "title": "event-select",
+        "issuer": 9,
+        "date_added": "2023-03-10T23:18:25.557Z",
+        "is_premium": true
+    }
+},
+{
+    "model": "core.playslip",
+    "pk": 40,
+    "fields": {
+        "title": "picture-learn",
+        "issuer": 9,
+        "date_added": "2023-03-10T23:19:50.172Z",
+        "is_premium": false
+    }
+},
+{
+    "model": "core.playslip",
+    "pk": 41,
+    "fields": {
+        "title": "particular-source",
+        "issuer": 9,
+        "date_added": "2023-03-10T23:43:25.512Z",
+        "is_premium": false
+    }
+},
+{
+    "model": "core.playslip",
+    "pk": 44,
+    "fields": {
+        "title": "arm-whistle",
+        "issuer": 1,
+        "date_added": "2023-03-11T16:43:02.184Z",
+        "is_premium": false
+    }
+},
+{
+    "model": "core.playslip",
+    "pk": 45,
+    "fields": {
+        "title": "poor-information",
+        "issuer": 98,
+        "date_added": "2023-03-13T20:34:51.644Z",
+        "is_premium": false
+    }
+}
+]

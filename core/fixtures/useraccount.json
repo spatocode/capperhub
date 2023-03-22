@@ -1,0 +1,236 @@
+[
+{
+    "model": "core.useraccount",
+    "pk": 1,
+    "fields": {
+        "user": 3,
+        "display_name": "Obi Tips",
+        "bio": "2023 Labour Party Presidential Candidate",
+        "country": "GH",
+        "phone_number": "07063925153",
+        "twitter_handle": "",
+        "facebook_handle": "",
+        "instagram_handle": "",
+        "pricing": 2,
+        "wallet": 3,
+        "ip_address": "127.0.0.1",
+        "last_updated": "2023-03-08T21:22:27.669Z"
+    }
+},
+{
+    "model": "core.useraccount",
+    "pk": 2,
+    "fields": {
+        "user": 4,
+        "display_name": "Datti Tips",
+        "bio": "2023 Labour Party Vice Presidential Candidate",
+        "country": "AU",
+        "phone_number": "+2348074040022",
+        "twitter_handle": "",
+        "facebook_handle": "",
+        "instagram_handle": "",
+        "pricing": 16,
+        "wallet": 6,
+        "ip_address": "127.0.0.1",
+        "last_updated": "2023-03-08T21:22:27.669Z"
+    }
+},
+{
+    "model": "core.useraccount",
+    "pk": 3,
+    "fields": {
+        "user": 5,
+        "display_name": "Chidi Mokeme",
+        "bio": "Scar a badass actor",
+        "country": "HU",
+        "phone_number": "+2348074040029",
+        "twitter_handle": "",
+        "facebook_handle": "",
+        "instagram_handle": "",
+        "pricing": 15,
+        "wallet": 5,
+        "ip_address": "127.0.0.1",
+        "last_updated": "2023-03-08T21:22:27.669Z"
+    }
+},
+{
+    "model": "core.useraccount",
+    "pk": 8,
+    "fields": {
+        "user": 10,
+        "display_name": "Uche Jumbo",
+        "bio": "A queen and many more.",
+        "country": "BH",
+        "phone_number": "+2348034040022",
+        "twitter_handle": "",
+        "facebook_handle": "",
+        "instagram_handle": "",
+        "pricing": 17,
+        "wallet": 7,
+        "ip_address": "127.0.0.1",
+        "last_updated": "2023-03-08T21:22:27.669Z"
+    }
+},
+{
+    "model": "core.useraccount",
+    "pk": 9,
+    "fields": {
+        "user": 11,
+        "display_name": "Chiamaka Nwashili",
+        "bio": "Baby girl for life",
+        "country": "NG",
+        "phone_number": "+2348074340022",
+        "twitter_handle": "",
+        "facebook_handle": "",
+        "instagram_handle": "",
+        "pricing": 19,
+        "wallet": 9,
+        "ip_address": "127.0.0.1",
+        "last_updated": "2023-03-19T10:21:43.504Z"
+    }
+},
+{
+    "model": "core.useraccount",
+    "pk": 12,
+    "fields": {
+        "user": 14,
+        "display_name": "Ahmed Tinubu",
+        "bio": "2023 All Progressive Congress Presidential Candidate",
+        "country": "BE",
+        "phone_number": "+2348084040022",
+        "twitter_handle": "",
+        "facebook_handle": "",
+        "instagram_handle": "",
+        "pricing": 18,
+        "wallet": 8,
+        "ip_address": "127.0.0.1",
+        "last_updated": "2023-03-08T21:22:27.669Z"
+    }
+},
+{
+    "model": "core.useraccount",
+    "pk": 18,
+    "fields": {
+        "user": 24,
+        "display_name": "Atiku Abubakar",
+        "bio": "2023 People's Democratic Party Presidential Candidate",
+        "country": "AF",
+        "phone_number": "08074040022",
+        "twitter_handle": "",
+        "facebook_handle": "",
+        "instagram_handle": "",
+        "pricing": 21,
+        "wallet": 10,
+        "ip_address": "127.0.0.1",
+        "last_updated": "2023-03-08T21:22:27.669Z"
+    }
+},
+{
+    "model": "core.useraccount",
+    "pk": 20,
+    "fields": {
+        "user": 26,
+        "display_name": "Emmanuel Eyiuche",
+        "bio": "Brotherly from Metal days",
+        "country": "AF",
+        "phone_number": "08074040020",
+        "twitter_handle": "",
+        "facebook_handle": "",
+        "instagram_handle": "",
+        "pricing": 3,
+        "wallet": 11,
+        "ip_address": "127.0.0.1",
+        "last_updated": "2023-03-08T21:22:27.669Z"
+    }
+},
+{
+    "model": "core.useraccount",
+    "pk": 96,
+    "fields": {
+        "user": 100,
+        "display_name": "Ekene Izukanne",
+        "bio": "",
+        "country": "NG",
+        "phone_number": null,
+        "twitter_handle": "",
+        "facebook_handle": "",
+        "instagram_handle": "",
+        "pricing": 81,
+        "wallet": 71,
+        "ip_address": null,
+        "last_updated": "2023-03-15T18:52:13.648Z"
+    }
+},
+{
+    "model": "core.useraccount",
+    "pk": 97,
+    "fields": {
+        "user": 101,
+        "display_name": "Impulse Tips",
+        "bio": "",
+        "country": "NG",
+        "phone_number": null,
+        "twitter_handle": "",
+        "facebook_handle": "",
+        "instagram_handle": "",
+        "pricing": 82,
+        "wallet": 72,
+        "ip_address": null,
+        "last_updated": "2023-03-13T20:30:19.489Z"
+    }
+},
+{
+    "model": "core.useraccount",
+    "pk": 98,
+    "fields": {
+        "user": 102,
+        "display_name": "Impulse Tips",
+        "bio": "A very sharp punter",
+        "country": "NG",
+        "phone_number": "+2347063925153",
+        "twitter_handle": "",
+        "facebook_handle": "",
+        "instagram_handle": "",
+        "pricing": 83,
+        "wallet": 75,
+        "ip_address": null,
+        "last_updated": "2023-03-19T10:13:46.579Z"
+    }
+},
+{
+    "model": "core.useraccount",
+    "pk": 99,
+    "fields": {
+        "user": 103,
+        "display_name": "Chloe Elvis",
+        "bio": "",
+        "country": "NG",
+        "phone_number": null,
+        "twitter_handle": "",
+        "facebook_handle": "",
+        "instagram_handle": "",
+        "pricing": 84,
+        "wallet": 74,
+        "ip_address": null,
+        "last_updated": "2023-03-14T07:27:10.475Z"
+    }
+},
+{
+    "model": "core.useraccount",
+    "pk": 100,
+    "fields": {
+        "user": 104,
+        "display_name": "",
+        "bio": "",
+        "country": "",
+        "phone_number": null,
+        "twitter_handle": "",
+        "facebook_handle": "",
+        "instagram_handle": "",
+        "pricing": null,
+        "wallet": null,
+        "ip_address": null,
+        "last_updated": "2023-03-19T10:20:38.914Z"
+    }
+}
+]
