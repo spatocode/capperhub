@@ -70,7 +70,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('127.0.0.1', 6379)],
+            "hosts": [f"redis://:{os.environ.get('REDIS_PASSWORD')}@127.0.0.1:6379/1" if os.environ.get('REDIS_PASSWORD') else "redis://127.0.0.1:6379/1"],
         },
     },
 }
@@ -214,7 +214,7 @@ if os.environ.get('DEBUG') != '1':
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",
+        "LOCATION": f"redis://:{os.environ.get('REDIS_PASSWORD')}@127.0.0.1:6379/1" if os.environ.get('REDIS_PASSWORD') else "redis://127.0.0.1:6379/1",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient"
         },
