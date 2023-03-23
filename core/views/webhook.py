@@ -44,7 +44,7 @@ class WebhookAPIView(ModelViewSet):
         xps_header = request.headers.get("x-paystack-signature")
         secret = settings.PAYSTACK_SECRET_KEY
         body_bytes = json.dumps(request.data).encode("utf-8")
-        hash = hashlib.new("sha512", secret)
+        hash = hashlib.new("sha512", secret.encode('utf-8'))
         hash.update(body_bytes)
         hash_digest = hash.hexdigest()
         return hash_digest == xps_header
