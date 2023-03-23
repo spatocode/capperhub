@@ -161,8 +161,8 @@ class UserSubscriptionView(ModelViewSet):
             previous_subscription.is_active = False
             previous_subscription.save()
 
-        subscriber_balance = subscriber.wallet.balance - amount
         if subscription_type == Subscription.PREMIUM:
+            subscriber_balance = subscriber.wallet.balance - amount
             self.sync_wallet_records(amount, tipster_wallet=tipster.wallet, subscriber_wallet=subscriber.wallet, subscriber_balance=subscriber_balance)
             self.record_transaction(subscriber, amount=amount, currency=tipster.wallet.currency, subscriber_balance=subscriber_balance)
 
