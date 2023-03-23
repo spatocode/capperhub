@@ -48,10 +48,19 @@ class WebhookAPIView(ModelViewSet):
         hash.update(body_bytes)
         hash_digest = hash.hexdigest()
         return hash_digest == xps_header
+    
+    def get_client_ip(request):
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
 
     def paystack_webhook(self, request):
         event = request.data.get("event")
-        is_verified_origin = self.verify_origin(request)
+        PAYSTACK_IPS = ['52.31.139.75', '52.49.173.169', '52.214.14.220']
+        is_verified_origin = self.get_client_ip(request) in PAYSTACK_IPS
         if is_verified_origin:
             #TODO: Handle more events
             if event == "charge.success":
