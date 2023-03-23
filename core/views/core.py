@@ -480,7 +480,7 @@ class TeamAPIView(ModelViewSet):
             )
             data = queryset
             cache.set(cache_key, data, timeout=settings.CACHE_TTL)
-        return queryset
+        return data
 
 
 @permission_classes((permissions.IsAuthenticated,))
