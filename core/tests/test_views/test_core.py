@@ -4,9 +4,6 @@ from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 from django.urls import reverse
-# from rest_framework.test import force_authenticate
-# from mock import patch
-# from django_fakeredis import FakeRedis, fakeredis
 
 from core.tests.view_test_mixins import get_mock_request
 from core.views.core import UserSubscriptionView
