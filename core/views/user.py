@@ -36,18 +36,13 @@ class UserAccountOwnerAPIView(ModelViewSet):
             raise NotFoundError(detail="User not found")
 
     def get_account_owner(self, request):
-        cache_key = f'{request.user.useraccount.id}_owner'
-        if cache_key in cache:
-            data = cache.get(cache_key)
-        else:
-            user_account = UserAccount.objects.get(
-                user=request.user.id,
-                user__is_active=True
-            )
-            self.check_object_permissions(request, user_account.id)
-            serializer = OwnerUserAccountSerializer(user_account)
-            data = serializer.data
-            cache.set(cache_key, data, timeout=settings.CACHE_TTL)
+        user_account = UserAccount.objects.get(
+            user=request.user.id,
+            user__is_active=True
+        )
+        self.check_object_permissions(request, user_account.id)
+        serializer = OwnerUserAccountSerializer(user_account)
+        data = serializer.data
 
         return Response(data)
 
