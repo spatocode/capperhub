@@ -16,6 +16,7 @@ channels==4.0.0
 channels-redis==4.0.0
 charset-normalizer==2.1.0
 constantly==15.1.0
+coverage==7.2.2
 cryptography==38.0.4
 daphne==4.0.0
 defusedxml==0.7.1
@@ -25,6 +26,7 @@ django-allauth==0.50.0
 django-cors-headers==3.13.0
 django-countries==7.3.2
 django-environ==0.9.0
+django-fakeredis==0.1.2
 django-filter==22.1
 django-redis==5.2.0
 django-storages==1.13.2
@@ -35,6 +37,8 @@ djangorestframework-simplejwt==5.2.0
 docutils==0.19
 esbonio==0.16.1
 exceptiongroup==1.1.0
+Faker==18.2.0
+fakeredis==2.10.1
 hiredis==2.2.2
 hyperlink==21.0.0
 idna==3.3
@@ -46,6 +50,7 @@ Jinja2==3.1.2
 jmespath==1.0.1
 lsprotocol==2023.0.0a1
 MarkupSafe==2.1.2
+mock==5.0.1
 msgpack==1.0.4
 msgpack-python==0.5.6
 oauthlib==3.2.2
@@ -55,6 +60,7 @@ psycopg2==2.9.3
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pycparser==2.21
+pycryptodome==3.17
 pygls==1.0.1
 Pygments==2.14.0
 PyJWT==1.7.1
@@ -63,6 +69,7 @@ pyspellchecker==0.7.1
 python-dateutil==2.8.2
 python3-openid==3.2.0
 pytz==2022.1
+rave-python==1.2.16
 redis==4.4.2
 requests==2.28.1
 requests-oauthlib==1.3.1
@@ -70,6 +77,7 @@ s3transfer==0.6.0
 service-identity==21.1.0
 six==1.16.0
 snowballstemmer==2.2.0
+sortedcontainers==2.4.0
 Sphinx==6.1.3
 sphinxcontrib-applehelp==1.0.4
 sphinxcontrib-devhelp==1.0.2

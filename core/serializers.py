@@ -130,6 +130,7 @@ class OwnerUserAccountSerializer(serializers.ModelSerializer):
     instagram = serializers.CharField(required=False, allow_blank=True)
     wallet = OwnerUserWalletSerializer()
     country = CountryField(name_only=True)
+    image = serializers.ImageField(required=False)
 
     class Meta:
         model = UserAccount

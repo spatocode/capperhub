@@ -6,7 +6,7 @@ from django.core.cache.backends.base import DEFAULT_TIMEOUT
 from rest_framework.decorators import permission_classes
 from rest_framework import permissions
 from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet
+from rest_framework import viewsets, parsers
 from rest_framework.response import Response
 from rest_framework import status
 from paystackapi.transaction import Transaction as PaystackTransaction
@@ -26,7 +26,7 @@ from core.exceptions import PricingError, InsuficientFundError, NotFoundError
 from core.shared.model_utils import generate_reference_code
 
 @permission_classes((permissions.AllowAny, IsOwnerOrReadOnly))
-class UserAccountOwnerAPIView(ModelViewSet):
+class UserAccountOwnerAPIView(viewsets.ModelViewSet):
     filter_class = UserAccountFilterSet
 
     def get_object(self, username):
@@ -48,8 +48,9 @@ class UserAccountOwnerAPIView(ModelViewSet):
 
 
 @permission_classes((permissions.AllowAny, IsOwnerOrReadOnly))
-class UserAPIView(ModelViewSet):
+class UserAPIView(viewsets.ModelViewSet):
     filter_class = UserAccountFilterSet
+    parser_classes = [parsers.MultiPartParser, parsers.FormParser]
 
     def get_object(self, username):
         try:
@@ -117,7 +118,7 @@ class UserPricingAPIView(APIView):
         })
 
 @permission_classes((permissions.IsAuthenticated,))
-class UserWalletAPIView(ModelViewSet):
+class UserWalletAPIView(viewsets.ModelViewSet):
     #TODO: Handle all errors from payment processor
     def initialize_deposit(self, request):
         if request.data.get("authorization_code"):
@@ -199,4 +200,3 @@ class UserWalletAPIView(ModelViewSet):
             bank_code=request.data.get("bank_code")
         )
         return Response(response)
-
