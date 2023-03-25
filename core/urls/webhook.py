@@ -1,6 +1,7 @@
 from django.urls import path
-from core.views.webhook import WebhookAPIView
+from core.views.webhook import PaystackWebhookAPIView, WhatsappWebhookAPIView
 
 urlpatterns = [
-    path('paystack', WebhookAPIView.as_view({"post": "paystack_webhook"}), name='paystack-webhook'),
+    path('paystack', PaystackWebhookAPIView.as_view(), name='paystack-webhook'),
+    path('whatsapp', WhatsappWebhookAPIView.as_view(), name='whatsapp-webhook'),
 ]

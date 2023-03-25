@@ -9,6 +9,21 @@ class  IsOwnerOrReadOnly(BasePermission):
         
         return int(obj) == request.user.useraccount.id
 
+class PaystackWebhookPermission(BasePermission):
+    def get_client_ip(self, request):
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
+
+    def has_permission(self, request, view):
+        PAYSTACK_IPS = ['52.31.139.75', '52.49.173.169', '52.214.14.220']
+        client_IP = self.get_client_ip(request) in PAYSTACK_IPS
+        client_IP in PAYSTACK_IPS
+
+
 
 # TODO: Implement blocked IP
 # class BlocklistPermission(BasePermission):
