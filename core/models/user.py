@@ -42,7 +42,7 @@ class Pricing(models.Model):
 
 
 def nameFile(instance, filename):
-    return '/'.join(['media', str(instance.user.username), filename])
+    return '/'.join(['images', str(instance.user.username), filename])
 
 class UserAccount(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

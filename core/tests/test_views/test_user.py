@@ -1,6 +1,8 @@
 import pytz
-from datetime import datetime, timedelta
+from datetime import datetime
 from django.test import override_settings
+from django.test.client import MULTIPART_CONTENT, encode_multipart, BOUNDARY
+from django.core.files.base import ContentFile
 from rest_framework import status
 from rest_framework.test import APITestCase
 from django.urls import reverse
@@ -92,7 +94,7 @@ class UserAPIViewTest(APITestCase):
         }
         url = reverse(self.API_URL, kwargs={'username': useraccount.user.username})
         self.client.force_authenticate(user=useraccount.user, token=self.user_jwt)
-        response = self.client.put(url, data, format=self.test_format)
+        response = self.client.put(url, data, content_type="multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response['content-type'], 'application/json')
 
@@ -112,13 +114,13 @@ class UserAPIViewTest(APITestCase):
         }
         url = reverse(self.API_URL, kwargs={'username': useraccount2.user.username})
         self.client.force_authenticate(user=useraccount.user, token=self.user_jwt)
-        response = self.client.put(url, data, format=self.test_format)
+        response = self.client.put(url, data, content_type="multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response['content-type'], 'application/json')
 
     def test_view_put_response_json(self):
         useraccount = UserAccount.objects.get(id=3)
-        data = {
+        payload = {
             "country": "US",
             "phone_number": "12345434543",
             "bio": "Testing bio",
@@ -127,14 +129,16 @@ class UserAPIViewTest(APITestCase):
             "display_name": "De Jong",
             "twitter": "dejong",
             "facebook": "dejong",
-            "instagram": "dejong"
+            "instagram": "dejong",
+            "image": open("core/tests/test.jpg", "rb")
         }
+        data = encode_multipart(data=payload, boundary=BOUNDARY)
         url = reverse(self.API_URL, kwargs={'username': useraccount.user.username})
         self.client.force_authenticate(user=useraccount.user, token=self.user_jwt)
-        response = self.client.put(url, data, format=self.test_format)
+        response = self.client.put(url, data, content_type=MULTIPART_CONTENT)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response['content-type'], 'application/json')
-        self.assertEqual(response.json()["data"].get("display_name"), data.get("display_name"))
+        self.assertEqual(response.json()["data"].get("display_name"), payload.get("display_name"))
 
 
 @override_settings(CACHES={"default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache" }})
