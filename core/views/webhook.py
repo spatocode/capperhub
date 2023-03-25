@@ -62,5 +62,10 @@ class PaystackWebhookAPIView(APIView):
 
 @permission_classes((permissions.AllowAny,))
 class WhatsappWebhookAPIView(APIView):
+    def get(self, request):
+        if request.query_params.get('hub.verify_token') == settings.WHATSAPP_WEBHOOK_VERIFY_TOKEN:
+            return Response({"hub.challenge": request.query_params.get('hub.challenge')})
+        return Response(status=status.HTTP_403_FORBIDDEN)
+
     def post(self, request):
         return Response(status=status.HTTP_200_OK)
