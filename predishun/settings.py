@@ -177,7 +177,7 @@ if os.environ.get('DEBUG') != '1':
         },
         'handlers': {
             'file': {
-                'level': 'INFO',
+                'level': 'DEBUG',
                 'class': 'logging.handlers.RotatingFileHandler',
                 'filename': 'log/debug.log',
                 'maxBytes' : 1024*1024*10,
