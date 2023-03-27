@@ -46,14 +46,9 @@ class UserSubscriptionView(ModelViewSet):
     def subscriptions(self, request):
         useraccount = self.request.user.useraccount
         sync_subscriptions(subscriber=useraccount.id)
-        cache_key = f'{useraccount.id}__subscriptions'
-        if cache_key in cache:
-            data = cache.get(cache_key)
-        else:
-            subscriptions = Subscription.objects.filter(subscriber=useraccount.id, is_active=True).order_by("-subscription_date")
-            subscriptions_serializer = self.serializer_class(subscriptions, many=True)
-            data = subscriptions_serializer.data
-            cache.set(cache_key, data, timeout=settings.CACHE_TTL)
+        subscriptions = Subscription.objects.filter(subscriber=useraccount.id, is_active=True).order_by("-subscription_date")
+        subscriptions_serializer = self.serializer_class(subscriptions, many=True)
+        data = subscriptions_serializer.data
         return Response(data)
 
     def subscribers(self, request):
