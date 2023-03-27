@@ -177,7 +177,7 @@ if os.environ.get('DEBUG') != '1':
         },
         'handlers': {
             'file': {
-                'level': 'DEBUG',
+                'level': 'INFO',
                 'class': 'logging.handlers.RotatingFileHandler',
                 'filename': 'log/debug.log',
                 'maxBytes' : 1024*1024*10,
@@ -252,6 +252,24 @@ CLIENT_RESET_PASSWORD_URL = os.environ.get("CLIENT_RESET_PASSWORD_URL")
 PAYSTACK_SECRET_KEY = os.environ.get("PAYSTACK_SECRET_KEY")
 
 WHATSAPP_WEBHOOK_VERIFY_TOKEN = os.environ.get("WHATSAPP_WEBHOOK_VERIFY_TOKEN")
+
+WHATSAPP_API_ID = os.environ.get("WHATSAPP_API_ID")
+
+WHATSAPP_API_SECRET = os.environ.get("WHATSAPP_API_SECRET")
+
+WHATSAPP_PHONE_NUMBER_ID = os.environ.get("WHATSAPP_PHONE_NUMBER_ID")
+
+WHATSAPP_ACCESS_TOKEN = os.environ.get("WHATSAPP_ACCESS_TOKEN")
+
+WHATSAPP_API_VERSION = os.environ.get("WHATSAPP_API_VERSION")
+
+TELEGRAM_API_ID = os.environ.get("TELEGRAM_API_ID")
+
+TELEGRAM_API_HASH = os.environ.get("TELEGRAM_API_HASH")
+
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
+
+TELEGRAM_PHONE_NUMBER = os.environ.get("TELEGRAM_PHONE_NUMBER")
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
