@@ -23,7 +23,7 @@ from core.models.games import SportsGame, Sport, Competition, Team, Market
 from core.models.subscription import Subscription
 from core.filters import PlayFilterSet, UserAccountFilterSet, SubscriptionFilterSet, SportsWagerFilterSet, SportsGameFilterSet
 from core.exceptions import SubscriptionError, InsuficientFundError, NotFoundError, ForbiddenError, PermissionDeniedError
-from core.shared.helper import sync_records, sync_subscriptions
+from core.shared.helper import sync_records, sync_subscriptions, notify_subscribers
 from core import ws
 
 
@@ -291,10 +291,11 @@ class PlayAPIView(ModelViewSet):
         plays = [Play(slip=play_slip, **play) for play in data.get("plays")]
         Play.objects.bulk_create(plays)
         play_slip_serializer = PlaySlipSerializer(PlaySlip.objects.get(id=play_slip.id))
-        ws.notify_update_user_play(play_slip_serializer.data)
+        data = play_slip_serializer.data
+        notify_subscribers(data)
         return Response({
             'message': 'Play Created Successfully',
-            'data': play_slip_serializer.data
+            'data': data
         })
 
 
