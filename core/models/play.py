@@ -1,7 +1,7 @@
 from django.db import models
 
 class PlaySlip(models.Model):
-    title = models.CharField(max_length=20, default="")
+    title = models.CharField(max_length=100, default="")
     issuer = models.ForeignKey('core.UserAccount', on_delete=models.CASCADE)
     date_added = models.DateTimeField(auto_now_add=True)
     is_premium = models.BooleanField(default=False)
