@@ -255,9 +255,16 @@ class PlayAPIView(ModelViewSet):
             is_active=True
         )
 
-        free_sub_issuers = free_subscriptions.values_list("issuer__id", flat=True)
-        pre_sub_issuers = premium_subscriptions.values_list("issuer__id", flat=True)
-        filters = Q(issuer=request.user.useraccount.id) | Q(issuer__in=free_sub_issuers, is_premium=False) | Q(issuer__in=pre_sub_issuers, is_premium=True)
+        free_sub_date = free_subscriptions.values_list("subscription_date", flat=True)
+        pre_sub_date = premium_subscriptions.values_list("subscription_date", flat=True)
+        filters = Q(issuer=request.user.useraccount.id)
+
+        for date in free_sub_date:
+            filters = filters | Q(date_added__gte=date, is_premium=False)
+
+        for date in pre_sub_date:
+            filters = filters | Q(date_added__gte=date, is_premium=True)
+
         plays = PlaySlip.objects.filter(filters).order_by("-date_added")
 
         query_params = request.query_params
