@@ -40,15 +40,14 @@ class Pricing(models.Model):
     def __str__(self):
         return f'{self.amount}'
 
-
-def nameFile(instance, filename):
-    return '/'.join(['images', str(instance.user.username), filename])
+def imageLocation(instance, filename):
+    return '/'.join(['images', str(instance.user.id), filename])
 
 class UserAccount(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     display_name = models.CharField(default="", max_length=50)
     bio = models.TextField(default="")
-    image = models.ImageField(upload_to=nameFile, null=True, blank=True)
+    image = models.ImageField(upload_to=imageLocation, null=True, blank=True)
     country = CountryField(default="", blank=True, blank_label="(Select country)")
     phone_number = models.CharField(null=True, unique=True, max_length=22)
     twitter_handle = models.CharField(default="", max_length=22, blank=True)
