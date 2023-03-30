@@ -9,6 +9,7 @@ from core.tests.view_test_mixins import get_mock_request
 from core.views.core import UserSubscriptionView
 from core.models.user import UserAccount
 from core.models.subscription import Subscription
+from core.models.play import PlaySlip, Play
 
 
 @override_settings(CACHES={"default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache" }})
@@ -114,12 +115,29 @@ class PlayViewTest(APITestCase):
     
     def test_only_subscriber_can_view_play(self):
         useraccount = UserAccount.objects.get(id=98)
+        issuer = UserAccount.objects.get(id=9)
+        play_slip = PlaySlip.objects.create(
+            issuer=issuer,
+            is_premium=True,
+            title="trs-vcg",
+        )
+        play = {
+            "slip": play_slip,
+            "sports": "Soccer",
+            "competition": "English Premier League",
+            "home_team": "Chelsea",
+            "away_team": "Bournemouth",
+            "prediction": "2",
+            "match_day": "2023-03-11T00:01:00Z",
+            "status": 2
+        }
+        Play.objects.create(**play)
         url = reverse('plays')
         self.client.force_authenticate(user=useraccount.user, token=self.user_jwt)
         response = self.client.get(url, format=self.test_format)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response['content-type'], 'application/json')
-        self.assertEqual(len(response.json()), 5)
+        self.assertEqual(len(response.json()), 2)
 
     def test_non_subscriber_cannot_view_play(self):
         subscription = Subscription.objects.get(
