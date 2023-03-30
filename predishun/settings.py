@@ -25,9 +25,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 root = environ.Path(__file__) - 2
-dotenv = root(os.environ.get('dotenv', '.env'))
-if os.path.exists(dotenv):
-    environ.Env.read_env(dotenv)
+# dotenv = root(os.environ.get('dotenv', '.env'))
+# if os.path.exists(dotenv):
+#     environ.Env.read_env(dotenv)
 
 # Create a directory for storing the log if necessary
 os.makedirs(os.path.join(root, 'log'), mode=0o755, exist_ok=True)
@@ -35,7 +35,7 @@ os.makedirs(os.path.join(root, 'log'), mode=0o755, exist_ok=True)
 SECRET_KEY = os.environ.get("SECRET_KEY") or 'cdhj6q8r&68+0n@l*t9&s$r-!&1%n=uq4x2i(v72ua=23df4dd567d/d89t24,nl0m.s33si&++='
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = int(os.environ.get("DEBUG", 1))
+DEBUG = int(os.environ.get("DEBUG", 0))
 
 # 'ALLOWED_HOSTS' should be a single string of hosts with a space between each.
 # For example: 'ALLOWED_HOSTS=localhost 127.0.0.1 [::1]'
@@ -295,7 +295,7 @@ PERCENTAGE_CHARGE = os.environ.get("PERCENTAGE_CHARGE", 0.15)
 
 DATABASES = {
     'default': {
-        "ENGINE": os.environ.get("RDS_ENGINE", "django.db.backends.postgresql_psycopg2"),
+        "ENGINE": os.environ.get("RDS_ENGINE", "django.db.backends.postgresql"),
         "NAME": os.environ.get("RDS_DATABASE", "predishun"),
         "USER": os.environ.get("RDS_USER", "postgres"),
         "PASSWORD": os.environ.get("RDS_PASSWORD", "postgres"),
