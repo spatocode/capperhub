@@ -162,11 +162,6 @@ class UserSubscriptionView(ModelViewSet):
             self.record_transaction(subscriber, amount=amount, currency=tipster.wallet.currency, subscriber_balance=subscriber_balance)
 
         data = self.serializer_class(instance=subscription[0]).data
-        cache_key = f'{subscriber.id}__subscriptions'
-        if cache_key in cache:
-            cached_data = cache.get(cache_key)
-            cached_data.insert(0, data)
-            cache.set(cache_key, cached_data)
 
         ws.notify_update_user_subscribe(data)
         return Response({
@@ -225,7 +220,7 @@ class PuntersAPIView(APIView):
                 wallet=None,
                 phone_number=None,
                 ip_address=None
-                )
+            )
             )
             serializer = UserAccountSerializer(filterset.qs, many=True)
             data = serializer.data
