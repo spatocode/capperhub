@@ -6,7 +6,15 @@ The marketplace for sports analysts and cappers
 
 - Clone the repository
 
-- Run using docker by running `docker compose up -d --build`
+**With docker**
+- Run `docker compose up -d --build` to build
+
+**Without docker**
+- Make sure you have postgres on your machine
+- Activate environment variables `pyenv activate predishun-env`
+- Install dependencies `pip install -r requirements.txt`
+- Run server `python manage.py runserver`
+
 
 Add .env file with variables
 
