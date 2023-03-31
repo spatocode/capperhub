@@ -25,12 +25,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 root = environ.Path(__file__) - 2
-# dotenv = root(os.environ.get('dotenv', '.env'))
-# if os.path.exists(dotenv):
-#     environ.Env.read_env(dotenv)
+dotenv = root(os.environ.get('dotenv', '.env'))
+if os.path.exists(dotenv):
+    environ.Env.read_env(dotenv)
 
 # Create a directory for storing the log if necessary
-os.makedirs(os.path.join(root, 'log'), mode=0o755, exist_ok=True)
+os.makedirs(os.path.join(BASE_DIR, 'log'), mode=0o755, exist_ok=True)
 
 SECRET_KEY = os.environ.get("SECRET_KEY") or 'cdhj6q8r&68+0n@l*t9&s$r-!&1%n=uq4x2i(v72ua=23df4dd567d/d89t24,nl0m.s33si&++='
 
@@ -216,10 +216,11 @@ if os.environ.get('DEBUG') != '1':
 
     SESSION_COOKIE_SECURE = True
 
+REDIS_URL = (os.environ.get('REDIS_URL', 'redis://localhost:6379/0'))
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": f"redis://:{os.environ.get('REDIS_PASSWORD')}@127.0.0.1:6379/1" if os.environ.get('REDIS_PASSWORD') else "redis://127.0.0.1:6379/1",
+        "LOCATION": REDIS_URL,
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient"
         },

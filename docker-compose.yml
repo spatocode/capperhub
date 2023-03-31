@@ -4,6 +4,9 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./:/usr/src/app/
+    environment:
+      - "REDIS_URL=${REDIS_URL:-redis://redis:6379/8}"
+      - RDS_HOST=db
     ports:
       - 8000:8000
     env_file:
@@ -15,9 +18,24 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
-      - POSTGRES_USER=predishun
-      - POSTGRES_PASSWORD=predishun
-      - POSTGRES_DB=predishun-db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=predishun
+  redis:
+    image: "bitnami/redis:latest"
+    restart: always
+    volumes:
+      - redis:/bitnami/redis
+    ports:
+      - 6379:6379
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    logging:
+      driver: "json-file"
+      options:
+          max-size: "10k"
+          max-file: "10"
 
 volumes:
   postgres_data:
+  redis:
