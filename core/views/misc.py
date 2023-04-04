@@ -11,7 +11,7 @@ from core.serializers import TermsOfUseSerializer, PrivacyPolicySerializer, Wait
 class TermsOfUseAPIView(APIView):
     def get(self, request):
         terms_of_use = TermsOfUse.objects.all()
-        serializer = TermsOfUseSerializer(terms_of_use)
+        serializer = TermsOfUseSerializer(terms_of_use, many=True)
         return Response(serializer.data)
 
 
@@ -19,7 +19,7 @@ class TermsOfUseAPIView(APIView):
 class PrivacyPolicyAPIView(APIView):
     def get(self, request):
         privacy_policy = PrivacyPolicy.objects.all()
-        serializer = PrivacyPolicySerializer(privacy_policy)
+        serializer = PrivacyPolicySerializer(privacy_policy, many=True)
         return Response(serializer.data)
 
 
