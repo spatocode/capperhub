@@ -9,7 +9,11 @@ class UserAccountRegisterView(RegisterView):
 
     def perform_create(self, serializer):
         user = super().perform_create(serializer)
-        wallet = Wallet.objects.create(currency=Currency.objects.get(country=serializer.data.get('country')))
+        try:
+            currency = Currency.objects.get(country=serializer.data.get('country'))
+        except Currency.DoesNotExist:
+            currency = Currency.objects.get(country="US")
+        wallet = Wallet.objects.create(currency=currency)
         pricing = Pricing.objects.create()
         user_account = UserAccount.objects.create(user=user, wallet=wallet, pricing=pricing)
         user_account.display_name = serializer.data.get('display_name')
