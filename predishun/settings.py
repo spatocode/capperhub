@@ -41,6 +41,8 @@ DEBUG = int(os.environ.get("DEBUG", 0))
 # For example: 'ALLOWED_HOSTS=localhost 127.0.0.1 [::1]'
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS").split(',') if os.environ.get("ALLOWED_HOSTS") else ['127.0.0.1', '0.0.0.0', 'localhost']
 
+REDIS_URL = (os.environ.get('REDIS_URL', 'redis://localhost:6379/0'))
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -70,7 +72,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [f"redis://:{os.environ.get('REDIS_PASSWORD')}@127.0.0.1:6379/1" if os.environ.get('REDIS_PASSWORD') else "redis://127.0.0.1:6379/1"],
+            "hosts": [REDIS_URL],
         },
     },
 }
@@ -216,7 +218,6 @@ if os.environ.get('DEBUG') != '1':
 
     SESSION_COOKIE_SECURE = True
 
-REDIS_URL = (os.environ.get('REDIS_URL', 'redis://localhost:6379/0'))
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
