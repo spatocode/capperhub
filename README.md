@@ -26,7 +26,6 @@ CLIENT_LOGIN_URL=http://localhost:3000/login
 CLIENT_ACTIVATE_ACCOUNT_URL=http://localhost:3000/account/activate
 CLIENT_RESET_PASSWORD_URL=http://localhost:3000/account/password
 PAYSTACK_SECRET_KEY=
-REDIS_URL=redis://127.0.0.1:6379/1
 RDS_ENGINE=django.db.backends.postgresql
 RDS_DATABASE=predishun
 RDS_USER=postgres
