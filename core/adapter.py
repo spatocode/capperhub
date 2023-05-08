@@ -17,4 +17,8 @@ class CustomDefaultAccountAdapter(DefaultAccountAdapter):
             email_template = "account/email/email_confirmation_signup"
         else:
             email_template = "account/email/email_confirmation"
-        self.send_mail(email_template, emailconfirmation.email_address.email, ctx)
+        try:
+            self.send_mail(email_template, emailconfirmation.email_address.email, ctx)
+        except Exception as e:
+            emailconfirmation.email_address.user.delete()
+            raise e
