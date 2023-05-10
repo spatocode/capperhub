@@ -1,5 +1,6 @@
 import pytz
 from datetime import datetime, timedelta
+from django.core.files.storage import FileSystemStorage
 from django.conf import settings
 from django.core.cache import cache
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
@@ -66,10 +67,9 @@ class UserAPIView(viewsets.ModelViewSet):
     def update_user(self, request, username=None):
         user_account = self.get_object(username)
         self.check_object_permissions(request, user_account.id)
-        data = request.data.copy()
         user_serializer = OwnerUserSerializer(
             instance=user_account.user,
-            data=data,
+            data=request.data,
             partial=True
         )
         user_serializer.is_valid(raise_exception=True)
@@ -77,7 +77,7 @@ class UserAPIView(viewsets.ModelViewSet):
 
         serializer = OwnerUserAccountSerializer(
             instance=user_account,
-            data=data,
+            data=request.data,
             partial=True
         )
         serializer.is_valid(raise_exception=True)
