@@ -7,6 +7,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django_countries.fields import CountryField
 from .subscription import Subscription
+from core.shared.model_utils import optimize_image
 
 
 def default_free_features():
@@ -40,14 +41,12 @@ class Pricing(models.Model):
     def __str__(self):
         return f'{self.amount}'
 
-def imageLocation(instance, filename):
-    return '/'.join(['images', str(instance.user.id), filename])
 
 class UserAccount(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     display_name = models.CharField(default="", max_length=50)
     bio = models.TextField(default="")
-    image = models.ImageField(upload_to=imageLocation, null=True, blank=True)
+    image = models.FileField(null=True, blank=True)
     country = CountryField(default="", blank=True, blank_label="(Select country)")
     phone_number = models.CharField(null=True, unique=True, max_length=22)
     twitter_handle = models.CharField(default="", max_length=22, blank=True)
@@ -126,6 +125,11 @@ class UserAccount(models.Model):
         if len(subscriber_count) > 0:
             return True
         return False
+
+    def save(self):
+        self.image = optimize_image(self)
+        super(UserAccount, self).save()
+
 
     # @receiver(post_save, sender=User)
     # def create_user_profile(sender, instance, created, **kwargs):
