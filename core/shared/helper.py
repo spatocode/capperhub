@@ -1,10 +1,5 @@
 import pytz
 from datetime import datetime
-from django.conf import settings
-import telebot
-from telethon.sync import TelegramClient
-from telethon.tl.types import InputPeerUser, InputPeerChannel
-from telethon import TelegramClient, sync, events
 
 from core.models.transaction import Transaction
 from core.models.subscription import Subscription
@@ -65,14 +60,7 @@ def sync_records(sports_wager, layer, **kwargs):
 
 
 def notify_telegram_users():
-    client = TelegramClient('session', settings.TELEGRAM_API_ID, settings.TELEGRAM_API_HASH)
-    client.connect()
-
-    if not client.is_user_authorized():  
-        client.send_code_request(settings.TELEGRAM_PHONE_NUMBER)
-        
-        # signing in the client
-        client.sign_in(settings.TELEGRAM_PHONE_NUMBER, input('Enter the code: '))
+    pass
 
 def notify_whatsapp_users():
     pass
