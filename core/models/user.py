@@ -1,5 +1,6 @@
 import pytz
 from datetime import datetime, timedelta
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
@@ -127,7 +128,8 @@ class UserAccount(models.Model):
         return False
 
     def save(self):
-        self.image = optimize_image(self)
+        if not settings.DEBUG:
+            self.image = optimize_image(self)
         super(UserAccount, self).save()
 
 
