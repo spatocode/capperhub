@@ -192,7 +192,6 @@ class MatchSerializer(serializers.ModelSerializer):
 
 
 class PlaySerializer(serializers.ModelSerializer):
-    slip = PlaySlipSerializer()
     match = MatchSerializer()
 
     def create(self, validated_data):
