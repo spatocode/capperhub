@@ -13,7 +13,6 @@ from core.permissions import PaystackWebhookPermission
 
 @permission_classes((permissions.AllowAny, PaystackWebhookPermission))
 class PaystackWebhookAPIView(APIView):
-
     def record_successful_deposit_transaction(request):
         data = request.data.get("data")
         user = UserAccount.objects.select_related("wallet").get(user__email=data["customer"]["email"])
@@ -66,6 +65,15 @@ class WhatsappWebhookAPIView(APIView):
         if request.query_params.get('hub.verify_token') == settings.WHATSAPP_WEBHOOK_VERIFY_TOKEN:
             return Response(int(request.query_params.get('hub.challenge')))
         return Response(status=status.HTTP_403_FORBIDDEN)
+
+    def post(self, request):
+        return Response(status=status.HTTP_200_OK)
+
+
+@permission_classes((permissions.AllowAny,))
+class FlutterwaveWebhookAPIView(APIView):
+    def get(self, request):
+        return Response(status=status.HTTP_200_OK)
 
     def post(self, request):
         return Response(status=status.HTTP_200_OK)

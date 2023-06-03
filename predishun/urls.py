@@ -8,7 +8,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include('core.urls.auth')),
     path('user/', include('core.urls.user')),
-    path('core/', include('core.urls.core')),
+    path('play/', include('core.urls.play')),
+    path('wager/', include('core.urls.wager')),
+    path('payment/', include('core.urls.payment')),
     path('misc/', include('core.urls.misc')),
     path('webhook/', include('core.urls.webhook')),
     path('__debug__/', include('debug_toolbar.urls'))
