@@ -127,7 +127,8 @@ class UserAccount(models.Model):
             return True
         return False
 
-    def save(self):
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
         if not settings.DEBUG:
             self.image = optimize_image(self)
         super(UserAccount, self).save()

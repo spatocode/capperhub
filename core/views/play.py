@@ -249,7 +249,7 @@ class PlayAPIView(ModelViewSet):
         query_params = request.query_params
         filterset = self.filter_class(
             data=query_params,
-            queryset= plays
+            queryset=plays
         )
         play_serializer = PlaySlipSerializer(filterset.qs, many=True)
 

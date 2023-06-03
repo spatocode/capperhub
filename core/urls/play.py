@@ -25,6 +25,7 @@ plays = PlayAPIView.as_view({
 urlpatterns = [
     path('cappers', CappersAPIView.as_view(), name='cappers'),
     path('subscriptions', subscriptions, name='subscriptions'),
+    path('subscribers', subscribers, name='subscribers'),
     path('subscribe', subscribe_user, name='subscribe'),
     path('unsubscribe', unsubscribe_user, name='unsubscribe'),
     path('list', plays, name='plays'),

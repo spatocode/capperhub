@@ -38,10 +38,8 @@ class UserAccountOwnerAPIView(viewsets.ModelViewSet):
         return Response(data)
     
     def update_user(self, request, username=None):
-        user_account = self.get_object(username)
-        self.check_object_permissions(request, user_account.id)
         user_serializer = OwnerUserSerializer(
-            instance=user_account.user,
+            instance=request.user,
             data=request.data,
             partial=True
         )
@@ -49,7 +47,7 @@ class UserAccountOwnerAPIView(viewsets.ModelViewSet):
         user_serializer.save()
 
         serializer = OwnerUserAccountSerializer(
-            instance=user_account,
+            instance=request.user.useraccount,
             data=request.data,
             partial=True
         )

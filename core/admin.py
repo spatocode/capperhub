@@ -41,8 +41,13 @@ class SubscriptionAdmin(admin.ModelAdmin):
     list_filter = ['type', 'is_active']
 
 class PlayAdmin(admin.ModelAdmin):
-    list_display = ['sports', 'home_team', 'away_team', 'match_day', 'prediction', 'status']
-    list_filter = ['sports', 'match_day', 'status']
+    list_display = ['match', 'prediction', 'status']
+    list_filter = ['status']
+
+
+class MatchAdmin(admin.ModelAdmin):
+    list_display = ['sports', 'home_team', 'away_team', 'match_day',]
+    list_filter = ['sports', 'match_day']
 
 
 class PlaySlipAdmin(admin.ModelAdmin):
