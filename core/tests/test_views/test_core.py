@@ -6,7 +6,7 @@ from rest_framework.test import APITestCase
 from django.urls import reverse
 
 from core.tests.view_test_mixins import get_mock_request
-from core.views.core import UserSubscriptionView
+from core.views.play import SubscriptionView
 from core.models.user import UserAccount
 from core.models.subscription import Subscription
 from core.models.play import PlaySlip, Play
@@ -35,7 +35,7 @@ class UserSubscriptionViewTest(APITestCase):
         useraccount = UserAccount.objects.get(id=3)
         request = get_mock_request(useraccount.user)
         self.client.force_authenticate(user=useraccount.user)
-        view = UserSubscriptionView()
+        view = SubscriptionView()
         view.request = request
         actual = view.get_object(3)
         self.assertEqual(actual, useraccount)

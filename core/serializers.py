@@ -15,7 +15,7 @@ from allauth.account.utils import user_pk_to_url_str, user_username
 from dj_rest_auth.forms import AllAuthPasswordResetForm
 from dj_rest_auth.serializers import PasswordResetSerializer
 from core.models.user import UserAccount, Pricing, Wallet
-from core.models.play import Play, PlaySlip
+from core.models.play import Play, PlaySlip, Match
 from core.models.wager import SportsWager, SportsWagerChallenge
 from core.models.games import SportsGame, Team, Sport, Competition, Market
 from core.models.transaction import Currency, Transaction
@@ -163,17 +163,15 @@ class UserAccountSerializer(serializers.ModelSerializer):
         exclude = ['ip_address', 'phone_number']
 
 
-class PlaySerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Play
-        fields = '__all__'
-        read_only_fields = ['id']
-
-
 class PlaySlipSerializer(serializers.ModelSerializer):
     issuer = UserAccountSerializer()
-    plays = serializers.SerializerMethodField()
+    plays = serializers.SerializerMethodField(read_only=True)
+
+    def to_internal_value(self, data):
+        new_data = data
+        issuer = UserAccount.objects.get(id=data.get("issuer"))
+        new_data['issuer'] = issuer
+        return new_data
 
     def get_plays(self, instance):
         serializer = PlaySerializer(data=instance.play_set.all(), many=True)
@@ -183,7 +181,32 @@ class PlaySlipSerializer(serializers.ModelSerializer):
     class Meta:
         model = PlaySlip
         fields = '__all__'
-        read_only_fields = ['id']
+        read_only_fields = ('plays',)
+
+
+class MatchSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Match
+        fields = '__all__'
+
+
+class PlaySerializer(serializers.ModelSerializer):
+    match = MatchSerializer()
+
+    def create(self, validated_data):
+        playslip = PlaySlip.objects.create(**validated_data.get('slip'))
+        match = Match.objects.get_or_create(**validated_data.get("match"))
+        play = Play.objects.create(
+            prediction=validated_data.get("prediction"),
+            match=match[0],
+            slip=playslip
+        )
+        return play
+
+    class Meta:
+        model = Play
+        fields = '__all__'
 
 
 class CurrencySerializer(serializers.ModelSerializer):

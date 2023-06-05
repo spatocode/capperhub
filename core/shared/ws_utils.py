@@ -13,7 +13,6 @@ class EventTypes:
 
 
 def notify_user_ws(event_type, payload):
-    assert isinstance(payload, dict), "event_data is not a dict"
 
     # Send a message to user updates group
     channels_group_name = USER_GROUP_NAME_TPL

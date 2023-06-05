@@ -81,13 +81,7 @@ class UserSubscriptionView(ModelViewSet):
                 detail='You\'ve already subscribed to Free plan',   
             )
 
-        if subscription.type == Subscription.PREMIUM and subscription_type == Subscription.PREMIUM:
-            if subscription.expiration_date > datetime.utcnow().replace(tzinfo=pytz.UTC):
-                raise SubscriptionError(
-                    detail='You\'ve already subscribed to Premium plan',
-                )
-
-        if subscription.type == Subscription.PREMIUM and subscription_type == Subscription.FREE:
+        if subscription.type == Subscription.PREMIUM and subscription_type == Subscription.PREMIUM or (subscription.type == Subscription.PREMIUM and subscription_type == Subscription.FREE):
             if subscription.expiration_date > datetime.utcnow().replace(tzinfo=pytz.UTC):
                 raise SubscriptionError(
                     detail='You\'ve already subscribed to Premium plan',
@@ -202,7 +196,7 @@ class UserSubscriptionView(ModelViewSet):
 
 
 @permission_classes((permissions.AllowAny,))
-class PuntersAPIView(APIView):
+class CappersAPIView(APIView):
     filter_class = UserAccountFilterSet
 
     def get(self, request, username=None):

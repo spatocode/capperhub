@@ -10,6 +10,15 @@ class PlaySlip(models.Model):
         return f'{self.title}'
 
 
+class Match(models.Model):
+    sports = models.CharField(max_length=20)
+    competition = models.CharField(max_length=50)
+    home_team = models.CharField(max_length=50)
+    away_team = models.CharField(max_length=50)
+    match_day = models.DateTimeField()
+    result = models.CharField(max_length=10, null=True)
+
+
 class Play(models.Model):
     LOSS = 0
     WIN = 1
@@ -19,16 +28,10 @@ class Play(models.Model):
         (WIN, "WIN"),
         (PENDING, "PENDING")
     )
-    slip = models.ForeignKey('core.PlaySlip', on_delete=models.CASCADE)
-    sports = models.CharField(max_length=20)
-    competition = models.CharField(max_length=50)
-    home_team = models.CharField(max_length=50)
-    away_team = models.CharField(max_length=50)
+    match = models.ForeignKey('core.Match', on_delete=models.CASCADE)
+    slip = models.ForeignKey('core.PlaySlip', on_delete=models.CASCADE)    
     prediction = models.CharField(max_length=50)
-    match_day = models.DateTimeField()
-    result = models.CharField(max_length=10, null=True)
     status = models.PositiveIntegerField(choices=STATUS, default=PENDING)
-    # analysis = models.TextField(default="")
 
     def __str__(self):
-        return f'{self.sports}-{self.slip.issuer.user.username}'
+        return f'{self.match.sports}-{self.slip.issuer.user.username}'
