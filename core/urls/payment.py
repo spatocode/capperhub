@@ -37,6 +37,10 @@ initialize_payout = FlutterwavePaymentAPIView.as_view({
     'get': 'initialize_payout'
 })
 
+initialize_payment = FlutterwavePaymentAPIView.as_view({
+    'get': 'initialize_payment'
+})
+
 urlpatterns = [
     path('transactions', PaymentTransactionAPIView.as_view(), name='transactions'),
     path('paystack/bank/list', PaystackPaymentAPIView.as_view({"get": "list_banks"}), name='list-bank'),
@@ -44,6 +48,7 @@ urlpatterns = [
     path('paystack/deposit/initialize', PaystackPaymentAPIView.as_view({"post": "initialize_deposit"}), name='initialize-deposit'),
     path('paystack/withdraw/initialize', PaystackPaymentAPIView.as_view({"post": "initialize_withdrawal"}), name='initialize-withdrawal'),
     path("flutterwave/banks/<country>", list_banks, name='list-banks'),
+	path("flutterwave/payment/initialize", initialize_payment, name='initialize_payment'),
 	path("flutterwave/bank/resolve", resolve_bank_account, name='resolve_bank_account'),
 	path("flutterwave/charge/card", charge_card, name='charge_card'),
 	path("flutterwave/validate/charge", validate_charge, name='validate_charge'),

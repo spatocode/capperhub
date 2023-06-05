@@ -18,17 +18,22 @@ def default_premium_features():
     return ["Carefully picked plays"]
 
 
+def meta_default():
+    return {}
+
+
 class Wallet(models.Model):
     currency = models.ForeignKey('core.Currency', on_delete=models.PROTECT)
     balance = models.FloatField(default=0.00)
     withheld = models.FloatField(default=0.00)
-    bank_name = models.CharField(max_length=50, default="", blank=True)
+    bank_code = models.CharField(max_length=10, default="", blank=True)
     bank_account_number = models.CharField(max_length=50, default="", blank=True)
     authorizations = ArrayField(models.JSONField(), size=5, default=list, blank=True)
+    meta = models.JSONField(default=meta_default)
     receipent_code = models.CharField(max_length=50, default="", blank=True)
 
     def __str__(self) -> str:
-        return f'{self.balance} - {self.bank_name}'
+        return f'{self.balance} - {self.bank_code}'
 
 
 class Pricing(models.Model):
