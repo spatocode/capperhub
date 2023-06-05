@@ -257,13 +257,22 @@ class PlayAPIView(ModelViewSet):
 
     def create_plays(self, request):
         #TODO: Confirm the match is valid from probably an API before saving to the DB
+        data = request.data.copy()
         self.check_object_permissions(request, request.user.useraccount.id)
         sync_subscriptions(issuer=request.user.useraccount.id)
-        serializer = PlaySerializer(data=request.data, many=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        notify_subscribers(serializer.data)
+        play_slip = PlaySlip.objects.create(
+            issuer=request.user.useraccount,
+            is_premium=data.get("is_premium"),
+            title=data.get("title"),
+        )
+        data['slip'] = play_slip
+        PlaySerializer(data=data.get("plays"), many=True)
+        plays = [Play(slip=play_slip, **play) for play in data.get("plays")]
+        Play.objects.bulk_create(plays)
+        play_slip_serializer = PlaySlipSerializer(PlaySlip.objects.get(id=play_slip.id))
+        data = play_slip_serializer.data
+        notify_subscribers(data)
         return Response({
             'message': 'Play Created Successfully',
-            'data': serializer.data
+            'data': data
         })

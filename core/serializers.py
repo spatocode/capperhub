@@ -167,12 +167,6 @@ class PlaySlipSerializer(serializers.ModelSerializer):
     issuer = UserAccountSerializer()
     plays = serializers.SerializerMethodField(read_only=True)
 
-    def to_internal_value(self, data):
-        new_data = data
-        issuer = UserAccount.objects.get(id=data.get("issuer"))
-        new_data['issuer'] = issuer
-        return new_data
-
     def get_plays(self, instance):
         serializer = PlaySerializer(data=instance.play_set.all(), many=True)
         serializer.is_valid()
@@ -193,16 +187,6 @@ class MatchSerializer(serializers.ModelSerializer):
 
 class PlaySerializer(serializers.ModelSerializer):
     match = MatchSerializer()
-
-    def create(self, validated_data):
-        playslip = PlaySlip.objects.create(**validated_data.get('slip'))
-        match = Match.objects.get_or_create(**validated_data.get("match"))
-        play = Play.objects.create(
-            prediction=validated_data.get("prediction"),
-            match=match[0],
-            slip=playslip
-        )
-        return play
 
     class Meta:
         model = Play
