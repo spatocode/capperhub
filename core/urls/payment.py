@@ -18,27 +18,27 @@ list_banks = FlutterwavePaymentAPIView.as_view({
 })
 
 resolve_bank_account = FlutterwavePaymentAPIView.as_view({
-    'get': 'resolve_bank_account'
+    'post': 'resolve_bank_account'
 })
 
 charge_card = FlutterwavePaymentAPIView.as_view({
-    'get': 'charge_card'
+    'post': 'charge_card'
 })
 
 validate_charge = FlutterwavePaymentAPIView.as_view({
-    'get': 'validate_charge'
+    'post': 'validate_charge'
 })
 
 verify_charge = FlutterwavePaymentAPIView.as_view({
-    'get': 'verify_charge'
+    'post': 'verify_charge'
 })
 
 initialize_payout = FlutterwavePaymentAPIView.as_view({
-    'get': 'initialize_payout'
+    'post': 'initialize_payout'
 })
 
 initialize_payment = FlutterwavePaymentAPIView.as_view({
-    'get': 'initialize_payment'
+    'post': 'initialize_payment'
 })
 
 urlpatterns = [
