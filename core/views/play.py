@@ -260,6 +260,7 @@ class PlayAPIView(ModelViewSet):
         data = request.data.copy()
         self.check_object_permissions(request, request.user.useraccount.id)
         sync_subscriptions(issuer=request.user.useraccount.id)
+        #TODO: Redesign this process
         play_slip = PlaySlip.objects.create(
             issuer=request.user.useraccount,
             is_premium=data.get("is_premium"),
@@ -267,7 +268,10 @@ class PlayAPIView(ModelViewSet):
         )
         data['slip'] = play_slip
         PlaySerializer(data=data.get("plays"), many=True)
-        plays = [Play(slip=play_slip, **play) for play in data.get("plays")]
+        plays = []
+        for play in data.get("plays"):
+            match = Match.objects.create(**play.pop("match"))
+            Play(slip=play_slip, match=match, **play)
         Play.objects.bulk_create(plays)
         play_slip_serializer = PlaySlipSerializer(PlaySlip.objects.get(id=play_slip.id))
         data = play_slip_serializer.data
