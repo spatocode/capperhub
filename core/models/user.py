@@ -40,6 +40,7 @@ class Pricing(models.Model):
     amount = models.DecimalField(default=0.00, max_digits=15, decimal_places=2)
     percentage_discount = models.DecimalField(default=0.0, max_digits=19, decimal_places=10)
     last_update = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     free_features = ArrayField(models.CharField(max_length=50), default=default_free_features, size=7)
     premium_features = ArrayField(models.CharField(max_length=50), default=default_premium_features, size=7)
     # play_frequency = models.CharField()
@@ -69,7 +70,7 @@ class UserAccount(models.Model):
     @property
     def full_name(self):
         if not self.user.first_name or not self.user.last_name:
-            return ''
+            return self.display_name
         return f'{self.user.first_name} {self.user.last_name}'
 
     @property

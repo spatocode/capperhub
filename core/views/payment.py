@@ -135,19 +135,18 @@ class FlutterwavePaymentAPIView(viewsets.ModelViewSet):
         pass
 
     def initialize_payment(self, request):
-        redirect_uri = payment.initiate_payment(
-            tx_ref="qwerty",
-            amount=100,
-            redirect_url='your_callback_url',
-            payment_options='mpesa',
-            customer_email='example@email.com',
-            customer_phone_number='0123456789',
-            currency='KES',
-            customer_name='John Doe',
-            title='Demo Payment',
-            description='Just pay me...'
+        useraccount = request.user.useraccount
+        res = payment.initiate_payment(
+            tx_ref=generate_reference_code(),
+            amount=request.data.get('amount'),
+            redirect_url=request.data.get("redirect_url"),
+            customer_email=request.user.email,
+            customer_phone_number=useraccount.phone_number,
+            customer_name=useraccount.full_name,
         )
-        return Response({"message": "Payment initiated", "data": redirect_uri})
+        if len(res) < 2 or res[1]["status"] != "success":
+            return Response({"detail": "Error initiating payment"}, status=status.HTTP_403_FORBIDDEN)
+        return Response({"message": "Payment initiated", "data": res[0]})
 
     def charge_card(self, request):
         try:

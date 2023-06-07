@@ -271,7 +271,7 @@ class PlayAPIView(ModelViewSet):
         plays = []
         for play in data.get("plays"):
             match = Match.objects.create(**play.pop("match"))
-            Play(slip=play_slip, match=match, **play)
+            plays.append(Play(slip=play_slip, match=match, **play))
         Play.objects.bulk_create(plays)
         play_slip_serializer = PlaySlipSerializer(PlaySlip.objects.get(id=play_slip.id))
         data = play_slip_serializer.data

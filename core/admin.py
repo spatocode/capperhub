@@ -55,7 +55,7 @@ class PlaySlipAdmin(admin.ModelAdmin):
     list_filter = ['is_premium']
 
 class PricingAdmin(admin.ModelAdmin):
-    list_display = ['amount']
+    list_display = ['amount', 'created_at', 'last_update']
     list_filter = ['amount']
 
 class WalletAdmin(admin.ModelAdmin):
