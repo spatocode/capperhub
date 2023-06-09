@@ -89,7 +89,7 @@ class UserPricingAPIView(APIView):
         # Make sure pricing can be updated once in 60days
         if user_account.pricing and float(request.data.get("amount")) != user_account.pricing.amount:
             date_due_for_update = user_account.pricing.last_update + timedelta(days=60)
-            if (user_account.pricing.created_at != user_account.pricing.last_update) \
+            if (user_account.pricing.created_at.replace(microsecond=0) != user_account.pricing.last_update.replace(microsecond=0)) \
                 and date_due_for_update > datetime.utcnow().replace(tzinfo=pytz.UTC):
                 raise PricingError(
                     detail='Pricing can only be updated once in 60 days',

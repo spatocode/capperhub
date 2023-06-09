@@ -70,7 +70,7 @@ class UserAccount(models.Model):
     @property
     def full_name(self):
         if not self.user.first_name or not self.user.last_name:
-            return self.display_name
+            return ""
         return f'{self.user.first_name} {self.user.last_name}'
 
     @property

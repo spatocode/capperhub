@@ -27,7 +27,7 @@ class CurrencyAdmin(admin.ModelAdmin):
     list_display = ['code', 'country']
 
 class TransactionAdmin(admin.ModelAdmin):
-    list_display = ['type', 'amount', 'balance', 'reference', 'payment_issuer', 'channel', 'user', 'currency', 'status']
+    list_display = ['type', 'amount', 'reference', 'user', 'currency', 'status']
     list_filter = ['type', 'status']
 
     def user(self, obj):
