@@ -24,7 +24,6 @@ from core.models.subscription import Subscription
 from core.filters import PlayFilterSet, UserAccountFilterSet, SubscriptionFilterSet, SportsWagerFilterSet, SportsGameFilterSet
 from core.exceptions import SubscriptionError, InsuficientFundError, NotFoundError, ForbiddenError, PermissionDeniedError
 from core.shared.helper import sync_records, sync_subscriptions, notify_subscribers
-from core import ws
 
 
 class CsrfExemptSessionAuthentication(authentication.SessionAuthentication):
@@ -157,7 +156,6 @@ class UserSubscriptionView(ModelViewSet):
 
         data = self.serializer_class(instance=subscription[0]).data
 
-        ws.notify_update_user_subscribe(data)
         return Response({
             "message": "Subscribed successfully",
             "data": data
@@ -191,7 +189,6 @@ class UserSubscriptionView(ModelViewSet):
         subscription.is_active = False
         subscription.save()
         serializer = self.serializer_class(instance=subscription)
-        ws.notify_update_user_unsubscribe(serializer.data)
         return Response({"message": "Unsubscribed successfully", "data": serializer.data})
 
 
@@ -316,7 +313,6 @@ class SportsWagerAPIView(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         sports_wager = serializer.save()
         game_serializer = SportsGameSerializer(sports_wager.game)
-        ws.notify_update_game(game_serializer.data)
         useraccount_wallet = request.user.useraccount.wallet
         useraccount_wallet.withheld = useraccount_wallet.withheld + int(data.get("stake"))
         useraccount_wallet.balance = useraccount_wallet.balance - int(data.get("stake"))
