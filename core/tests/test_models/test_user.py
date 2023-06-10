@@ -90,9 +90,9 @@ class WalletModelTestCase(TestCase):
         field_label = wallet._meta.get_field("withheld").verbose_name
         self.assertEqual(field_label, "withheld")
 
-    def test_bank_name_label(self):
+    def test_bank_code_label(self):
         wallet = Wallet.objects.get(id=3)
-        field_label = wallet._meta.get_field("bank_name").verbose_name
+        field_label = wallet._meta.get_field("bank_code").verbose_name
         self.assertEqual(field_label, "bank name")
 
     def test_bank_account_number_label(self):
@@ -112,7 +112,7 @@ class WalletModelTestCase(TestCase):
 
     def test__str__(self):
         wallet = Wallet.objects.get(id=3)
-        self.assertEqual(wallet.__str__(), f"{wallet.balance} - {wallet.bank_name}")
+        self.assertEqual(wallet.__str__(), f"{wallet.balance} - {wallet.bank_code}")
 
 
 class PricingModelTestCase(TestCase):

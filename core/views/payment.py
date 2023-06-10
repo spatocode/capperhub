@@ -1,3 +1,5 @@
+import requests
+from django.conf import settings
 from rest_framework.decorators import permission_classes
 from rest_framework import permissions
 from rest_framework.response import Response
@@ -6,15 +8,20 @@ from rest_framework import viewsets
 from rest_framework.views import APIView
 from paystackapi.transaction import Transaction as PaystackTransaction
 from paystackapi.verification import Verification
-from paystackapi.misc import Misc
+from paystackapi.misc import Misc as PaystackMisc
 from paystackapi.trecipient import TransferRecipient
 from paystackapi.transfer import Transfer
+from python_flutterwave import payment
+from rave_python import Rave, RaveExceptions, Misc
 from core.permissions import IsOwnerOrReadOnly
 from core.models.user import UserAccount
 from core.models.transaction import Transaction
 from core.serializers import TransactionSerializer
 from core.exceptions import InsuficientFundError, NotFoundError
 from core.shared.model_utils import generate_reference_code
+
+
+payment.token = settings.RAVE_SECRET_KEY
 
 
 @permission_classes((permissions.IsAuthenticated, IsOwnerOrReadOnly))
@@ -85,10 +92,8 @@ class PaystackPaymentAPIView(viewsets.ModelViewSet):
                     type=Transaction.WITHDRAWAL,
                     status=Transaction.PENDING,
                     amount=amount,
-                    channel="bank",
                     currency=userwallet.currency,
                     reference=reference,
-                    payment_issuer=Transaction.PAYSTACK,
                     balance=userwallet.balance,
                     user=user
                 )
@@ -107,7 +112,7 @@ class PaystackPaymentAPIView(viewsets.ModelViewSet):
         return Response(tr_response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def list_banks(self, request):
-        response = Misc.list_banks(country=request.user.useraccount.country.name)
+        response = PaystackMisc.list_banks(country=request.user.useraccount.country.name)
         return Response(response)
 
     def resolve_bank_details(self, request):
@@ -120,20 +125,96 @@ class PaystackPaymentAPIView(viewsets.ModelViewSet):
 
 @permission_classes((permissions.IsAuthenticated,))
 class FlutterwavePaymentAPIView(viewsets.ModelViewSet):
+    rave = Rave(settings.RAVE_PUBLIC_KEY, settings.RAVE_SECRET_KEY, production=settings.DEBUG)
+
     def list_banks(self, request):
-        pass
+        headers = {'Authorization': settings.RAVE_SECRET_KEY}
+        url = f'https://api.flutterwave.com/v3/banks/{request.user.useraccount.country.code}'
+        response = requests.get(url, headers=headers)
+        return Response(response)
 
     def resolve_bank_account(self, request):
-        pass
+        headers = {'Authorization': settings.RAVE_SECRET_KEY}
+        data = {
+            "account_number": request.data.get("account_number"),
+            "account_bank": request.data.get("bank_code")
+        }
+        url = 'https://api.flutterwave.com/v3/accounts/resolve'
+        response = requests.get(url, headers=headers, json=data)
+        return Response(response)
+
+    def initialize_payment(self, request):
+        useraccount = request.user.useraccount
+        res = payment.initiate_payment(
+            tx_ref=generate_reference_code(),
+            amount=request.data.get('amount'),
+            redirect_url=request.data.get("redirect_url"),
+            customer_email=request.user.email,
+            customer_phone_number=useraccount.phone_number,
+            customer_name=useraccount.full_name,
+        )
+        if len(res) < 2 or res[1]["status"] != "success":
+            return Response({"detail": "Error initiating payment"}, status=status.HTTP_403_FORBIDDEN)
+        return Response({"message": "Payment initiated", "data": res[0]})
 
     def charge_card(self, request):
-        pass
+        try:
+            payload = request.data.copy()
+            chargeWithToken=payload.get("chargeWithToken")
+            pin=request.payload.get("pin")
+            address=request.payload.get("address")
+            payload.pop("chargeWithToken")
+            payload.pop("pin")
+            payload.pop("address")
+            payload["subaccounts"] = [{id: request.user.useraccount.wallet.meta["fw_subaccount_id"]}]
+            if chargeWithToken:
+                res = self.rave.Card.charge(request.data, chargeWithToken=chargeWithToken)
+            else:
+                res = self.rave.Card.charge(request.data)
+            if res.get("suggestedAuth"):
+                arg = Misc.getTypeOfArgsRequired(res.get("suggestedAuth"))
+                if arg == "pin":
+                    Misc.updatePayload(res.get("suggestedAuth"), request.data, pin=pin)
+                if arg == "address":
+                    Misc.updatePayload(res.get("suggestedAuth"), request.data, address=address)
+                res = self.rave.Card.charge(request.data)
+            return Response(res)
+        except RaveExceptions.CardChargeError as e:
+            return Response({"detail": e.err["errMsg"]}, status=status.HTTP_403_FORBIDDEN)
+        except RaveExceptions.TransactionValidationError as e:
+            return Response({"detail": e.err}, status=status.HTTP_403_FORBIDDEN)
+        except RaveExceptions.TransactionVerificationError as e:
+            return Response({"detail": e.err["errMsg"]}, status=status.HTTP_403_FORBIDDEN)
 
     def validate_charge(self, request):
-        pass
+        try:
+            flwRef = request.data.get("flwRef")
+            otp = request.data.get("otp")
+            res = self.rave.Card.validate(flwRef, otp)
+            return Response(res)
+        except RaveExceptions.CardChargeError as e:
+            return Response({"detail": e.err["errMsg"]}, status=status.HTTP_403_FORBIDDEN)
 
     def verify_charge(self, request):
-        pass
+        res = self.rave.Card.verify(request.data.get("txRef"))
+        return Response(res)
 
     def initialize_payout(self, request):
-        pass
+        user = request.user.useraccount
+        userwallet = user.wallet
+        amount = request.data.get("amount")
+        if userwallet.balance < int(amount):
+            raise InsuficientFundError(detail="You don't have sufficient fund to withdraw")
+        try:
+            res = self.rave.Transfer.initiate({
+                "account_bank": request.data.get("account_bank"),
+                "account_number": request.data.get("account_number"),
+                "amount": amount,
+                "narration": "Predishun Systems Ltd. Payout",
+                "currency": userwallet.currency.code,
+                "beneficiary_name": request.user.useraccount.full_name
+            })
+            return Response(res)
+        except RaveExceptions.IncompletePaymentDetailsError as e:
+            import pdb; pdb.set_trace()
+            return Response({"detail": e})
