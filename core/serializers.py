@@ -157,6 +157,15 @@ class UserAccountSerializer(serializers.ModelSerializer):
     country = CountryField(name_only=True)
     is_punter = serializers.BooleanField()
     currency = serializers.CharField(source="wallet.currency.code")
+    is_premium_capper = serializers.SerializerMethodField()
+    fw_subaccount_id = serializers.SerializerMethodField()
+
+    def get_is_premium_capper(self, instance):
+        return instance.wallet.bank_code and instance.wallet.bank_account_number \
+        and instance.pricing.amount and instance.pricing.amount > 0
+    
+    def get_fw_subaccount_id(self, instance):
+        return instance.wallet.meta.get("fw_subaccount_id")
 
     class Meta:
         model = UserAccount

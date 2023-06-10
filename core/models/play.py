@@ -28,7 +28,7 @@ class Play(models.Model):
         (WIN, "WIN"),
         (PENDING, "PENDING")
     )
-    match = models.ForeignKey('core.Match', on_delete=models.CASCADE)
+    match = models.ForeignKey('core.Match', on_delete=models.CASCADE, null=True)
     slip = models.ForeignKey('core.PlaySlip', on_delete=models.CASCADE)    
     prediction = models.CharField(max_length=50)
     status = models.PositiveIntegerField(choices=STATUS, default=PENDING)

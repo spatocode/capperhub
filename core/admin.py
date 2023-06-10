@@ -27,7 +27,7 @@ class CurrencyAdmin(admin.ModelAdmin):
     list_display = ['code', 'country']
 
 class TransactionAdmin(admin.ModelAdmin):
-    list_display = ['type', 'amount', 'balance', 'reference', 'payment_issuer', 'channel', 'user', 'currency', 'status']
+    list_display = ['type', 'amount', 'reference', 'user', 'currency', 'status']
     list_filter = ['type', 'status']
 
     def user(self, obj):
@@ -55,12 +55,12 @@ class PlaySlipAdmin(admin.ModelAdmin):
     list_filter = ['is_premium']
 
 class PricingAdmin(admin.ModelAdmin):
-    list_display = ['amount']
+    list_display = ['amount', 'created_at', 'last_update']
     list_filter = ['amount']
 
 class WalletAdmin(admin.ModelAdmin):
-    list_display = ['balance', 'withheld', 'bank_name', 'bank_account_number']
-    list_filter = ['bank_name']
+    list_display = ['balance', 'withheld', 'bank_code', 'bank_account_number']
+    list_filter = ['bank_code']
 
 class SportsWagerAdmin(admin.ModelAdmin):
     list_display = ['backer', 'layer', 'market', 'backer_option', 'layer_option', 'winner', 'game', 'placed_time', 'is_public', 'status']

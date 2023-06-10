@@ -8,6 +8,7 @@ from rest_framework import authentication, permissions
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
+from rave_python import Rave, RaveExceptions, Misc
 from core.permissions import IsOwnerOrReadOnly
 from core.serializers import (
     PlaySerializer, UserAccountSerializer, SubscriptionSerializer, PlaySlipSerializer
@@ -17,7 +18,7 @@ from core.models.transaction import Transaction
 from core.models.play import Play, PlaySlip, Match
 from core.models.subscription import Subscription
 from core.filters import PlayFilterSet, UserAccountFilterSet, SubscriptionFilterSet
-from core.exceptions import SubscriptionError, InsuficientFundError, NotFoundError
+from core.exceptions import SubscriptionError, ForbiddenError, NotFoundError
 from core.shared.helper import sync_subscriptions, notify_subscribers
 from core import ws
 
@@ -29,6 +30,7 @@ class CsrfExemptSessionAuthentication(authentication.SessionAuthentication):
 
 @permission_classes((permissions.IsAuthenticated,))
 class SubscriptionView(ModelViewSet):
+    rave = Rave(settings.RAVE_PUBLIC_KEY, settings.RAVE_SECRET_KEY, production=settings.DEBUG)
     serializer_class = SubscriptionSerializer
     filter_class = SubscriptionFilterSet
 
@@ -88,13 +90,11 @@ class SubscriptionView(ModelViewSet):
         amount = kwargs.get('amount')
         transaction = Transaction.objects.create(
             type=Transaction.PURCHASE,
+            reference=kwargs.get("tx_ref"),
             user=subscriber,
-            payment_issuer=kwargs.get('payment_issuer'),
-            channel=kwargs.get('channel'),
             amount=amount,
             currency=kwargs.get('currency'),
-            status=Transaction.SUCCEED,
-            balance=kwargs.get("subscriber_balance")
+            status=kwargs.get('status')
         )
 
         return transaction
@@ -111,11 +111,19 @@ class SubscriptionView(ModelViewSet):
         subscriber_wallet.balance = kwargs.get("subscriber_balance")
         subscriber_wallet.save()
 
+    def verify_transaction(self, tx_ref):
+        try:
+            res = self.rave.Account.verify(tx_ref)
+            return res["transactionComplete"], res["acctmessage"]
+        except RaveExceptions.TransactionVerificationError as e:
+            return False, e.err["errMsg"]
+
     def subscribe(self, request):
         subscription_type = request.data.get('type')
         tipster_id = request.data.get('tipster')
         period = request.data.get('period')
         amount = request.data.get('amount')
+        tx_ref = request.data.get('tx_ref')
         subscriber = request.user.useraccount
         tipster = self.get_object(tipster_id)
 
@@ -126,8 +134,15 @@ class SubscriptionView(ModelViewSet):
         )
 
         if subscription_type == Subscription.PREMIUM:
-            if subscriber.wallet.balance < int(amount):
-                raise InsuficientFundError(detail="You don't have sufficient funds to subscribe")
+            verification = self.verify_transaction(tx_ref)
+            if not verification[0]:
+                self.record_transaction(
+                    subscriber,
+                    status=Transaction.PENDING,
+                    amount=amount,
+                    currency=tipster.wallet.currency
+                )
+                raise ForbiddenError(detail=verification[1])
 
         subscription = Subscription.objects.get_or_create(
             type=subscription_type,
@@ -148,7 +163,12 @@ class SubscriptionView(ModelViewSet):
         if subscription_type == Subscription.PREMIUM:
             subscriber_balance = subscriber.wallet.balance - amount
             self.sync_wallet_records(amount, tipster_wallet=tipster.wallet, subscriber_wallet=subscriber.wallet, subscriber_balance=subscriber_balance)
-            self.record_transaction(subscriber, amount=amount, currency=tipster.wallet.currency, subscriber_balance=subscriber_balance)
+            self.record_transaction(
+                subscriber,
+                status=Transaction.SUCCEED,
+                amount=amount,
+                currency=tipster.wallet.currency
+            )
 
         data = self.serializer_class(instance=subscription[0]).data
 
@@ -200,16 +220,17 @@ class CappersAPIView(APIView):
             data = cache.get(cache_key)
         else:
             filterset = self.filter_class(
-            data=request.query_params,
-            queryset=UserAccount.objects.filter(
-                playslip__date_added__gt=datetime.utcnow().replace(tzinfo=pytz.UTC)-timedelta(days=14)
-            ).distinct().exclude(
-                user__first_name=None,
-                user__last_name=None,
-                wallet=None,
-                phone_number=None,
-                ip_address=None
-            )
+                data=request.query_params,
+                queryset=UserAccount.objects.filter(
+                    user__is_active=True,
+                    playslip__date_added__gt=datetime.utcnow().replace(tzinfo=pytz.UTC)-timedelta(days=14)
+                ).distinct().exclude(
+                    user__first_name=None,
+                    user__last_name=None,
+                    wallet=None,
+                    phone_number=None,
+                    ip_address=None
+                )
             )
             serializer = UserAccountSerializer(filterset.qs, many=True)
             data = serializer.data
@@ -260,6 +281,7 @@ class PlayAPIView(ModelViewSet):
         data = request.data.copy()
         self.check_object_permissions(request, request.user.useraccount.id)
         sync_subscriptions(issuer=request.user.useraccount.id)
+        #TODO: Redesign this process
         play_slip = PlaySlip.objects.create(
             issuer=request.user.useraccount,
             is_premium=data.get("is_premium"),
@@ -267,7 +289,10 @@ class PlayAPIView(ModelViewSet):
         )
         data['slip'] = play_slip
         PlaySerializer(data=data.get("plays"), many=True)
-        plays = [Play(slip=play_slip, **play) for play in data.get("plays")]
+        plays = []
+        for play in data.get("plays"):
+            match = Match.objects.create(**play.pop("match"))
+            plays.append(Play(slip=play_slip, match=match, **play))
         Play.objects.bulk_create(plays)
         play_slip_serializer = PlaySlipSerializer(PlaySlip.objects.get(id=play_slip.id))
         data = play_slip_serializer.data
