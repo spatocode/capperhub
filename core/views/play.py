@@ -19,7 +19,6 @@ from core.models.subscription import Subscription
 from core.filters import PlayFilterSet, UserAccountFilterSet, SubscriptionFilterSet
 from core.exceptions import SubscriptionError, InsuficientFundError, NotFoundError
 from core.shared.helper import sync_subscriptions, notify_subscribers
-from core import ws
 
 
 class CsrfExemptSessionAuthentication(authentication.SessionAuthentication):
@@ -152,7 +151,6 @@ class SubscriptionView(ModelViewSet):
 
         data = self.serializer_class(instance=subscription[0]).data
 
-        ws.notify_update_user_subscribe(data)
         return Response({
             "message": "Subscribed successfully",
             "data": data
@@ -186,7 +184,6 @@ class SubscriptionView(ModelViewSet):
         subscription.is_active = False
         subscription.save()
         serializer = self.serializer_class(instance=subscription)
-        ws.notify_update_user_unsubscribe(serializer.data)
         return Response({"message": "Unsubscribed successfully", "data": serializer.data})
 
 

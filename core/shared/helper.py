@@ -4,7 +4,6 @@ from datetime import datetime
 from core.models.transaction import Transaction
 from core.models.subscription import Subscription
 from core.serializers import SportsWagerSerializer
-from core import ws
 
 def sync_subscriptions(**kwargs):
     if kwargs.get("issuer"):
@@ -66,4 +65,4 @@ def notify_whatsapp_users():
     pass
 
 def notify_subscribers(data):
-    ws.notify_update_user_play(data)
+    pass
