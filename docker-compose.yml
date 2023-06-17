@@ -22,19 +22,7 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=predishun
   redis:
-    image: "bitnami/redis:latest"
-    restart: always
-    volumes:
-      - redis:/bitnami/redis
-    ports:
-      - 6379:6379
-    environment:
-      - ALLOW_EMPTY_PASSWORD=yes
-    logging:
-      driver: "json-file"
-      options:
-          max-size: "10k"
-          max-file: "10"
+    image: redis:alpine
 
 volumes:
   postgres_data:
