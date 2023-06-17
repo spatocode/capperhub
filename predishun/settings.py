@@ -30,7 +30,7 @@ if os.path.exists(dotenv):
     environ.Env.read_env(dotenv)
 
 # Create a directory for storing the log if necessary
-os.makedirs(os.path.join(BASE_DIR, 'log'), mode=0o755, exist_ok=True)
+# os.makedirs(os.path.join(BASE_DIR, 'log'), mode=0o755, exist_ok=True)
 
 SECRET_KEY = os.environ.get("SECRET_KEY") or 'cdhj6q8r&68+0n@l*t9&s$r-!&1%n=uq4x2i(v72ua=23df4dd567d/d89t24,nl0m.s33si&++='
 
@@ -156,53 +156,53 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 if os.environ.get('DEBUG') != '1':
-    LOGGING = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'formatters': {
-            'verbose': {
-                'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
-            },
-            'simple': {
-                'format': '%(levelname)s %(message)s'
-            },
-        },
-        'handlers': {
-            'file': {
-                'level': 'DEBUG',
-                'class': 'logging.handlers.RotatingFileHandler',
-                'filename': 'log/debug.log',
-                'maxBytes' : 1024*1024*10,
-                'backupCount' : 10,
-                'formatter': 'verbose',
-            },
-            'console': {  # allow werkzeug debugger in runserver_plus to log console
-                'level': 'DEBUG',
-                'class': 'logging.StreamHandler',
-            },
-        },
-        'loggers': {
-            'django': {  # for all django-internal messages
-                'handlers': ['console', 'file'],
-                'level': 'ERROR',
-                'propagate': True,
-            },
-            'django.db.backends': {  # for database-related messages
-                'handlers': ['file'],
-                'level': 'DEBUG',
-            },
-            'debug': {
-                'handlers': ['file'],
-                'level': 'DEBUG',
-                'propagate': True,
-            },
-            'werkzeug': {  # allow werkzeug debugger in runserver_plus to log console
-                'handlers': ['console'],
-                'level': 'DEBUG',
-                'propagate': True,
-            }
-        },
-    }
+    # LOGGING = {
+    #     'version': 1,
+    #     'disable_existing_loggers': False,
+    #     'formatters': {
+    #         'verbose': {
+    #             'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+    #         },
+    #         'simple': {
+    #             'format': '%(levelname)s %(message)s'
+    #         },
+    #     },
+    #     'handlers': {
+    #         'file': {
+    #             'level': 'DEBUG',
+    #             'class': 'logging.handlers.RotatingFileHandler',
+    #             'filename': 'log/debug.log',
+    #             'maxBytes' : 1024*1024*10,
+    #             'backupCount' : 10,
+    #             'formatter': 'verbose',
+    #         },
+    #         'console': {  # allow werkzeug debugger in runserver_plus to log console
+    #             'level': 'DEBUG',
+    #             'class': 'logging.StreamHandler',
+    #         },
+    #     },
+    #     'loggers': {
+    #         'django': {  # for all django-internal messages
+    #             'handlers': ['console', 'file'],
+    #             'level': 'ERROR',
+    #             'propagate': True,
+    #         },
+    #         'django.db.backends': {  # for database-related messages
+    #             'handlers': ['file'],
+    #             'level': 'DEBUG',
+    #         },
+    #         'debug': {
+    #             'handlers': ['file'],
+    #             'level': 'DEBUG',
+    #             'propagate': True,
+    #         },
+    #         'werkzeug': {  # allow werkzeug debugger in runserver_plus to log console
+    #             'handlers': ['console'],
+    #             'level': 'DEBUG',
+    #             'propagate': True,
+    #         }
+    #     },
+    # }
 
     CSRF_COOKIE_SECURE = True
 
@@ -333,6 +333,8 @@ USE_I18N = True
 
 USE_TZ = True
 
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
@@ -344,8 +346,8 @@ if DEBUG:
     MEDIA_ROOT = os.path.join(BASE_DIR, 'mediafiles')
 else:
     # aws settings
-    AWS_ACCESS_KEY_ID = os.getenv('AWS_S3_ACCESS_KEY_ID')
-    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_S3_SECRET_ACCESS_KEY')
+    AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
     AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
     AWS_DEFAULT_ACL = None
     AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'

@@ -12,13 +12,18 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+zappa_settings.json
 
 /*env/
 /*env.dev/
 /*env.prod/
+/*env.prod.proxy-companion/
+/*env.staging/
+/*env.staging.proxy-companion/
 /*env.prod.db/
 /.git/
 /.idea/
+/.aws/
 /node_modules/
 
 *.env
@@ -35,6 +40,7 @@ yarn-error.log*
 /static/
 /dist/
 /media/
+/mediafiles/
 /staticfiles/
 !/static/web.config
 
@@ -46,8 +52,3 @@ webpack-stats.json
 !.elasticbeanstalk/config.yml
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
-
-composed.html
-/product_api
-/product_auth_api
-/logger_api

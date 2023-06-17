@@ -47,6 +47,7 @@ exceptiongroup==1.1.0
 Faker==18.2.0
 fakeredis==2.10.1
 future==0.16.0
+gunicorn==20.1.0
 hiredis==2.2.2
 hjson==3.0.1
 hyperlink==21.0.0
@@ -59,7 +60,7 @@ isort==5.12.0
 Jinja2==3.1.2
 jmespath==0.9.3
 kappa==0.6.0
-lambda-packages==0.19.0
+# lambda-packages==0.19.0
 lazy-object-proxy==1.9.0
 lsprotocol==2023.0.0a1
 MarkupSafe==2.1.2
@@ -74,6 +75,7 @@ paystackapi==2.1.0
 Pillow==9.4.0
 placebo==0.9.0
 platformdirs==3.2.0
+psycopg2==2.9.3
 psycopg2-binary==2.9.5
 pyaes==1.6.1
 pyasn1==0.4.8
@@ -125,6 +127,6 @@ urllib3==1.26.11
 Werkzeug==0.12
 wrapt==1.15.0
 wsgi-request-logger==0.4.6
-zappa==0.57.0
+# zappa==0.57.0
 zipp==3.15.0
 zope.interface==5.5.2
