@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.prod
-    image: 158480711633.dkr.ecr.eu-north-1.amazonaws.com/predishun-ec2:web
+    image: 158480711633.dkr.ecr.us-east-1.amazonaws.com/predishun-ec2:web
     command: gunicorn predishun.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - static_volume:/home/app/web/staticfiles
@@ -15,7 +15,7 @@ services:
   nginx-proxy:
     container_name: nginx-proxy
     build: nginx
-    image: 158480711633.dkr.ecr.eu-north-1.amazonaws.com/predishun-ec2:nginx-proxy
+    image: 158480711633.dkr.ecr.us-east-1.amazonaws.com/predishun-ec2:nginx-proxy
     restart: always
     ports:
       - 443:443
