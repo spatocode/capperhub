@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile.prod
     image: 158480711633.dkr.ecr.eu-north-1.amazonaws.com/predishun-ec2:web
-    command: gunicorn predishun.wsgi:application --bind 0.0.0.0:8000
+    command: newrelic-admin run-program gunicorn predishun.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - static_volume:/home/app/web/staticfiles
       - media_volume:/home/app/web/mediafiles
