@@ -21,3 +21,7 @@ class BadRequestError(APIException):
 
 class PermissionDeniedError(APIException):
     status_code = 401
+
+class RateLimited(ForbiddenError):
+    status_code = 403
+    default_detail = "Too many requests from user"

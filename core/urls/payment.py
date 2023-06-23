@@ -4,15 +4,6 @@ from core.views.payment import (
     PaymentTransactionAPIView, PaystackPaymentAPIView, FlutterwavePaymentAPIView
 )
 
-account_owner = UserAccountOwnerAPIView.as_view({
-    'get': 'get_account_owner',
-    'put': 'update_user'
-})
-
-get_user = UserAPIView.as_view({
-    'get': 'get_user',
-})
-
 list_banks = FlutterwavePaymentAPIView.as_view({
     'get': 'list_banks'
 })

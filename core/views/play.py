@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.db.models import Q
 from django.core.cache import cache
+from django_ratelimit.decorators import ratelimit
+from django.utils.decorators import method_decorator
 from rest_framework.decorators import permission_classes
 from rest_framework import authentication, permissions
 from rest_framework.views import APIView
@@ -39,6 +41,7 @@ class SubscriptionView(ModelViewSet):
         except UserAccount.DoesNotExist:
             raise NotFoundError(detail="User not found")
 
+    @method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='GET'))
     def subscriptions(self, request):
         useraccount = self.request.user.useraccount
         sync_subscriptions(subscriber=useraccount.id)
@@ -47,6 +50,7 @@ class SubscriptionView(ModelViewSet):
         data = subscriptions_serializer.data
         return Response(data)
 
+    @method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='GET'))
     def subscribers(self, request):
         useraccount = self.request.user.useraccount
         sync_subscriptions(issuer=useraccount.id)
@@ -117,6 +121,7 @@ class SubscriptionView(ModelViewSet):
         except RaveExceptions.TransactionVerificationError as e:
             return False, e.err["errMsg"]
 
+    @method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='POST'))
     def subscribe(self, request):
         subscription_type = request.data.get('type')
         tipster_id = request.data.get('tipster')
@@ -176,6 +181,7 @@ class SubscriptionView(ModelViewSet):
             "data": data
         })
 
+    @method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='POST'))
     def unsubscribe(self, request, pk=None):
         subscription_type = int(request.data.get('type'))
         tipster_id = request.data.get('tipster')
@@ -207,6 +213,7 @@ class SubscriptionView(ModelViewSet):
         return Response({"message": "Unsubscribed successfully", "data": serializer.data})
 
 
+@method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='GET'), name='get')
 @permission_classes((permissions.AllowAny,))
 class CappersAPIView(APIView):
     filter_class = UserAccountFilterSet
@@ -240,6 +247,7 @@ class CappersAPIView(APIView):
 class PlayAPIView(ModelViewSet):
     filter_class = PlayFilterSet
 
+    @method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='GET'))
     def get_plays(self, request):
         free_subscriptions = Subscription.objects.filter(
             subscriber=request.user.useraccount.id,
@@ -273,6 +281,7 @@ class PlayAPIView(ModelViewSet):
 
         return Response(play_serializer.data)
 
+    @method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='POST'))
     def create_plays(self, request):
         #TODO: Confirm the match is valid from probably an API before saving to the DB
         data = request.data.copy()

@@ -1,5 +1,7 @@
 import requests
 from django.conf import settings
+from django_ratelimit.decorators import ratelimit
+from django.utils.decorators import method_decorator
 from rest_framework.decorators import permission_classes
 from rest_framework import permissions
 from rest_framework.response import Response
@@ -24,6 +26,7 @@ from core.shared.model_utils import generate_reference_code
 payment.token = settings.RAVE_SECRET_KEY
 
 
+@method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='GET'), name='get')
 @permission_classes((permissions.IsAuthenticated, IsOwnerOrReadOnly))
 class PaymentTransactionAPIView(APIView):
     def get_object(self, pk):
@@ -43,6 +46,7 @@ class PaymentTransactionAPIView(APIView):
 @permission_classes((permissions.IsAuthenticated,))
 class PaystackPaymentAPIView(viewsets.ModelViewSet):
     #TODO: Handle all errors from payment processor
+    @method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='POST'))
     def initialize_deposit(self, request):
         if request.data.get("authorization_code"):
             response = PaystackTransaction.charge(
@@ -57,6 +61,7 @@ class PaystackPaymentAPIView(viewsets.ModelViewSet):
         )
         return Response(response)
 
+    @method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='POST'))
     def initialize_withdrawal(self, request):
         user = request.user.useraccount
         userwallet = user.wallet
@@ -111,10 +116,12 @@ class PaystackPaymentAPIView(viewsets.ModelViewSet):
 
         return Response(tr_response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    @method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='GET'))
     def list_banks(self, request):
         response = PaystackMisc.list_banks(country=request.user.useraccount.country.name)
         return Response(response)
 
+    @method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='POST'))
     def resolve_bank_details(self, request):
         response = Verification.verify_account(
             account_number=request.data.get("account_number"),
@@ -127,12 +134,14 @@ class PaystackPaymentAPIView(viewsets.ModelViewSet):
 class FlutterwavePaymentAPIView(viewsets.ModelViewSet):
     rave = Rave(settings.RAVE_PUBLIC_KEY, settings.RAVE_SECRET_KEY, production=settings.DEBUG)
 
+    @method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='GET'))
     def list_banks(self, request):
         headers = {'Authorization': settings.RAVE_SECRET_KEY}
         url = f'https://api.flutterwave.com/v3/banks/{request.user.useraccount.country.code}'
         response = requests.get(url, headers=headers)
         return Response(response)
 
+    @method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='POST'))
     def resolve_bank_account(self, request):
         headers = {'Authorization': settings.RAVE_SECRET_KEY}
         data = {
@@ -143,6 +152,7 @@ class FlutterwavePaymentAPIView(viewsets.ModelViewSet):
         response = requests.get(url, headers=headers, json=data)
         return Response(response)
 
+    @method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='POST'))
     def initialize_payment(self, request):
         useraccount = request.user.useraccount
         res = payment.initiate_payment(
@@ -157,6 +167,7 @@ class FlutterwavePaymentAPIView(viewsets.ModelViewSet):
             return Response({"detail": "Error initiating payment"}, status=status.HTTP_403_FORBIDDEN)
         return Response({"message": "Payment initiated", "data": res[0]})
 
+    @method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='POST'))
     def charge_card(self, request):
         try:
             payload = request.data.copy()
@@ -186,6 +197,7 @@ class FlutterwavePaymentAPIView(viewsets.ModelViewSet):
         except RaveExceptions.TransactionVerificationError as e:
             return Response({"detail": e.err["errMsg"]}, status=status.HTTP_403_FORBIDDEN)
 
+    @method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='POST'))
     def validate_charge(self, request):
         try:
             flwRef = request.data.get("flwRef")
@@ -195,10 +207,12 @@ class FlutterwavePaymentAPIView(viewsets.ModelViewSet):
         except RaveExceptions.CardChargeError as e:
             return Response({"detail": e.err["errMsg"]}, status=status.HTTP_403_FORBIDDEN)
 
+    @method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='POST'))
     def verify_charge(self, request):
         res = self.rave.Card.verify(request.data.get("txRef"))
         return Response(res)
 
+    @method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='POST'))
     def initialize_payout(self, request):
         user = request.user.useraccount
         userwallet = user.wallet
@@ -216,5 +230,4 @@ class FlutterwavePaymentAPIView(viewsets.ModelViewSet):
             })
             return Response(res)
         except RaveExceptions.IncompletePaymentDetailsError as e:
-            import pdb; pdb.set_trace()
             return Response({"detail": e})

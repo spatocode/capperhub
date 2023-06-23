@@ -72,6 +72,7 @@ SITE_ID = 1
 # REST_USE_JWT = True
 
 MIDDLEWARE = [
+    'core.middlewares.reverse_proxy',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     "corsheaders.middleware.CorsMiddleware",
@@ -280,6 +281,10 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 EMAIL_PORT = os.environ.get("EMAIL_PORT")
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+RATELIMIT_EXCEPTION_CLASS = "core.exceptions.RateLimited"
+
+DEFAULT_RATE_LIMIT = "10"
 
 # EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'tmp/email')
 

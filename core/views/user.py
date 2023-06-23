@@ -2,6 +2,8 @@ import pytz
 from datetime import datetime, timedelta
 from django.conf import settings
 from django.core.cache import cache
+from django_ratelimit.decorators import ratelimit
+from django.utils.decorators import method_decorator
 from rest_framework.decorators import permission_classes
 from rest_framework import status
 from rest_framework import permissions
@@ -18,6 +20,7 @@ from core.models.user import UserAccount
 from core.filters import UserAccountFilterSet
 from core.exceptions import PricingError, NotFoundError
 
+
 @permission_classes((permissions.AllowAny, IsOwnerOrReadOnly))
 class UserAccountOwnerAPIView(viewsets.ModelViewSet):
     filter_class = UserAccountFilterSet
@@ -28,6 +31,7 @@ class UserAccountOwnerAPIView(viewsets.ModelViewSet):
         except UserAccount.DoesNotExist:
             raise NotFoundError(detail="User not found")
 
+    @method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='GET'))
     def get_account_owner(self, request):
         user_account = UserAccount.objects.get(
             user=request.user.id,
@@ -38,7 +42,8 @@ class UserAccountOwnerAPIView(viewsets.ModelViewSet):
         data = serializer.data
 
         return Response(data)
-    
+
+    @method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='PUT'))
     def update_user(self, request, username=None):
         user_serializer = OwnerUserSerializer(
             instance=request.user,
@@ -75,6 +80,7 @@ class UserAPIView(viewsets.ModelViewSet):
         except UserAccount.DoesNotExist:
             raise NotFoundError(detail="User not found")
 
+    @method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='GET'))
     def get_user(self, request, username=None):
         data = self.get_object(username)
         serializer = UserAccountSerializer(data)
@@ -84,6 +90,7 @@ class UserAPIView(viewsets.ModelViewSet):
 @permission_classes((permissions.IsAuthenticated,))
 class UserPricingAPIView(APIView):
 
+    @method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='POST'))
     def post(self, request, format=None):
         user_account = request.user.useraccount
         # Make sure pricing can be updated once in 60days
@@ -131,6 +138,7 @@ class UserPaymentDetailsAPIView(APIView):
         except RaveExceptions.SubaccountCreationError as e:
             return e.err["errMsg"]
 
+    @method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='POST'))
     def post(self, request, format=None):
         user_account = request.user.useraccount
         # Make sure pricing can be updated once in 60days

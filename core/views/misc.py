@@ -1,3 +1,6 @@
+from django.conf import settings
+from django_ratelimit.decorators import ratelimit
+from django.utils.decorators import method_decorator
 from django.core.cache import cache
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 from rest_framework.decorators import permission_classes
@@ -7,6 +10,7 @@ from rest_framework.response import Response
 from core.models.misc import TermsOfUse, PrivacyPolicy, Feedback, Waitlist
 from core.serializers import TermsOfUseSerializer, PrivacyPolicySerializer, WaitlistSerializer, FeedbackSerializer
 
+@method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='GET'), name='get')
 @permission_classes((permissions.AllowAny,))
 class TermsOfUseAPIView(APIView):
     def get(self, request):
@@ -15,6 +19,7 @@ class TermsOfUseAPIView(APIView):
         return Response(serializer.data)
 
 
+@method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='GET'), name='get')
 @permission_classes((permissions.AllowAny,))
 class PrivacyPolicyAPIView(APIView):
     def get(self, request):
@@ -23,6 +28,7 @@ class PrivacyPolicyAPIView(APIView):
         return Response(serializer.data)
 
 
+@method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='POST'), name='post')
 @permission_classes((permissions.AllowAny,))
 class FeedbackAPIView(APIView):
     def post(self, request):
@@ -32,6 +38,7 @@ class FeedbackAPIView(APIView):
         return Response(serializer.data)
 
 
+@method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='POST'), name='post')
 @permission_classes((permissions.AllowAny,))
 class WaitlistAPIView(APIView):
     def post(self, request):

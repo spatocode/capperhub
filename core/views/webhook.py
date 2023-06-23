@@ -1,6 +1,8 @@
 import json
 import hashlib
 from django.conf import settings
+from django_ratelimit.decorators import ratelimit
+from django.utils.decorators import method_decorator
 from rest_framework.decorators import permission_classes
 from rest_framework import permissions
 from rest_framework.views import APIView
@@ -49,6 +51,7 @@ class PaystackWebhookAPIView(APIView):
         hash_digest = hash.hexdigest()
         return hash_digest == xps_header
 
+    @method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='POST'))
     def post(self, request):
         event = request.data.get("event")
         #TODO: Handle more events
@@ -61,19 +64,23 @@ class PaystackWebhookAPIView(APIView):
 
 @permission_classes((permissions.AllowAny,))
 class WhatsappWebhookAPIView(APIView):
+    @method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='GET'))
     def get(self, request):
         if request.query_params.get('hub.verify_token') == settings.WHATSAPP_WEBHOOK_VERIFY_TOKEN:
             return Response(int(request.query_params.get('hub.challenge')))
         return Response(status=status.HTTP_403_FORBIDDEN)
 
+    @method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='POST'))
     def post(self, request):
         return Response(status=status.HTTP_200_OK)
 
 
 @permission_classes((permissions.AllowAny,))
 class FlutterwaveWebhookAPIView(APIView):
+    @method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='GET'))
     def get(self, request):
         return Response(status=status.HTTP_200_OK)
 
+    @method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='POST'))
     def post(self, request):
         return Response(status=status.HTTP_200_OK)

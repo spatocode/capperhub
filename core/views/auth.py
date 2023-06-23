@@ -1,9 +1,12 @@
+from django_ratelimit.decorators import ratelimit
+from django.utils.decorators import method_decorator
 from dj_rest_auth.registration.views import RegisterView
 from core.serializers import UserAccountRegisterSerializer
 from core.models.user import Wallet, Pricing, UserAccount
 from core.models.transaction import Currency
 
 
+@method_decorator(ratelimit(key='ip', rate='8/m', method='POST'), name='post')
 class UserAccountRegisterView(RegisterView):
     serializer_class = UserAccountRegisterSerializer
 
