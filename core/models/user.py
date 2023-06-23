@@ -4,9 +4,10 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+# from django.db.models.signals import post_save
+# from django.dispatch import receiver
 from django_countries.fields import CountryField
+from hashlib import md5
 from .subscription import Subscription
 from core.shared.model_utils import optimize_image
 
@@ -133,12 +134,19 @@ class UserAccount(models.Model):
             return True
         return False
 
+    def save_avatar(self):
+        digest = md5(self.user.email.encode('utf-8')).hexdigest()
+        url = 'https://gravatar.com/avatar/{}?d=identicon'.format(digest)
+        self.image.name = url
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        if not settings.DEBUG:
+        gravatar_uri = "https://gravatar.com/avatar/"
+        if not settings.DEBUG and self.image.name and gravatar_uri not in self.image.name:
             self.image = optimize_image(self)
+        elif not self.image:
+            self.save_avatar()
         super(UserAccount, self).save()
-
 
     # @receiver(post_save, sender=User)
     # def create_user_profile(sender, instance, created, **kwargs):
