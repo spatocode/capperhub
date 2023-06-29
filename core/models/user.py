@@ -140,7 +140,6 @@ class UserAccount(models.Model):
         self.image.name = url
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
         gravatar_uri = "https://gravatar.com/avatar/"
         if not settings.DEBUG and self.image.name and gravatar_uri not in self.image.name:
             self.image = optimize_image(self)
