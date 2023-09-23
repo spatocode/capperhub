@@ -1,7 +1,7 @@
 from django.urls import path
-from core.views.user import UserAPIView, UserAccountOwnerAPIView
 from core.views.payment import (
-    PaymentTransactionAPIView, PaystackPaymentAPIView, FlutterwavePaymentAPIView
+    PaymentTransactionAPIView, PaystackPaymentAPIView, FlutterwavePaymentAPIView,
+    PricingAPIView
 )
 
 list_banks = FlutterwavePaymentAPIView.as_view({
@@ -33,6 +33,7 @@ initialize_payment = FlutterwavePaymentAPIView.as_view({
 })
 
 urlpatterns = [
+    path('pricing', PricingAPIView.as_view(), name='pricing'),
     path('transactions', PaymentTransactionAPIView.as_view(), name='transactions'),
     path('paystack/bank/list', PaystackPaymentAPIView.as_view({"get": "list_banks"}), name='list-bank'),
     path('paystack/bank/resolve', PaystackPaymentAPIView.as_view({"post": "resolve_bank_details"}), name='resolve-bank-details'),

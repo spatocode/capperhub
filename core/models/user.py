@@ -44,7 +44,6 @@ class Pricing(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     free_features = ArrayField(models.CharField(max_length=50), default=default_free_features, size=7)
     premium_features = ArrayField(models.CharField(max_length=50), default=default_premium_features, size=7)
-    # play_frequency = models.CharField()
 
     def __str__(self):
         return f'{self.amount}'
@@ -75,64 +74,15 @@ class UserAccount(models.Model):
         return f'{self.user.first_name} {self.user.last_name}'
 
     @property
-    def is_punter(self):
+    def is_premium(self):
         try:
-            latest_play = self.playslip_set.latest('date_added')
-            if latest_play.date_added + timedelta(days=14) > datetime.utcnow().replace(tzinfo=pytz.UTC):
-                return True
-            return False
-        except:
-            return False
-
-    @property
-    def subscription_issuers(self):
-        subscribers = Subscription.objects.filter(
-            subscriber=self.pk,
-            is_active=True,
-            type=Subscription.FREE
-        ).values_list("issuer__user__username", flat=True)
-        return subscribers
-
-    @property
-    def free_subscribers(self):
-        subscribers = Subscription.objects.filter(
-            issuer=self.pk,
-            is_active=True,
-            type=Subscription.FREE
-        ).values_list("subscriber__user__username", flat=True)
-        return subscribers
-    
-    @property
-    def premium_subscribers(self):
-        subscribers = Subscription.objects.filter(
-            issuer=self.pk,
-            is_active=True,
-            type=Subscription.PREMIUM
-        ).values_list("subscriber__user__username", flat=True)
-        return subscribers
-
-    def is_subscriber(self, issuer):
-        subscriber_count = Subscription.objects.filter(
-            issuer=issuer,
-            subscriber=self.pk,
-            is_active=True,
-        ).count()
-
-        if len(subscriber_count) > 0:
+            Subscription.objects.get(
+                user=self,
+                expiration__gt=datetime.utcnow().replace(tzinfo=pytz.UTC)
+            )
             return True
-        return False
-    
-    def is_premium_subscriber(self, issuer):
-        subscriber_count = Subscription.objects.filter(
-            issuer=issuer,
-            subscriber=self.pk,
-            type=Subscription.PREMIUM,
-            is_active=True,
-        ).count()
-
-        if len(subscriber_count) > 0:
-            return True
-        return False
+        except Subscription.DoesNotExist:
+            return False
 
     def save_avatar(self):
         digest = md5(self.user.email.encode('utf-8')).hexdigest()

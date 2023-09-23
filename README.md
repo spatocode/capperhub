@@ -16,7 +16,7 @@ The marketplace for sports analysts and cappers
 - Run server `python manage.py runserver`
 
 
-Add .env file with variables
+Add .env.staging file with variables
 
 ```
 DEBUG=1

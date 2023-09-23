@@ -217,8 +217,7 @@ class TransactionSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
-    issuer = UserAccountSerializer()
-    subscriber = UserAccountSerializer()
+    user = UserAccountSerializer()
 
     class Meta:
         model = Subscription
@@ -305,6 +304,13 @@ class TransactionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Transaction
+        fields = '__all__'
+
+
+class PricingSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Pricing
         fields = '__all__'
 
 

@@ -5,7 +5,7 @@ services:
     volumes:
       - ./:/usr/src/app/
     environment:
-      - "REDIS_URL=${REDIS_URL:-redis://redis:6379/8}"
+      - "REDIS_URL=${REDIS_URL:-redis://redis:6379}"
       - RDS_HOST=db
     ports:
       - 8000:8000
