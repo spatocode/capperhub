@@ -13,7 +13,6 @@ from paystackapi.verification import Verification
 from paystackapi.misc import Misc as PaystackMisc
 from paystackapi.trecipient import TransferRecipient
 from paystackapi.transfer import Transfer
-from python_flutterwave import payment
 from rave_python import Rave, RaveExceptions, Misc
 from core.permissions import IsOwnerOrReadOnly
 from core.models.user import UserAccount
@@ -21,9 +20,6 @@ from core.models.transaction import Transaction
 from core.serializers import TransactionSerializer
 from core.exceptions import InsuficientFundError, NotFoundError
 from core.shared.model_utils import generate_reference_code
-
-
-payment.token = settings.RAVE_SECRET_KEY
 
 
 @method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='GET'), name='get')
@@ -155,17 +151,25 @@ class FlutterwavePaymentAPIView(viewsets.ModelViewSet):
     @method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='POST'))
     def initialize_payment(self, request):
         useraccount = request.user.useraccount
-        res = payment.initiate_payment(
-            tx_ref=generate_reference_code(),
-            amount=request.data.get('amount'),
-            redirect_url=request.data.get("redirect_url"),
-            customer_email=request.user.email,
-            customer_phone_number=useraccount.phone_number,
-            customer_name=useraccount.full_name,
-        )
-        if len(res) < 2 or res[1]["status"] != "success":
+        headers = {'Authorization': settings.RAVE_SECRET_KEY}
+        url = 'https://api.ravepay.co/flwv3-pug/getpaidx/api/v2/hosted/pay'
+        payload = {
+            "amount": str(request.data.get('amount')),
+            "customer_email": request.user.email,
+            "customer_firstname": request.user.first_name,
+            "customer_lastname": request.user.last_name,
+            "currency": useraccount.wallet.currency.code,
+            "txref": f'{generate_reference_code()}_{useraccount.id}',
+            "redirect_url": request.data.get("redirect_url"),
+            "PBFPubKey": settings.RAVE_PUBLIC_KEY,
+            "custom_title": "Predishun Systems Ltd.",
+            "custom_logo": "https://predishun.com/_ipx/static/icons/icon.png",
+        }
+        res = requests.post(url, data=payload, headers=headers)
+        json = res.json()
+        if json.get("status") != "success":
             return Response({"detail": "Error initiating payment"}, status=status.HTTP_403_FORBIDDEN)
-        return Response({"message": "Payment initiated", "data": res[0]})
+        return Response({"message": "Payment initiated", "data": json.get("data")})
 
     @method_decorator(ratelimit(key='ip', rate=f'{settings.DEFAULT_RATE_LIMIT}/m', method='POST'))
     def charge_card(self, request):
