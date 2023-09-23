@@ -29,6 +29,7 @@ zappa_settings.json
 *.env
 *.env.dev
 *.env.prod
+*.env.staging
 *.env.prod.db
 *.sqlite3
 
