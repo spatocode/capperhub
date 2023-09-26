@@ -56,7 +56,7 @@ class UserAccount(models.Model):
     bio = models.TextField(default="")
     image = models.FileField(null=True, blank=True)
     country = CountryField(default="", blank=True, blank_label="(Select country)")
-    phone_number = models.CharField(null=True, unique=True, max_length=22)
+    phone_number = models.CharField(default="", max_length=22)
     twitter_handle = models.CharField(default="", max_length=22, blank=True)
     facebook_handle = models.CharField(default="", max_length=22, blank=True)
     instagram_handle = models.CharField(default="", max_length=22, blank=True)
